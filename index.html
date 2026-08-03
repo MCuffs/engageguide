@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Engage Guide — AE 운영 모듈 · 설정 센터</title>
+<style>
+:root{--paper:#FFFFFF;--sub:#F7F8FA;--ink:#212121;--ink-2:#333333;--ink-3:#8A8F9E;
+ --line:#EDEEF2;--line-2:#DCDFE8;--pri:#3C50FF;--pri-soft:#E8EAFF;
+ --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+ --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+@media (prefers-color-scheme:dark){:root{--paper:#12141A;--sub:#1A1D25;--ink:#EEF0F5;--ink-2:#D3D7E0;--ink-3:#8A8F9E;
+ --line:#242732;--line-2:#333744;--pri:#7A88FF;--pri-soft:#20243F;}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink-2);font-family:var(--sans);line-height:1.7;font-size:15px;}
+.w{max-width:860px;margin:0 auto;padding:64px 22px 90px;}
+.kick{font-size:11.5px;letter-spacing:.16em;color:var(--pri);font-weight:600;margin:0 0 10px;}
+h1{font-size:34px;line-height:1.25;margin:0 0 12px;font-weight:700;color:var(--ink);letter-spacing:-.015em;}
+.lede{font-size:16px;color:var(--ink-2);margin:0 0 12px;max-width:64ch;}
+.meta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:38px;}
+.chip{font-size:12px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:99px;padding:3px 11px;}
+h2{font-size:19px;font-weight:600;color:var(--ink);margin:42px 0 14px;}
+a.card{display:block;text-decoration:none;color:inherit;background:var(--paper);border:1px solid var(--line-2);
+ border-radius:12px;padding:18px 20px;margin-bottom:11px;transition:.14s;}
+a.card:hover{border-color:var(--pri);transform:translateY(-1px);}
+a.card .t{font-size:17px;font-weight:600;color:var(--pri);display:flex;align-items:center;gap:8px;}
+a.card .d{font-size:13.5px;color:var(--ink-3);margin-top:4px;}
+a.card.hero{background:linear-gradient(135deg,var(--pri-soft),transparent 70%);border-color:var(--pri);}
+a.card.hero .t{font-size:19px;}
+ul{padding-left:20px;margin:0 0 16px;}
+li{margin-bottom:6px;max-width:62ch;}
+table{width:100%;border-collapse:collapse;font-size:13.5px;margin:14px 0 18px;}
+th{text-align:left;font-size:11.5px;color:var(--ink-3);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+code{font-family:var(--mono);font-size:12.5px;background:var(--sub);border:1px solid var(--line);border-radius:4px;padding:1px 5px;}
+pre{background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:12.5px;line-height:1.65;}
+pre code{background:none;border:none;padding:0;}
+.docs a{display:inline-block;font-size:13.5px;color:var(--pri);text-decoration:none;border:1px solid var(--line-2);
+ border-radius:8px;padding:6px 12px;margin:0 6px 6px 0;}
+.docs a:hover{border-color:var(--pri);}
+footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-3);}
+</style>
+</head>
+<body>
+<div class="w">
+  <p class="kick">THINKINGAI · AGENTIC ENGINE</p>
+  <h1>Engage Guide</h1>
+  <p class="lede">AE 운영 모듈과 설정 센터를 처음 도입하는 팀을 위한 학습 자료입니다. 실제 콘솔을 측정해 재현한 시뮬레이터에서 직접 조작해 보고, 기능마다 개발팀·사업팀이 무엇을 해야 하는지 확인할 수 있습니다.</p>
+  <div class="meta">
+    <span class="chip">실측 기준 2026-08-03</span>
+    <span class="chip">Ant Design 기반</span>
+    <span class="chip">게임 · 이커머스 예제</span>
+    <span class="chip">계정 불필요</span>
+  </div>
+
+  <a class="card hero" href="engagement-os.html">
+    <div class="t">🎛️ Engagement OS — 콘솔 시뮬레이터</div>
+    <div class="d">채널 생성부터 발송·측정까지 직접 조작. 스포트라이트 도입 가이드(운영 19단계 · 설정 센터 11단계)와 기능별 도움말 44종 포함.</div>
+  </a>
+
+  <h2>개발자용 가이드</h2>
+  <a class="card" href="webhook-server-guide.html">
+    <div class="t">🔗 Webhook 수신 서버 구현 가이드</div>
+    <div class="d">서버 개발자 · 고정 규격, C#/ASP.NET Core 참조 구현, 도달 퍼널 트래킹 코드</div>
+  </a>
+  <a class="card" href="webhook-client-guide.html">
+    <div class="t">📱 Webhook 클라이언트 연동 가이드</div>
+    <div class="d">클라이언트 개발자 · Unity/JS/Android/iOS 이벤트 리포트 구현</div>
+  </a>
+
+  <h2>먼저 알아둘 것</h2>
+  <table>
+    <tr><th>채널</th><th>서버 개발</th><th>닿는 대상</th><th>용도</th></tr>
+    <tr><td><b>메시지 푸시</b></td><td>불필요</td><td>앱 밖 유저 포함</td><td>복귀 유도 — 주력</td></tr>
+    <tr><td><b>클라이언트</b></td><td>불필요</td><td>앱 실행 중 유저만</td><td>온보딩 · 이탈 방지</td></tr>
+    <tr><td><b>Webhook</b></td><td>필요 (약 4 man-day)</td><td>서버 구현에 따름</td><td>인게임 메일 · 쿠폰 지급</td></tr>
+  </table>
+  <p style="font-size:13.5px;color:var(--ink-3);margin-top:-6px">SMS는 AE가 직접 제공하지 않습니다. Webhook으로 자사 서버를 거쳐 SMS 사업자에 연결해야 합니다.</p>
+
+  <h2>자주 하는 실수</h2>
+  <ul>
+    <li><b>필드명 불일치</b> — 컨텐츠 템플릿의 필드명이 곧 서버가 읽을 JSON 키입니다. 자동 매핑이 아니라 이름 약속이라, 한쪽만 바꾸면 값이 조용히 무시됩니다.</li>
+    <li><b>이벤트명 3곳 불일치</b> — 앱 코드 · 채널의 도달 퍼널 설정 · 트래킹 플랜이 모두 같아야 클릭이 집계됩니다.</li>
+    <li><b>멱등성 누락</b> — <code>message_id</code> 기준 중복 차단이 없으면 재시도 시 보상이 이중 지급됩니다.</li>
+    <li><b>URL 오해</b> — 채널의 URL은 플랫폼이 발급하는 값이 아니라, 자사 서버를 만들어야 생기는 값입니다.</li>
+  </ul>
+
+  <h2>실측 디자인 토큰</h2>
+  <pre><code>Primary        #3C50FF
+본문 / 제목     #333333 / #212121
+버튼           height 32px · radius 8px · padding 5px 16px
+Input          height 32px · radius 8px · focus #3040CC
+Switch         32 × 16px · radius 16px
+탭 잉크바       height 4px · 활성 weight 500
+상단 내비       56px      사이드바  260px (아이템 40px)
+채널 생성       우측 드로어 992px</code></pre>
+
+  <h2>문서</h2>
+  <div class="docs">
+    <a href="docs/PLAN.md">기획안</a>
+    <a href="docs/webhook-channel-guide.md">Webhook 채널 도입</a>
+    <a href="docs/webhook-pm-playbook.md">PM 플레이북</a>
+    <a href="docs/webhook-server-example.md">서버 구현 예시</a>
+    <a href="docs/DESIGN-TOKENS.md">디자인 토큰</a>
+  </div>
+
+  <footer>
+    시뮬레이터의 데이터는 브라우저 메모리에만 존재하며 실제 AE 계정·서버에 연결되지 않습니다.<br>
+    화면 구조와 토큰은 2026-08-03 기준 데모 환경 측정값으로, 제품 업데이트에 따라 달라질 수 있습니다.
+  </footer>
+</div>
+</body>
+</html>

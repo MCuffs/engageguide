@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Engage Webhook 클라이언트 연동 가이드</title>
+<style>*{box-sizing:border-box}body{margin:0}</style>
+</head>
+<body>
+<style>
+:root{
+  --paper:#FFFFFF; --paper-2:#F5F6F9; --ink:#15171D; --ink-2:#4C5261; --ink-3:#787E8E;
+  --line:#E3E5EC; --line-2:#CBCFDB;
+  --accent:#3B4A8C; --accent-soft:#ECEEF8; --accent-line:#B4BDE0;
+  --warn:#9A4520; --warn-soft:#FBEDE6; --warn-line:#E3B89F;
+  --good:#0B6E5F; --good-soft:#E4F1EE; --good-line:#9CCDC3;
+  --code-bg:#14161E; --code-ink:#E1E4EE; --code-mut:#828AA3; --code-key:#A6B4F0; --code-str:#E3B98C; --code-cmt:#666E88;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"D2Coding",monospace;
+  --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#101116; --paper-2:#181A22; --ink:#EAECF2; --ink-2:#A8AEC0; --ink-3:#787E8E;
+    --line:#262935; --line-2:#353A4A;
+    --accent:#98A5E8; --accent-soft:#1A1E36; --accent-line:#343B63;
+    --warn:#E0916B; --warn-soft:#2A1A13; --warn-line:#4A2E20;
+    --good:#4FBFA8; --good-soft:#102A26; --good-line:#1E4A43;
+    --code-bg:#0A0B10;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#101116; --paper-2:#181A22; --ink:#EAECF2; --ink-2:#A8AEC0; --ink-3:#787E8E;
+  --line:#262935; --line-2:#353A4A;
+  --accent:#98A5E8; --accent-soft:#1A1E36; --accent-line:#343B63;
+  --warn:#E0916B; --warn-soft:#2A1A13; --warn-line:#4A2E20;
+  --good:#4FBFA8; --good-soft:#102A26; --good-line:#1E4A43;
+  --code-bg:#0A0B10;
+}
+:root[data-theme="light"]{
+  --paper:#FFFFFF; --paper-2:#F5F6F9; --ink:#15171D; --ink-2:#4C5261; --ink-3:#787E8E;
+  --line:#E3E5EC; --line-2:#CBCFDB;
+  --accent:#3B4A8C; --accent-soft:#ECEEF8; --accent-line:#B4BDE0;
+  --warn:#9A4520; --warn-soft:#FBEDE6; --warn-line:#E3B89F;
+  --good:#0B6E5F; --good-soft:#E4F1EE; --good-line:#9CCDC3;
+  --code-bg:#14161E;
+}
+html{background:var(--paper);}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.72;font-size:16px;}
+.page{max-width:880px;margin:0 auto;padding:0 22px 96px;}
+
+header.top{padding:56px 0 30px;border-bottom:1px solid var(--line);}
+.brow{display:flex;align-items:center;gap:9px;margin-bottom:16px;}
+.dot{width:9px;height:9px;border-radius:2px;background:var(--accent);transform:rotate(45deg);}
+.brow span{font-size:12.5px;letter-spacing:.14em;color:var(--accent);font-weight:600;}
+h1{font-size:34px;line-height:1.28;margin:0 0 14px;font-weight:700;letter-spacing:-.01em;text-wrap:balance;}
+.lede{font-size:16.5px;color:var(--ink-2);margin:0 0 22px;max-width:60ch;}
+.facts{display:flex;flex-wrap:wrap;gap:8px;}
+.fact{font-size:12.5px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 13px;background:var(--paper-2);}
+
+nav.toc{margin:30px 0 6px;padding:18px 0 22px;border-bottom:1px solid var(--line);}
+nav.toc p{margin:0 0 11px;font-size:11.5px;letter-spacing:.13em;color:var(--ink-3);font-weight:600;}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:5px 22px;counter-reset:t;}
+nav.toc li{counter-increment:t;}
+nav.toc a{display:block;text-decoration:none;color:var(--ink-2);font-size:14px;padding:3px 0;border-bottom:1px solid transparent;}
+nav.toc a::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);font-size:11.5px;color:var(--accent);margin-right:10px;}
+nav.toc a:hover{color:var(--ink);border-bottom-color:var(--line-2);}
+
+section{padding-top:52px;scroll-margin-top:16px;}
+h2{font-size:23px;margin:0 0 6px;font-weight:700;letter-spacing:-.005em;text-wrap:balance;display:flex;align-items:baseline;gap:13px;}
+h2 .n{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:500;letter-spacing:0;flex:none;}
+.sub{color:var(--ink-3);font-size:14px;margin:0 0 20px;padding-left:37px;}
+h3{font-size:16.5px;margin:32px 0 9px;font-weight:600;}
+h4{font-size:14.5px;margin:22px 0 7px;font-weight:600;color:var(--ink-2);}
+p{margin:0 0 15px;max-width:66ch;}
+ul,ol.n{margin:0 0 15px;padding-left:21px;}
+li{margin-bottom:7px;max-width:64ch;}
+strong{font-weight:600;}
+code{font-family:var(--mono);font-size:.855em;background:var(--paper-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--ink);}
+
+.codewrap{position:relative;margin:16px 0 20px;border-radius:9px;overflow:hidden;background:var(--code-bg);border:1px solid var(--line);}
+.codehead{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
+.codehead .fn{font-family:var(--mono);font-size:11.5px;color:var(--code-mut);}
+.copy{font-family:var(--sans);font-size:11.5px;color:var(--code-mut);background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;padding:3px 10px;cursor:pointer;}
+.copy:hover{color:var(--code-ink);border-color:rgba(255,255,255,.3);}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+pre{margin:0;padding:15px 16px 17px;overflow-x:auto;}
+pre code{font-family:var(--mono);font-size:12.9px;line-height:1.68;background:none;border:none;padding:0;color:var(--code-ink);white-space:pre;}
+.k{color:var(--code-key);} .s{color:var(--code-str);} .c{color:var(--code-cmt);font-style:italic;}
+
+.note{border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:9px;padding:14px 17px;margin:18px 0;font-size:14.5px;}
+.note.warn{border-color:var(--warn-line);background:var(--warn-soft);}
+.note.good{border-color:var(--good-line);background:var(--good-soft);}
+.note p{margin:0;max-width:none;}
+.note p+p{margin-top:8px;}
+.note b{color:var(--accent);}
+.note.warn b{color:var(--warn);}
+.note.good b{color:var(--good);}
+
+.tbl{overflow-x:auto;margin:16px 0 20px;border:1px solid var(--line);border-radius:9px;}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px;}
+th{text-align:left;font-size:12px;letter-spacing:.03em;color:var(--ink-3);font-weight:600;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--paper-2);white-space:nowrap;}
+td{padding:10px 15px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+td code{font-size:.86em;}
+.tag{display:inline-block;font-size:11px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;}
+.tag.req{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line);}
+.tag.opt{background:var(--paper-2);color:var(--ink-3);border:1px solid var(--line-2);}
+
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:22px 0 26px;}
+.fnode{flex:1 1 175px;border:1px solid var(--line);border-radius:9px;padding:13px 15px;background:var(--paper-2);}
+.fnode.on{border-color:var(--accent-line);background:var(--accent-soft);}
+.fnode .t{font-size:11px;letter-spacing:.1em;color:var(--ink-3);font-weight:600;margin-bottom:5px;}
+.fnode.on .t{color:var(--accent);}
+.fnode .d{font-size:13.5px;color:var(--ink-2);line-height:1.55;}
+.farrow{align-self:center;color:var(--ink-3);font-size:16px;flex:none;}
+
+.chk{list-style:none;padding:0;margin:14px 0 0;}
+.chk li{position:relative;padding-left:27px;margin-bottom:9px;}
+.chk li::before{content:"";position:absolute;left:0;top:.55em;width:13px;height:13px;border:1.5px solid var(--line-2);border-radius:3px;}
+
+footer{margin-top:66px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3);}
+@media (max-width:640px){
+  h1{font-size:27px;} h2{font-size:20px;gap:9px;} .sub{padding-left:0;}
+  header.top{padding-top:38px;} section{padding-top:40px;}
+}
+</style>
+
+<div class="page">
+
+<header class="top">
+  <div class="brow"><span class="dot"></span><span>ENGAGE · WEBHOOK CHANNEL</span></div>
+  <h1>클라이언트 연동 가이드</h1>
+  <p class="lede">Webhook 채널로 발송한 메시지의 효과를 측정하기 위해 클라이언트가 해야 할 작업. 신규 SDK 설치 없이, 기존 트래킹 SDK로 이벤트 하나를 추가하는 것이 전부입니다.</p>
+  <div class="facts">
+    <span class="fact">대상: 클라이언트 개발자</span>
+    <span class="fact">예상 공수 0.5 man-day</span>
+    <span class="fact">신규 SDK 설치 없음</span>
+    <span class="fact">Unity · JS · Android · iOS</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <p>목차</p>
+  <ol>
+    <li><a href="#s1">클라이언트의 역할과 범위</a></li>
+    <li><a href="#s2">선행 조건 — 계정 식별</a></li>
+    <li><a href="#s3">서버와의 연결 — message_id</a></li>
+    <li><a href="#s4">이벤트 규격</a></li>
+    <li><a href="#s5">구현 코드</a></li>
+    <li><a href="#s6">트래킹 플랜 등록</a></li>
+    <li><a href="#s7">검증</a></li>
+    <li><a href="#s8">체크리스트와 흔한 실수</a></li>
+  </ol>
+</nav>
+
+<section id="s1">
+  <h2><span class="n">01</span>클라이언트의 역할과 범위</h2>
+  <p class="sub">무엇을 하고, 무엇은 하지 않는가</p>
+  <p>Webhook 채널에서 <strong>메시지 발송과 보상 지급은 전부 서버가 처리</strong>합니다. 클라이언트는 발송 경로에 관여하지 않습니다. 클라이언트가 필요한 이유는 단 하나, <strong>유저가 실제로 열어봤는지를 측정</strong>하기 위해서입니다.</p>
+
+  <div class="flow">
+    <div class="fnode"><div class="t">발송</div><div class="d">플랫폼이 자동 기록<br><span style="color:var(--ink-3)">작업 없음</span></div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="t">도달</div><div class="d">서버가 이벤트 리포트<br><span style="color:var(--ink-3)">서버팀 담당</span></div></div>
+    <div class="farrow">→</div>
+    <div class="fnode on"><div class="t">열람 · 수령</div><div class="d">클라이언트가 이벤트 리포트<br><code>mail_opened</code></div></div>
+  </div>
+
+  <h3>작업 범위</h3>
+  <div class="tbl"><table>
+    <tr><th>항목</th><th>클라이언트 작업</th></tr>
+    <tr><td>메시지 발송 · 보상 지급</td><td>없음 — 서버가 처리</td></tr>
+    <tr><td>신규 SDK 설치 · 패키지 추가</td><td>없음 — 기존 트래킹 SDK 사용</td></tr>
+    <tr><td>푸시 토큰 등록</td><td>없음 — FCM 채널을 쓸 때만 필요</td></tr>
+    <tr><td>우편함 UI 신규 개발</td><td>없음 — 기존 우편함을 그대로 사용</td></tr>
+    <tr><td><strong>열람 이벤트 리포트</strong></td><td><strong>있음 — 이 문서의 전부</strong></td></tr>
+  </table></div>
+
+  <div class="note">
+    <p><b>이 작업을 하지 않으면</b> — 발송과 보상 지급은 정상 동작합니다. 다만 도달 퍼널이 "발송 → 도달"까지만 채워지고, 열람률을 알 수 없어 <strong>캠페인 효과를 측정할 수 없습니다.</strong> 다음 캠페인을 개선할 근거가 사라지므로 함께 진행하는 것을 권장합니다.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">02</span>선행 조건 — 계정 식별</h2>
+  <p class="sub">구현 전에 반드시 확인할 것</p>
+  <p>운영 플랫폼은 <strong>계정 ID를 기준으로 발송 대상을 선정</strong>합니다. 채널의 「전송 ID」에 계정 ID 속성을 지정하기 때문에, 클라이언트가 로그인 시점에 계정 ID를 SDK에 알려주고 있어야 합니다.</p>
+
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">로그인 처리 (Unity 예시)</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="c">// 로그인 성공 직후 — 이미 구현되어 있는지 확인만 하면 된다</span>
+TDAnalytics.Login(accountId);
+
+<span class="c">// 로그아웃 시</span>
+TDAnalytics.Logout();</code></pre>
+  </div>
+
+  <p>이미 애널리틱스를 연동해 이벤트를 수집 중이라면 대부분 되어 있는 부분입니다. <strong>확인 방법</strong>은 분석 플랫폼에서 아무 이벤트나 열어 계정 ID 속성이 채워져 있는지 보는 것입니다. 비어 있다면 이벤트가 계정과 연결되지 않아 발송 대상 자체가 잡히지 않으므로, 이 작업이 먼저입니다.</p>
+
+  <div class="note warn">
+    <p><b>확인 없이 넘어가지 마세요</b> — 계정 식별이 안 된 상태에서는 열람 이벤트를 올려도 "누가 열었는지"를 알 수 없어 퍼널이 비어 있게 됩니다. 발송 대상 선정에도 영향을 줍니다.</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">03</span>서버와의 연결 — message_id</h2>
+  <p class="sub">클라이언트 단독으로는 구현할 수 없는 부분</p>
+  <p>열람 이벤트에는 <strong><code>message_id</code>(발송 건 고유 ID)를 반드시 포함</strong>해야 합니다. 이 값이 "이 열람이 어느 발송에서 비롯됐는지"를 잇는 유일한 키이기 때문입니다.</p>
+  <p>그런데 이 값은 운영 플랫폼이 서버로 보낸 것이라, <strong>서버가 메일 데이터에 실어 내려주어야</strong> 클라이언트가 알 수 있습니다.</p>
+
+  <h4>서버팀에 요청할 내용</h4>
+  <div class="note">
+    <p>운영 발송으로 생성된 우편함 메일에 <code>message_id</code>를 저장하고, <strong>메일 목록·상세 조회 API 응답에 해당 필드를 포함</strong>해 주세요. 운영 발송이 아닌 일반 메일은 이 값이 비어 있어도 됩니다.</p>
+  </div>
+
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">기대하는 메일 API 응답 형태</span><button class="copy" type="button">복사</button></div>
+    <pre><code>{
+  <span class="s">"mail_id"</span>: <span class="s">"m_88123"</span>,
+  <span class="s">"title"</span>: <span class="s">"복귀 보상이 도착했어요"</span>,
+  <span class="s">"body"</span>: <span class="s">"7일 출석 보상을 확인하세요"</span>,
+  <span class="s">"reward_id"</span>: <span class="s">"comeback_pack_01"</span>,
+  <span class="s">"message_id"</span>: <span class="s">"msg_a1b2c3"</span>,   <span class="c">// ★ 운영 발송 메일에만 존재</span>
+  <span class="s">"expires_at"</span>: <span class="s">"2026-08-06T00:00:00Z"</span>
+}</code></pre>
+  </div>
+
+  <p>클라이언트는 이 값을 <strong>화면에 표시하지 않고</strong>, 메일 데이터 모델에 담아 두었다가 이벤트를 올릴 때만 사용합니다.</p>
+</section>
+
+<section id="s4">
+  <h2><span class="n">04</span>이벤트 규격</h2>
+  <p class="sub">무엇을 언제 올릴 것인가</p>
+
+  <h3>이벤트명</h3>
+  <p>이름은 자유롭게 정할 수 있지만, <strong>채널의 「도달 퍼널 설정」에 등록한 이름과 정확히 일치</strong>해야 합니다. 대소문자와 언더스코어까지 동일해야 하므로, 운영 담당자와 미리 합의하고 시작하세요. 이 문서에서는 <code>mail_opened</code>를 예시로 사용합니다.</p>
+
+  <h3>이벤트 속성</h3>
+  <div class="tbl"><table>
+    <tr><th>속성명</th><th>필수</th><th>값</th><th>용도</th></tr>
+    <tr><td><code>message_id</code></td><td><span class="tag req">필수</span></td><td>서버가 내려준 발송 건 ID</td><td><strong>퍼널 연결 키</strong> — 없으면 집계 불가</td></tr>
+    <tr><td><code>channel</code></td><td><span class="tag opt">선택</span></td><td><code>"webhook"</code></td><td>여러 채널을 쓸 때 구분</td></tr>
+    <tr><td><code>mail_id</code></td><td><span class="tag opt">선택</span></td><td>우편함 메일 고유 ID</td><td>서버 로그와 대조</td></tr>
+    <tr><td><code>action</code></td><td><span class="tag opt">선택</span></td><td><code>"open"</code> 또는 <code>"claim"</code></td><td>단순 열람과 보상 수령 구분</td></tr>
+  </table></div>
+
+  <h3>발생 시점</h3>
+  <p>두 가지 중 무엇을 "열람"으로 볼지 기획과 합의해 정하세요. 둘 다 올리고 <code>action</code> 속성으로 구분하는 방법도 좋습니다.</p>
+  <div class="tbl"><table>
+    <tr><th>시점</th><th>의미</th><th>권장</th></tr>
+    <tr><td>메일 상세를 열었을 때</td><td>내용을 확인함</td><td>메시지 도달 효과 측정에 적합</td></tr>
+    <tr><td>보상을 수령했을 때</td><td>실제 행동으로 이어짐</td><td>전환 측정에 적합</td></tr>
+  </table></div>
+
+  <div class="note warn">
+    <p><b>중복 발생 주의</b> — 메일 상세를 여러 번 열면 이벤트가 여러 번 올라갑니다. 유니크 열람률이 필요하다면 분석 단계에서 유저 단위로 집계하거나, 클라이언트에서 메일당 최초 1회만 올리도록 처리하세요. 어느 쪽으로 할지 기획과 미리 정하는 편이 좋습니다.</p>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span>구현 코드</h2>
+  <p class="sub">사용 중인 플랫폼의 코드를 참고하세요</p>
+
+  <h3>Unity (C#)</h3>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">MailboxUI.cs</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">using</span> ThinkingAnalytics;
+<span class="k">using</span> System.Collections.Generic;
+
+<span class="k">public void</span> OnMailOpened(MailData mail)
+{
+    <span class="c">// 운영 발송 메일이 아니면(message_id 없음) 이벤트를 올리지 않는다</span>
+    <span class="k">if</span> (<span class="k">string</span>.IsNullOrEmpty(mail.MessageId)) <span class="k">return</span>;
+
+    <span class="k">var</span> props = <span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;
+    {
+        { <span class="s">"message_id"</span>, mail.MessageId },   <span class="c">// ★ 필수</span>
+        { <span class="s">"channel"</span>,    <span class="s">"webhook"</span> },
+        { <span class="s">"mail_id"</span>,    mail.Id },
+        { <span class="s">"action"</span>,     <span class="s">"open"</span> }
+    };
+
+    TDAnalytics.Track(<span class="s">"mail_opened"</span>, props);
+}
+
+<span class="c">// 보상 수령까지 구분해서 측정하려면</span>
+<span class="k">public void</span> OnRewardClaimed(MailData mail)
+{
+    <span class="k">if</span> (<span class="k">string</span>.IsNullOrEmpty(mail.MessageId)) <span class="k">return</span>;
+
+    TDAnalytics.Track(<span class="s">"mail_opened"</span>, <span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;
+    {
+        { <span class="s">"message_id"</span>, mail.MessageId },
+        { <span class="s">"channel"</span>,    <span class="s">"webhook"</span> },
+        { <span class="s">"mail_id"</span>,    mail.Id },
+        { <span class="s">"action"</span>,     <span class="s">"claim"</span> },
+        { <span class="s">"reward_id"</span>,  mail.RewardId }
+    });
+}</code></pre>
+  </div>
+
+  <h3>JavaScript / 웹</h3>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">mailbox.js</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">function</span> onMailOpened(mail) {
+  <span class="k">if</span> (!mail.message_id) <span class="k">return</span>;
+
+  ta.track(<span class="s">'mail_opened'</span>, {
+    message_id: mail.message_id,   <span class="c">// ★ 필수</span>
+    channel:    <span class="s">'webhook'</span>,
+    mail_id:    mail.mail_id,
+    action:     <span class="s">'open'</span>
+  });
+}</code></pre>
+  </div>
+
+  <h3>Android (Java)</h3>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">MailDetailActivity.java</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">private void</span> onMailOpened(Mail mail) {
+    <span class="k">if</span> (TextUtils.isEmpty(mail.getMessageId())) <span class="k">return</span>;
+
+    <span class="k">try</span> {
+        JSONObject props = <span class="k">new</span> JSONObject();
+        props.put(<span class="s">"message_id"</span>, mail.getMessageId());   <span class="c">// ★ 필수</span>
+        props.put(<span class="s">"channel"</span>,    <span class="s">"webhook"</span>);
+        props.put(<span class="s">"mail_id"</span>,    mail.getId());
+        props.put(<span class="s">"action"</span>,     <span class="s">"open"</span>);
+
+        TDAnalytics.track(<span class="s">"mail_opened"</span>, props);
+    } <span class="k">catch</span> (JSONException e) {
+        Log.e(TAG, <span class="s">"이벤트 속성 생성 실패"</span>, e);
+    }
+}</code></pre>
+  </div>
+
+  <h3>iOS (Swift)</h3>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">MailDetailViewController.swift</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">func</span> onMailOpened(_ mail: Mail) {
+    <span class="k">guard let</span> messageId = mail.messageId, !messageId.isEmpty <span class="k">else</span> { <span class="k">return</span> }
+
+    <span class="k">let</span> props: [String: Any] = [
+        <span class="s">"message_id"</span>: messageId,   <span class="c">// ★ 필수</span>
+        <span class="s">"channel"</span>:    <span class="s">"webhook"</span>,
+        <span class="s">"mail_id"</span>:    mail.id,
+        <span class="s">"action"</span>:     <span class="s">"open"</span>
+    ]
+
+    TDAnalytics.track(<span class="s">"mail_opened"</span>, properties: props)
+}</code></pre>
+  </div>
+</section>
+
+<section id="s6">
+  <h2><span class="n">06</span>트래킹 플랜 등록</h2>
+  <p class="sub">코드만으로는 끝나지 않는다</p>
+  <p>새로 만든 이벤트는 <strong>트래킹 플랜(이벤트 관리)에 등록</strong>해야 분석 화면에서 정상적으로 인식되고 선택할 수 있습니다. 등록하지 않으면 데이터는 들어오지만 리포트에서 이벤트를 찾을 수 없습니다.</p>
+  <div class="tbl"><table>
+    <tr><th>등록 대상</th><th>표시 이름 예시</th><th>타입</th></tr>
+    <tr><td><code>mail_opened</code></td><td>메일 열람</td><td>이벤트</td></tr>
+    <tr><td><code>message_id</code></td><td>발송 건 ID</td><td>이벤트 속성 (문자열)</td></tr>
+    <tr><td><code>channel</code></td><td>발송 채널</td><td>이벤트 속성 (문자열)</td></tr>
+    <tr><td><code>mail_id</code></td><td>메일 ID</td><td>이벤트 속성 (문자열)</td></tr>
+    <tr><td><code>action</code></td><td>동작 구분</td><td>이벤트 속성 (문자열)</td></tr>
+  </table></div>
+  <p>이 작업은 보통 운영 담당자나 데이터 담당자가 처리합니다. 클라이언트 개발자는 <strong>사용한 이벤트명과 속성명 목록을 전달</strong>하면 됩니다.</p>
+</section>
+
+<section id="s7">
+  <h2><span class="n">07</span>검증</h2>
+  <p class="sub">개발 빌드에서 확인하는 방법</p>
+
+  <h4>1. 로그 확인</h4>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">디버그 로그 활성화</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="c">// Unity</span>
+TDAnalytics.EnableLog(<span class="k">true</span>);
+
+<span class="c">// Android</span>
+TDAnalytics.enableLog(<span class="k">true</span>);
+
+<span class="c">// iOS (Swift)</span>
+TDAnalytics.setLogLevel(.debug)
+
+<span class="c">// JavaScript — SDK 초기화 시</span>
+ta.init({ appId: <span class="s">'...'</span>, serverUrl: <span class="s">'...'</span>, showLog: <span class="k">true</span> });</code></pre>
+  </div>
+  <p>메일을 열었을 때 <code>mail_opened</code>가 전송되고, 속성에 <code>message_id</code>가 채워져 있는지 로그에서 확인합니다.</p>
+
+  <h4>2. 실시간 유입 확인</h4>
+  <p>분석 플랫폼의 디버그 모드에서 테스트 기기의 이벤트가 실시간으로 들어오는지 확인합니다. 계정 ID가 함께 붙어 있는지도 이때 같이 봅니다.</p>
+
+  <h4>3. 퍼널 연결 확인</h4>
+  <p>운영 담당자가 테스트 발송을 한 뒤, 그 메일을 열어 도달 퍼널에서 <strong>발송 → 도달 → 열람</strong>이 모두 집계되는지 확인합니다. 여기까지 통과하면 연동 완료입니다.</p>
+
+  <div class="note good">
+    <p><b>완료 판정</b> — 테스트 계정으로 받은 운영 메일을 열었을 때, 도달 퍼널의 열람 단계 숫자가 올라가면 정상입니다. 이벤트는 들어오는데 퍼널이 0이면 <code>message_id</code> 누락이나 이벤트명 불일치를 의심하세요.</p>
+  </div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">08</span>체크리스트와 흔한 실수</h2>
+  <p class="sub">놓치기 쉬운 지점</p>
+
+  <h4>구현 체크리스트</h4>
+  <ul class="chk">
+    <li>로그인 시 계정 ID가 SDK에 리포트되고 있음 (02장)</li>
+    <li>서버로부터 메일 데이터에 <code>message_id</code>가 내려옴 (03장)</li>
+    <li>이벤트명을 운영 담당자와 합의함</li>
+    <li>메일 열람 시 이벤트 리포트 구현, <code>message_id</code> 속성 포함</li>
+    <li>운영 발송이 아닌 메일에서는 이벤트를 올리지 않도록 분기</li>
+    <li>이벤트명 · 속성명 목록을 운영 담당자에게 전달 (트래킹 플랜 등록용)</li>
+    <li>디버그 로그와 실시간 유입으로 확인</li>
+    <li>도달 퍼널에서 열람 단계가 집계되는 것 확인</li>
+  </ul>
+
+  <h4>흔한 실수</h4>
+  <div class="tbl"><table>
+    <tr><th>실수</th><th>증상</th><th>해결</th></tr>
+    <tr><td><code>message_id</code>를 속성에 넣지 않음</td><td>이벤트는 쌓이는데 퍼널이 0</td><td>속성에 추가 (가장 흔한 원인)</td></tr>
+    <tr><td>이벤트명 오탈자</td><td>퍼널이 0</td><td>채널 설정의 이벤트명과 문자 단위 대조</td></tr>
+    <tr><td>트래킹 플랜 미등록</td><td>분석 화면에서 이벤트 선택 불가</td><td>운영 담당자에게 등록 요청</td></tr>
+    <tr><td>계정 식별 누락</td><td>이벤트가 유저와 연결 안 됨</td><td>로그인 시 계정 ID 리포트 확인</td></tr>
+    <tr><td>모든 메일에서 이벤트 발생</td><td>일반 메일까지 집계되어 수치 왜곡</td><td><code>message_id</code> 유무로 분기</td></tr>
+    <tr><td>중복 발생 미고려</td><td>열람률이 100%를 넘음</td><td>유저 단위 집계 또는 최초 1회 제한</td></tr>
+  </table></div>
+</section>
+
+<footer>
+  Webhook 채널 클라이언트 연동 가이드 · 코드는 각 플랫폼 SDK 기준 참조 구현입니다. 이벤트명과 속성명은 채널의 도달 퍼널 설정 및 트래킹 플랜과 일치시켜 사용하시기 바랍니다.
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var code = btn.closest('.codewrap').querySelector('code');
+    navigator.clipboard.writeText(code.innerText).then(function(){
+      var old = btn.textContent;
+      btn.textContent = '복사됨';
+      setTimeout(function(){ btn.textContent = old; }, 1400);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

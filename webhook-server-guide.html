@@ -1,0 +1,703 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Engage Webhook 수신 서버 구현 가이드</title>
+<style>*{box-sizing:border-box}body{margin:0}</style>
+</head>
+<body>
+<style>
+:root{
+  --paper:#FFFFFF; --paper-2:#F4F6F6; --ink:#14181B; --ink-2:#4A555C; --ink-3:#78858C;
+  --line:#E1E6E7; --line-2:#CDD5D7;
+  --accent:#0B6E5F; --accent-soft:#E4F1EE; --accent-line:#9CCDC3;
+  --warn:#9A4520; --warn-soft:#FBEDE6; --warn-line:#E3B89F;
+  --lock:#3B4A8C; --lock-soft:#ECEEF8; --lock-line:#B4BDE0;
+  --code-bg:#12191D; --code-ink:#DEE7EA; --code-mut:#7E9099; --code-key:#7FD4BE; --code-str:#E3B98C; --code-cmt:#5E7078;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"D2Coding",monospace;
+  --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --paper:#0E1214; --paper-2:#161C1F; --ink:#E9EFF0; --ink-2:#A9B6BA; --ink-3:#78858C;
+    --line:#242D31; --line-2:#333F44;
+    --accent:#4FBFA8; --accent-soft:#102A26; --accent-line:#1E4A43;
+    --warn:#E0916B; --warn-soft:#2A1A13; --warn-line:#4A2E20;
+    --lock:#9AA6E0; --lock-soft:#191D33; --lock-line:#333B63;
+    --code-bg:#080C0E;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0E1214; --paper-2:#161C1F; --ink:#E9EFF0; --ink-2:#A9B6BA; --ink-3:#78858C;
+  --line:#242D31; --line-2:#333F44;
+  --accent:#4FBFA8; --accent-soft:#102A26; --accent-line:#1E4A43;
+  --warn:#E0916B; --warn-soft:#2A1A13; --warn-line:#4A2E20;
+  --lock:#9AA6E0; --lock-soft:#191D33; --lock-line:#333B63;
+  --code-bg:#080C0E;
+}
+:root[data-theme="light"]{
+  --paper:#FFFFFF; --paper-2:#F4F6F6; --ink:#14181B; --ink-2:#4A555C; --ink-3:#78858C;
+  --line:#E1E6E7; --line-2:#CDD5D7;
+  --accent:#0B6E5F; --accent-soft:#E4F1EE; --accent-line:#9CCDC3;
+  --warn:#9A4520; --warn-soft:#FBEDE6; --warn-line:#E3B89F;
+  --lock:#3B4A8C; --lock-soft:#ECEEF8; --lock-line:#B4BDE0;
+  --code-bg:#12191D;
+}
+html{background:var(--paper);}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.72;font-size:16px;}
+.page{max-width:880px;margin:0 auto;padding:0 22px 96px;}
+
+header.top{padding:56px 0 30px;border-bottom:1px solid var(--line);}
+.brow{display:flex;align-items:center;gap:9px;margin-bottom:16px;}
+.dot{width:9px;height:9px;border-radius:2px;background:var(--accent);transform:rotate(45deg);}
+.brow span{font-size:12.5px;letter-spacing:.14em;color:var(--accent);font-weight:600;}
+h1{font-size:34px;line-height:1.28;margin:0 0 14px;font-weight:700;letter-spacing:-.01em;text-wrap:balance;}
+.lede{font-size:16.5px;color:var(--ink-2);margin:0 0 22px;max-width:60ch;}
+.facts{display:flex;flex-wrap:wrap;gap:8px;}
+.fact{font-size:12.5px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:4px 13px;background:var(--paper-2);}
+
+nav.toc{margin:30px 0 6px;padding:18px 0 22px;border-bottom:1px solid var(--line);}
+nav.toc p{margin:0 0 11px;font-size:11.5px;letter-spacing:.13em;color:var(--ink-3);font-weight:600;}
+nav.toc ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(238px,1fr));gap:5px 22px;counter-reset:t;}
+nav.toc li{counter-increment:t;}
+nav.toc a{display:block;text-decoration:none;color:var(--ink-2);font-size:14px;padding:3px 0;border-bottom:1px solid transparent;}
+nav.toc a::before{content:counter(t,decimal-leading-zero);font-family:var(--mono);font-size:11.5px;color:var(--accent);margin-right:10px;}
+nav.toc a:hover{color:var(--ink);border-bottom-color:var(--line-2);}
+
+section{padding-top:52px;scroll-margin-top:16px;}
+h2{font-size:23px;margin:0 0 6px;font-weight:700;letter-spacing:-.005em;text-wrap:balance;display:flex;align-items:baseline;gap:13px;}
+h2 .n{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:500;letter-spacing:0;flex:none;}
+.sub{color:var(--ink-3);font-size:14px;margin:0 0 20px;padding-left:37px;}
+h3{font-size:16.5px;margin:32px 0 9px;font-weight:600;}
+h4{font-size:14.5px;margin:22px 0 7px;font-weight:600;color:var(--ink-2);}
+p{margin:0 0 15px;max-width:66ch;}
+ul,ol.n{margin:0 0 15px;padding-left:21px;}
+li{margin-bottom:7px;max-width:64ch;}
+strong{font-weight:600;}
+code{font-family:var(--mono);font-size:.855em;background:var(--paper-2);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--ink);}
+
+.codewrap{position:relative;margin:16px 0 20px;border-radius:9px;overflow:hidden;background:var(--code-bg);border:1px solid var(--line);}
+.codehead{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;border-bottom:1px solid rgba(255,255,255,.07);}
+.codehead .fn{font-family:var(--mono);font-size:11.5px;color:var(--code-mut);}
+.copy{font-family:var(--sans);font-size:11.5px;color:var(--code-mut);background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;padding:3px 10px;cursor:pointer;}
+.copy:hover{color:var(--code-ink);border-color:rgba(255,255,255,.3);}
+.copy:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+pre{margin:0;padding:15px 16px 17px;overflow-x:auto;}
+pre code{font-family:var(--mono);font-size:12.9px;line-height:1.68;background:none;border:none;padding:0;color:var(--code-ink);white-space:pre;}
+.k{color:var(--code-key);} .s{color:var(--code-str);} .c{color:var(--code-cmt);font-style:italic;}
+
+.note{border:1px solid var(--accent-line);background:var(--accent-soft);border-radius:9px;padding:14px 17px;margin:18px 0;font-size:14.5px;}
+.note.warn{border-color:var(--warn-line);background:var(--warn-soft);}
+.note.lock{border-color:var(--lock-line);background:var(--lock-soft);}
+.note p{margin:0;max-width:none;}
+.note p+p{margin-top:8px;}
+.note b{color:var(--accent);}
+.note.warn b{color:var(--warn);}
+.note.lock b{color:var(--lock);}
+
+.tbl{overflow-x:auto;margin:16px 0 20px;border:1px solid var(--line);border-radius:9px;}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:520px;}
+th{text-align:left;font-size:12px;letter-spacing:.03em;color:var(--ink-3);font-weight:600;padding:11px 15px;border-bottom:1px solid var(--line);background:var(--paper-2);white-space:nowrap;}
+td{padding:10px 15px;border-bottom:1px solid var(--line);vertical-align:top;}
+tr:last-child td{border-bottom:none;}
+td code{font-size:.86em;}
+.tag{display:inline-block;font-size:11px;font-weight:600;border-radius:4px;padding:2px 8px;white-space:nowrap;}
+.tag.fix{background:var(--lock-soft);color:var(--lock);border:1px solid var(--lock-line);}
+.tag.free{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);}
+
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin:22px 0 26px;}
+.fnode{flex:1 1 175px;border:1px solid var(--line);border-radius:9px;padding:13px 15px;background:var(--paper-2);}
+.fnode .t{font-size:11px;letter-spacing:.1em;color:var(--accent);font-weight:600;margin-bottom:5px;}
+.fnode .d{font-size:13.5px;color:var(--ink-2);line-height:1.55;}
+.farrow{align-self:center;color:var(--ink-3);font-size:16px;flex:none;}
+
+.chk{list-style:none;padding:0;margin:14px 0 0;}
+.chk li{position:relative;padding-left:27px;margin-bottom:9px;}
+.chk li::before{content:"";position:absolute;left:0;top:.55em;width:13px;height:13px;border:1.5px solid var(--line-2);border-radius:3px;}
+
+footer{margin-top:66px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3);}
+@media (max-width:640px){
+  h1{font-size:27px;} h2{font-size:20px;gap:9px;} .sub{padding-left:0;}
+  header.top{padding-top:38px;} section{padding-top:40px;}
+}
+</style>
+
+<div class="page">
+
+<header class="top">
+  <div class="brow"><span class="dot"></span><span>ENGAGE · WEBHOOK CHANNEL</span></div>
+  <h1>Webhook 수신 서버 구현 가이드</h1>
+  <p class="lede">운영 플랫폼이 보내는 발송 요청을 받아, 자사 시스템으로 메시지를 전달하는 엔드포인트를 만드는 방법. 고정 규격, 참조 구현, 효과 측정을 위한 트래킹까지 다룹니다.</p>
+  <div class="facts">
+    <span class="fact">대상: 서버 · 클라이언트 개발자</span>
+    <span class="fact">예상 공수 4~5 man-day</span>
+    <span class="fact">신규 인프라 불필요</span>
+    <span class="fact">예제: 인게임 우편함 지급</span>
+  </div>
+</header>
+
+<nav class="toc">
+  <p>목차</p>
+  <ol>
+    <li><a href="#s1">동작 구조와 역할</a></li>
+    <li><a href="#s2">고정 규격과 자유 선택</a></li>
+    <li><a href="#s3">컨텐츠 템플릿 = 개발 계약</a></li>
+    <li><a href="#s4">DTO 정의</a></li>
+    <li><a href="#s5">엔드포인트 구현</a></li>
+    <li><a href="#s6">서명 검증</a></li>
+    <li><a href="#s7">처리 로직과 매핑</a></li>
+    <li><a href="#s8">발송 결과 회신 (receipt)</a></li>
+    <li><a href="#s9">도달 퍼널 트래킹 코드</a></li>
+    <li><a href="#s10">배포 (Kubernetes)</a></li>
+    <li><a href="#s11">검증 절차</a></li>
+    <li><a href="#s12">체크리스트</a></li>
+  </ol>
+</nav>
+
+<section id="s1">
+  <h2><span class="n">01</span>동작 구조와 역할</h2>
+  <p class="sub">누가 무엇을 담당하는가</p>
+  <p>Webhook 채널은 운영 플랫폼이 <strong>메시지를 직접 전달하지 않고</strong>, 발송해야 할 내용을 자사 서버로 넘기는 방식입니다. 실제 전달 수단은 서버가 정합니다 — 인게임 우편함, 사내 메시징, 외부 시스템 연동 등 무엇이든 가능합니다.</p>
+  <div class="flow">
+    <div class="fnode"><div class="t">운영 플랫폼</div><div class="d">대상 유저 선정 → 유저별로 발송 요청을 JSON으로 POST</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="t">수신 서버 (구현 대상)</div><div class="d">서명 검증 · 중복 차단 · 자사 발송 로직 호출 · 결과 회신</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="t">유저</div><div class="d">우편함 보상, 알림 등 실제 전달물 수령</div></div>
+  </div>
+  <p><strong>요청은 유저 1명당 1건</strong>입니다. 대상 유저가 1만 명이면 1만 번의 POST가 발생하므로, 서버는 이 부하를 감당할 수 있어야 합니다.</p>
+  <div class="note">
+    <p><b>다른 채널과의 차이</b> — 푸시 알림(FCM)이나 인앱 메시지(클라이언트 채널)는 서버 구현 없이 사용할 수 있습니다. Webhook은 자체 발송 로직이 필요할 때 선택하는 채널이며, 세 채널 중 개발 비용이 가장 큽니다.</p>
+  </div>
+</section>
+
+<section id="s2">
+  <h2><span class="n">02</span>고정 규격과 자유 선택</h2>
+  <p class="sub">반드시 이 값이어야 하는 것과, 직접 정하는 것</p>
+  <p>구현 전에 이 구분을 명확히 해야 합니다. <span class="tag fix">고정</span> 표시 항목은 플랫폼이 정한 값이라 <strong>철자·대소문자까지 정확히 일치</strong>해야 하고, <span class="tag free">자유</span> 항목은 자사 컨벤션에 맞춰 정하면 됩니다.</p>
+
+  <h3>통신 규격</h3>
+  <div class="tbl"><table>
+    <tr><th>항목</th><th>구분</th><th>값</th></tr>
+    <tr><td>HTTP 메서드</td><td><span class="tag fix">고정</span></td><td><code>POST</code> — GET/PUT 불가</td></tr>
+    <tr><td>Content-Type</td><td><span class="tag fix">고정</span></td><td><code>application/json</code></td></tr>
+    <tr><td>프로토콜</td><td><span class="tag fix">고정</span></td><td><code>https</code> — 공개 접근 가능해야 함 (사내망 전용 불가)</td></tr>
+    <tr><td>성공 응답</td><td><span class="tag fix">고정</span></td><td>HTTP <code>200</code> + <code>{"code": 0}</code></td></tr>
+    <tr><td>응답 시간</td><td><span class="tag fix">고정</span></td><td>타임아웃 내 응답 필수 — 초과 시 실패 처리 후 재시도</td></tr>
+    <tr><td>도메인 · 경로</td><td><span class="tag free">자유</span></td><td>자사 API 컨벤션대로 (예: <code>/engage/webhook</code>, <code>/v1/hook/mail</code>)</td></tr>
+    <tr><td>포트</td><td><span class="tag free">자유</span></td><td>443 외 포트도 URL에 명시하면 사용 가능</td></tr>
+  </table></div>
+
+  <h3>요청 본문(payload) 최상위 키</h3>
+  <p>아래 키 이름은 플랫폼이 보내는 값이므로 <strong>전부 고정</strong>입니다. DTO에서 이 이름 그대로 받아야 합니다.</p>
+  <div class="tbl"><table>
+    <tr><th>키</th><th>타입</th><th>의미</th><th>용도</th></tr>
+    <tr><td><code>message_id</code></td><td>string</td><td>발송 건 고유 ID</td><td><strong>멱등성 키</strong> · 로그 추적 · receipt 회신</td></tr>
+    <tr><td><code>user_id</code></td><td>string</td><td>채널의 「전송 ID」로 지정한 유저 속성값</td><td>수신자 식별 — 이 값으로 계정 조회</td></tr>
+    <tr><td><code>channel</code></td><td>string</td><td>채널 종류 식별자</td><td>다중 채널 분기 시 사용</td></tr>
+    <tr><td><code>content</code></td><td>object</td><td>컨텐츠 템플릿에 입력된 내용</td><td>실제 전달 내용 — 03장 참조</td></tr>
+    <tr><td><code>timestamp</code></td><td>number</td><td>발송 시각 (Unix seconds)</td><td>지연 감지 · 로깅</td></tr>
+  </table></div>
+
+  <h3>receipt(결과 회신) 규격</h3>
+  <div class="tbl"><table>
+    <tr><th>키</th><th>구분</th><th>값</th></tr>
+    <tr><td><code>message_id</code></td><td><span class="tag fix">고정</span></td><td>받은 요청의 값을 그대로 반환</td></tr>
+    <tr><td><code>user_id</code></td><td><span class="tag fix">고정</span></td><td>받은 요청의 값을 그대로 반환</td></tr>
+    <tr><td><code>status</code></td><td><span class="tag fix">고정</span></td><td><code>"success"</code> 또는 <code>"failed"</code> — <strong>이 두 문자열만 유효</strong></td></tr>
+    <tr><td><code>error_msg</code></td><td><span class="tag fix">고정</span></td><td>실패 시 사유, 성공 시 빈 문자열</td></tr>
+    <tr><td><code>timestamp</code></td><td><span class="tag fix">고정</span></td><td>처리 시각 (Unix seconds)</td></tr>
+  </table></div>
+
+  <h3>채널 설정값</h3>
+  <div class="tbl"><table>
+    <tr><th>설정 항목</th><th>구분</th><th>넣어야 할 값</th></tr>
+    <tr><td>채널 이름</td><td><span class="tag free">자유</span></td><td>운영자가 알아볼 식별용 이름 (80자 이내)</td></tr>
+    <tr><td>URL</td><td><span class="tag free">자유</span></td><td>배포한 엔드포인트 전체 주소 — <strong>플랫폼이 주는 값이 아니라 자사 서버 주소</strong></td></tr>
+    <tr><td>전송 ID</td><td><span class="tag free">자유</span></td><td>수신자 식별용 유저 속성. <strong>서버가 계정을 조회할 수 있는 키</strong>를 선택 (통상 계정 ID)</td></tr>
+    <tr><td>시크릿 토큰</td><td><span class="tag free">자유</span></td><td>직접 생성한 무작위 문자열 (64자 이내). 서버 환경변수와 동일하게 설정</td></tr>
+    <tr><td>암호화 방식</td><td><span class="tag free">자유</span></td><td>기본값 사용 권장. 변경 시 서버 검증 로직도 함께 변경</td></tr>
+    <tr><td>컨텐츠 템플릿 필드명</td><td><span class="tag free">자유</span></td><td>서버 코드와 이름만 일치하면 됨</td></tr>
+    <tr><td>도달 퍼널 이벤트명</td><td><span class="tag free">자유</span></td><td>트래킹으로 올리는 이벤트명과 일치해야 함 — 09장 참조</td></tr>
+  </table></div>
+
+  <div class="note lock">
+    <p><b>시크릿 토큰 생성</b> — 아래 명령으로 만든 64자 hex 문자열을 채널 설정과 서버 환경변수에 동일하게 넣으면 됩니다. 메신저 평문 대신 비밀번호 관리자나 시크릿 저장소로 전달하세요.</p>
+    <p><code>openssl rand -hex 32</code></p>
+  </div>
+  <div class="note warn">
+    <p><b>환경별 확인 필요</b> — 위 규격은 표준 문서 기준입니다. 서명 헤더의 이름, 서명 대상 범위, receipt 회신 주소는 사용 중인 환경의 채널 매뉴얼(채널 생성 화면 상단의 매뉴얼 링크)에서 확인해 맞추시기 바랍니다.</p>
+  </div>
+</section>
+
+<section id="s3">
+  <h2><span class="n">03</span>컨텐츠 템플릿 = 개발 계약</h2>
+  <p class="sub">채널 설정의 필드명이 곧 코드의 키가 된다</p>
+  <p>채널 생성 시 정의하는 <strong>컨텐츠 템플릿</strong>은 두 가지 역할을 동시에 합니다. 운영자가 메시지를 작성할 <strong>입력 폼</strong>이자, 서버가 받게 될 <strong>JSON의 구조</strong>입니다. 아래는 인게임 우편함 지급 시나리오의 예시입니다.</p>
+  <div class="tbl"><table>
+    <tr><th>필드 (payload 키)</th><th>표시 이름</th><th>입력 방식</th><th>필수</th><th>예시값</th></tr>
+    <tr><td><code>title</code></td><td>메일 제목</td><td>텍스트</td><td>필수</td><td>복귀 보상이 도착했어요</td></tr>
+    <tr><td><code>body</code></td><td>메일 본문</td><td>텍스트</td><td>필수</td><td>7일 출석 보상을 확인하세요</td></tr>
+    <tr><td><code>reward_id</code></td><td>보상 ID</td><td>텍스트</td><td>선택</td><td>comeback_pack_01</td></tr>
+    <tr><td><code>expire_days</code></td><td>만료일(일)</td><td>텍스트</td><td>선택</td><td>7</td></tr>
+  </table></div>
+
+  <h4>필드 설계 요령</h4>
+  <ul>
+    <li>운영자가 태스크마다 <strong>바꿔서 입력할 값</strong>만 필드로 만듭니다. 항상 고정인 값은 커스텀 파라미터로 처리하세요.</li>
+    <li>보상 코드는 <strong>기존 기획 데이터의 코드 체계를 그대로</strong> 사용합니다. 웹훅용으로 새 체계를 만들면 매핑 테이블이 하나 더 생깁니다.</li>
+    <li>숫자로 쓸 값이라도 payload에서는 문자열로 올 수 있습니다. 서버에서 파싱하고 기본값을 두세요.</li>
+    <li>필드명은 나중에 바꾸기 어렵습니다. 확장 가능성(딥링크, 만료 정책 등)을 미리 고려하세요.</li>
+  </ul>
+
+  <h4>개인화 변수</h4>
+  <p>운영자가 입력하는 <strong>값 안에</strong> 유저 속성을 삽입하면, 플랫폼이 수신자별로 실제 값으로 치환해서 전송합니다. 예를 들어 본문에 닉네임 속성을 넣으면 유저마다 다른 문구가 서버로 도착합니다. <strong>서버는 이미 치환된 최종 문자열을 받으므로 별도 처리가 필요 없습니다.</strong></p>
+
+  <div class="note warn">
+    <p><b>자동 매핑이 아닙니다</b> — 플랫폼은 서버 내부 구조를 알지 못합니다. 템플릿에 <code>reward_id</code>라고 적으면 payload에 그 이름으로 실릴 뿐이고, <strong>서버가 같은 이름으로 읽도록 구현</strong>되어 있어야 동작합니다. 양측이 이름을 약속하는 계약이며, 이 표가 그대로 개발 명세가 됩니다.</p>
+  </div>
+</section>
+
+<section id="s4">
+  <h2><span class="n">04</span>DTO 정의</h2>
+  <p class="sub">수신할 JSON의 형태 — C# / ASP.NET Core 기준</p>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">Models/WebhookPayload.cs</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">using</span> System.Text.Json.Serialization;
+
+<span class="k">public sealed class</span> WebhookPayload
+{
+    <span class="c">// ↓ 이 5개 키 이름은 플랫폼 고정 규격이다 (02장 참조)</span>
+    [JsonPropertyName(<span class="s">"message_id"</span>)] <span class="k">public string</span> MessageId { <span class="k">get</span>; <span class="k">init</span>; } = <span class="s">""</span>;
+    [JsonPropertyName(<span class="s">"user_id"</span>)]    <span class="k">public string</span> UserId    { <span class="k">get</span>; <span class="k">init</span>; } = <span class="s">""</span>;
+    [JsonPropertyName(<span class="s">"channel"</span>)]    <span class="k">public string</span> Channel   { <span class="k">get</span>; <span class="k">init</span>; } = <span class="s">""</span>;
+    [JsonPropertyName(<span class="s">"timestamp"</span>)]  <span class="k">public long</span>   Timestamp { <span class="k">get</span>; <span class="k">init</span>; }
+    [JsonPropertyName(<span class="s">"content"</span>)]    <span class="k">public</span> WebhookContent Content { <span class="k">get</span>; <span class="k">init</span>; } = <span class="k">new</span>();
+}
+
+<span class="k">public sealed class</span> WebhookContent
+{
+    <span class="c">// ↓ 컨텐츠 템플릿에 정의한 필드가 여기로 들어온다 (자유 명명)</span>
+    [JsonPropertyName(<span class="s">"title"</span>)] <span class="k">public string</span> Title { <span class="k">get</span>; <span class="k">init</span>; } = <span class="s">""</span>;
+    [JsonPropertyName(<span class="s">"body"</span>)]  <span class="k">public string</span> Body  { <span class="k">get</span>; <span class="k">init</span>; } = <span class="s">""</span>;
+
+    <span class="c">// ↓ 커스텀 필드와 커스텀 파라미터는 extra로 전달된다</span>
+    [JsonPropertyName(<span class="s">"extra"</span>)] <span class="k">public</span> Dictionary&lt;<span class="k">string</span>, <span class="k">string</span>&gt; Extra { <span class="k">get</span>; <span class="k">init</span>; } = <span class="k">new</span>();
+
+    <span class="c">// 미확인 필드를 흘리지 않고 받아두면 스키마 변경에 안전하다</span>
+    [JsonExtensionData] <span class="k">public</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;? Unknown { <span class="k">get</span>; <span class="k">init</span>; }
+}</code></pre>
+  </div>
+  <div class="note warn">
+    <p><b>착수 전 실제 payload를 확인하세요</b> — <code>content</code> 안에서 어떤 값이 최상위로 오고 어떤 값이 <code>extra</code>로 묶이는지는 환경에 따라 다를 수 있습니다. <code>webhook.site</code> 같은 임시 엔드포인트를 채널 URL에 넣고 시험 발송하면 실제 JSON과 서명 헤더 이름까지 그대로 확인할 수 있습니다. DTO는 그 결과로 확정하는 것이 재작업을 막는 가장 값싼 방법입니다.</p>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="n">05</span>엔드포인트 구현</h2>
+  <p class="sub">요청 수신부 — 검증하고, 큐에 넣고, 즉시 응답</p>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">Program.cs</span><button class="copy" type="button">복사</button></div>
+    <pre><code>app.MapPost(<span class="s">"/engage/webhook"</span>, <span class="k">async</span> (
+    HttpContext http,
+    WebhookService service,
+    ILogger&lt;Program&gt; log) =&gt;
+{
+    <span class="c">// (1) 원문 보관 — 서명 검증은 원문 기준이므로 역직렬화 전에 읽는다</span>
+    http.Request.EnableBuffering();
+    <span class="k">using var</span> reader = <span class="k">new</span> StreamReader(http.Request.Body, leaveOpen: <span class="k">true</span>);
+    <span class="k">var</span> raw = <span class="k">await</span> reader.ReadToEndAsync();
+    http.Request.Body.Position = <span class="s">0</span>;
+
+    <span class="c">// (2) 서명 검증 — 헤더명은 채널 매뉴얼 규격에 맞출 것</span>
+    <span class="k">var</span> signature = http.Request.Headers[<span class="s">"X-Signature"</span>].FirstOrDefault();
+    <span class="k">if</span> (!WebhookAuth.Verify(raw, signature))
+    {
+        log.LogWarning(<span class="s">"서명 불일치 — 요청 거부"</span>);
+        <span class="k">return</span> Results.Unauthorized();
+    }
+
+    <span class="c">// (3) 파싱</span>
+    <span class="k">var</span> payload = JsonSerializer.Deserialize&lt;WebhookPayload&gt;(raw);
+    <span class="k">if</span> (payload <span class="k">is null</span> || <span class="k">string</span>.IsNullOrEmpty(payload.MessageId))
+        <span class="k">return</span> Results.BadRequest(<span class="k">new</span> { code = <span class="s">400</span>, msg = <span class="s">"invalid payload"</span> });
+
+    <span class="c">// (4) 큐에 적재하고 즉시 응답 — 성공 응답은 고정 규격</span>
+    <span class="k">await</span> service.EnqueueAsync(payload);
+    <span class="k">return</span> Results.Ok(<span class="k">new</span> { code = <span class="s">0</span> });
+});</code></pre>
+  </div>
+
+  <h4>왜 큐를 쓰는가</h4>
+  <p>운영 태스크 한 건이 수천에서 수만 건의 호출을 만듭니다. 요청 스레드에서 DB 쓰기와 보상 지급까지 처리하면 응답이 지연되고, 플랫폼은 이를 발송 실패로 기록한 뒤 재시도합니다. 그 재시도가 다시 부하를 키우는 악순환이 생깁니다. <strong>접수만 하고 즉시 200을 반환한 뒤 워커에서 처리</strong>하세요.</p>
+
+  <h4>응답 코드 설계</h4>
+  <div class="tbl"><table>
+    <tr><th>상황</th><th>응답</th><th>플랫폼 동작</th></tr>
+    <tr><td>정상 접수</td><td><code>200</code> + <code>{"code":0}</code></td><td>발송 성공으로 기록</td></tr>
+    <tr><td>서명 불일치</td><td><code>401</code></td><td>실패로 기록 — 재시도해도 동일하므로 설정을 고쳐야 함</td></tr>
+    <tr><td>payload 형식 오류</td><td><code>400</code></td><td>실패로 기록</td></tr>
+    <tr><td>서버 일시 장애</td><td><code>500</code> 또는 무응답</td><td>재시도 대상 — 멱등성이 없으면 중복 처리 위험</td></tr>
+  </table></div>
+</section>
+
+<section id="s6">
+  <h2><span class="n">06</span>서명 검증</h2>
+  <p class="sub">채널에 설정한 시크릿 토큰으로 요청의 진위를 확인</p>
+  <p>채널 생성 시 「채널 검증」을 켜면 시크릿 토큰을 등록하게 됩니다. 플랫폼은 이 토큰으로 요청에 서명을 붙여 보내고, 서버는 같은 토큰으로 재계산해 대조합니다. <strong>토큰은 코드에 하드코딩하지 말고 시크릿 저장소에서 주입</strong>하세요.</p>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">Services/WebhookAuth.cs</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">public static class</span> WebhookAuth
+{
+    <span class="k">private static readonly string</span> Secret =
+        Environment.GetEnvironmentVariable(<span class="s">"WEBHOOK_SECRET"</span>)!;
+
+    <span class="k">public static bool</span> Verify(<span class="k">string</span> rawBody, <span class="k">string</span>? signatureHeader)
+    {
+        <span class="k">if</span> (<span class="k">string</span>.IsNullOrEmpty(signatureHeader)) <span class="k">return false</span>;
+
+        <span class="k">using var</span> hmac = <span class="k">new</span> HMACSHA256(Encoding.UTF8.GetBytes(Secret));
+        <span class="k">var</span> computed = Convert.ToHexString(
+            hmac.ComputeHash(Encoding.UTF8.GetBytes(rawBody))).ToLowerInvariant();
+
+        <span class="c">// 타이밍 공격 방지를 위한 고정시간 비교</span>
+        <span class="k">return</span> CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(computed),
+            Encoding.UTF8.GetBytes(signatureHeader.ToLowerInvariant()));
+    }
+}</code></pre>
+  </div>
+  <div class="note warn">
+    <p><b>규격 확인 필요</b> — 서명 헤더의 이름, 서명 대상(원문 전체인지 특정 필드 조합인지), 암호화 방식은 채널 설정 화면의 매뉴얼에 명시된 값을 따라야 합니다. 위 코드는 HMAC-SHA256 기준의 일반적인 형태입니다.</p>
+  </div>
+</section>
+
+<section id="s7">
+  <h2><span class="n">07</span>처리 로직과 매핑</h2>
+  <p class="sub">템플릿 필드를 자사 비즈니스 로직으로 연결하는 지점</p>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">Services/WebhookService.cs</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">public async Task</span> ProcessAsync(WebhookPayload p)
+{
+    <span class="c">// (1) 멱등성 — 재시도로 인한 중복 지급 방지</span>
+    <span class="k">var</span> key = $<span class="s">"webhook:{p.MessageId}"</span>;
+    <span class="k">if</span> (!<span class="k">await</span> _cache.TrySetIfNotExistsAsync(key, <span class="s">"1"</span>, TimeSpan.FromDays(<span class="s">7</span>)))
+    {
+        _log.LogInformation(<span class="s">"중복 수신 무시: {Id}"</span>, p.MessageId);
+        <span class="k">return</span>;
+    }
+
+    <span class="k">try</span>
+    {
+        <span class="c">// (2) 계정 조회 — user_id는 채널의 전송 ID로 지정한 속성값</span>
+        <span class="k">var</span> account = <span class="k">await</span> _mailbox.FindAccountAsync(p.UserId);
+        <span class="k">if</span> (account <span class="k">is null</span>)
+        {
+            <span class="k">await</span> _receipt.ReportAsync(p, success: <span class="k">false</span>, error: <span class="s">"account_not_found"</span>);
+            <span class="k">return</span>;
+        }
+
+        <span class="c">// (3) ★ 템플릿 필드 → 서버 변수 매핑 지점 ★</span>
+        <span class="k">var</span> title      = p.Content.Title;                                  <span class="c">// 필드: title</span>
+        <span class="k">var</span> body       = p.Content.Body;                                   <span class="c">// 필드: body</span>
+        <span class="k">var</span> rewardId   = p.Content.Extra.GetValueOrDefault(<span class="s">"reward_id"</span>);   <span class="c">// 필드: reward_id</span>
+        <span class="k">var</span> expireDays = <span class="k">int</span>.TryParse(
+            p.Content.Extra.GetValueOrDefault(<span class="s">"expire_days"</span>), <span class="k">out var</span> d) ? d : <span class="s">30</span>;
+
+        <span class="c">// (4) 자사 발송 로직 호출 — 기존 시스템을 그대로 재사용</span>
+        <span class="k">await</span> _mailbox.SendAsync(<span class="k">new</span> MailRequest
+        {
+            AccountId = account.Id,
+            Title     = title,
+            Body      = body,          <span class="c">// 개인화 변수는 플랫폼이 이미 치환해서 전달</span>
+            RewardId  = rewardId,
+            ExpiresAt = DateTime.UtcNow.AddDays(expireDays),
+            SourceTag = $<span class="s">"engage:{p.MessageId}"</span>,   <span class="c">// ★ 추적 키 — 09장에서 사용</span>
+        });
+
+        <span class="c">// (5) 도달 이벤트 리포트 — 09장 참조</span>
+        <span class="k">await</span> _analytics.TrackAsync(account.Id, <span class="s">"mail_delivered"</span>, <span class="k">new</span> {
+            message_id = p.MessageId, reward_id = rewardId
+        });
+
+        <span class="k">await</span> _receipt.ReportAsync(p, success: <span class="k">true</span>);
+    }
+    <span class="k">catch</span> (Exception ex)
+    {
+        _log.LogError(ex, <span class="s">"처리 실패 {Id}"</span>, p.MessageId);
+        <span class="k">await</span> _cache.RemoveAsync(key);   <span class="c">// 재시도 허용을 위해 멱등키 해제</span>
+        <span class="k">await</span> _receipt.ReportAsync(p, success: <span class="k">false</span>, error: ex.Message);
+    }
+}</code></pre>
+  </div>
+  <p>새로 만드는 것은 <strong>플랫폼의 JSON을 자사 도메인 객체로 번역하는 얇은 어댑터 한 층</strong>뿐입니다. 실제 발송은 이미 운영 중인 시스템(<code>_mailbox.SendAsync</code>)이 담당합니다.</p>
+  <div class="note">
+    <p><b>SourceTag를 반드시 남기세요</b> — 우편함 레코드에 <code>message_id</code>를 저장해 두어야, 유저가 메일을 열었을 때 "어느 발송 건의 메일인지"를 클라이언트가 알 수 있습니다. 09장의 열람 이벤트가 이 값을 필요로 합니다.</p>
+  </div>
+</section>
+
+<section id="s8">
+  <h2><span class="n">08</span>발송 결과 회신 (receipt)</h2>
+  <p class="sub">receipt를 보내야 도달 퍼널이 정확해진다</p>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">Services/ReceiptReporter.cs</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">public async Task</span> ReportAsync(WebhookPayload p, <span class="k">bool</span> success, <span class="k">string</span>? error = <span class="k">null</span>)
+{
+    <span class="k">var</span> payload = <span class="k">new</span>
+    {
+        message_id = p.MessageId,                        <span class="c">// 받은 값 그대로</span>
+        user_id    = p.UserId,                           <span class="c">// 받은 값 그대로</span>
+        status     = success ? <span class="s">"success"</span> : <span class="s">"failed"</span>,   <span class="c">// 이 두 문자열만 유효</span>
+        error_msg  = error ?? <span class="s">""</span>,
+        timestamp  = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+    };
+    <span class="k">await</span> _http.PostAsJsonAsync(_receiptUrl, payload);
+}</code></pre>
+  </div>
+  <p>계정을 찾지 못하거나 보상 코드가 유효하지 않은 등의 <strong>부분 실패를 성공으로 처리하면</strong>, 통계상으로는 모두 발송된 것처럼 보이지만 실제로는 전달되지 않은 유저가 생깁니다. 나중에 효과가 낮게 나와도 원인을 찾을 수 없습니다. 실패는 실패로 회신하고, <code>error_msg</code>에 사유를 남기세요.</p>
+</section>
+
+<section id="s9">
+  <h2><span class="n">09</span>도달 퍼널 트래킹 코드</h2>
+  <p class="sub">효과를 측정하려면 이벤트를 직접 올려야 한다</p>
+  <p>Webhook 채널은 플랫폼이 직접 전달하지 않기 때문에, <strong>"도달했는지 · 열어봤는지"를 플랫폼이 알 수 없습니다.</strong> 자사에서 트래킹 이벤트를 올려주어야 도달 퍼널이 채워집니다. 이 작업을 생략하면 "몇 건 보냈다"까지만 남고 효과 측정이 불가능합니다.</p>
+
+  <div class="flow">
+    <div class="fnode"><div class="t">발송</div><div class="d">플랫폼이 자동 기록<br>추가 작업 없음</div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="t">도달</div><div class="d"><strong>서버</strong>가 이벤트 리포트<br><code>mail_delivered</code></div></div>
+    <div class="farrow">→</div>
+    <div class="fnode"><div class="t">열람 · 클릭</div><div class="d"><strong>클라이언트</strong>가 이벤트 리포트<br><code>mail_opened</code></div></div>
+  </div>
+
+  <h3>공통 규칙</h3>
+  <ul>
+    <li>이벤트 속성에 <strong><code>message_id</code>를 반드시 포함</strong>합니다. 이 값이 발송 건과 이벤트를 잇는 유일한 키입니다.</li>
+    <li>이벤트명은 자유롭게 정하되, <strong>채널의 「도달 퍼널 설정」에 등록한 이름과 정확히 일치</strong>해야 합니다.</li>
+    <li>새로 만든 이벤트는 <strong>트래킹 플랜(이벤트 관리)에 등록</strong>해야 분석에서 정상 인식됩니다.</li>
+    <li>이벤트를 올리는 주체가 로그인 상태(계정 식별 완료)여야 유저와 이벤트가 연결됩니다.</li>
+  </ul>
+
+  <h3>서버 — 도달 이벤트</h3>
+  <p>우편함에 메일을 실제로 생성한 직후 리포트합니다. 07장 처리 로직의 (5)번 위치입니다.</p>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">서버 SDK (C#)</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="c">// 메일 생성 성공 직후</span>
+<span class="k">var</span> evt = <span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;
+{
+    [<span class="s">"message_id"</span>]  = p.MessageId,      <span class="c">// ★ 퍼널 연결 키 — 필수</span>
+    [<span class="s">"channel"</span>]     = <span class="s">"webhook"</span>,
+    [<span class="s">"reward_id"</span>]   = rewardId ?? <span class="s">""</span>,
+    [<span class="s">"mail_id"</span>]     = mail.Id,           <span class="c">// 열람 이벤트와 대조용</span>
+};
+
+<span class="c">// 계정 ID 기준으로 이벤트 전송</span>
+_analytics.Track(accountId: account.Id, eventName: <span class="s">"mail_delivered"</span>, properties: evt);</code></pre>
+  </div>
+
+  <h3>클라이언트 — 열람 이벤트</h3>
+  <p>유저가 우편함에서 해당 메일을 <strong>열람하거나 보상을 수령할 때</strong> 리포트합니다. 07장에서 <code>SourceTag</code>로 저장해 둔 <code>message_id</code>를 메일 데이터와 함께 클라이언트로 내려주어야 합니다.</p>
+
+  <h4>Unity (C#)</h4>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">MailboxUI.cs</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">using</span> ThinkingAnalytics;
+
+<span class="k">public void</span> OnMailOpened(MailData mail)
+{
+    <span class="c">// 서버가 내려준 message_id가 없으면(=운영 발송 메일이 아니면) 스킵</span>
+    <span class="k">if</span> (<span class="k">string</span>.IsNullOrEmpty(mail.MessageId)) <span class="k">return</span>;
+
+    <span class="k">var</span> props = <span class="k">new</span> Dictionary&lt;<span class="k">string</span>, <span class="k">object</span>&gt;
+    {
+        { <span class="s">"message_id"</span>, mail.MessageId },   <span class="c">// ★ 퍼널 연결 키 — 필수</span>
+        { <span class="s">"channel"</span>,    <span class="s">"webhook"</span> },
+        { <span class="s">"mail_id"</span>,    mail.Id },
+        { <span class="s">"action"</span>,     <span class="s">"open"</span> }           <span class="c">// open / claim 구분이 필요하면</span>
+    };
+
+    TDAnalytics.Track(<span class="s">"mail_opened"</span>, props);
+}</code></pre>
+  </div>
+
+  <h4>JavaScript / 웹</h4>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">mailbox.js</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">function</span> onMailOpened(mail) {
+  <span class="k">if</span> (!mail.message_id) <span class="k">return</span>;
+
+  ta.track(<span class="s">'mail_opened'</span>, {
+    message_id: mail.message_id,   <span class="c">// ★ 퍼널 연결 키 — 필수</span>
+    channel:    <span class="s">'webhook'</span>,
+    mail_id:    mail.id,
+    action:     <span class="s">'open'</span>
+  });
+}</code></pre>
+  </div>
+
+  <h4>Android (Java / Kotlin)</h4>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">MailboxActivity.java</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="k">if</span> (mail.getMessageId() != <span class="k">null</span>) {
+    JSONObject props = <span class="k">new</span> JSONObject();
+    props.put(<span class="s">"message_id"</span>, mail.getMessageId());   <span class="c">// ★ 퍼널 연결 키 — 필수</span>
+    props.put(<span class="s">"channel"</span>,    <span class="s">"webhook"</span>);
+    props.put(<span class="s">"mail_id"</span>,    mail.getId());
+
+    TDAnalytics.track(<span class="s">"mail_opened"</span>, props);
+}</code></pre>
+  </div>
+
+  <h3>채널 설정과 연결</h3>
+  <p>이벤트를 올리는 것만으로는 퍼널이 채워지지 않습니다. 채널의 <strong>「도달 퍼널 설정」을 켜고</strong>, 위에서 정한 이벤트명을 각 단계에 등록해야 합니다.</p>
+  <div class="tbl"><table>
+    <tr><th>퍼널 단계</th><th>등록할 이벤트명</th><th>리포트 주체</th><th>시점</th></tr>
+    <tr><td>발송</td><td>— (플랫폼 자동)</td><td>플랫폼</td><td>webhook 호출 시</td></tr>
+    <tr><td>도달</td><td><code>mail_delivered</code></td><td>서버</td><td>우편함 메일 생성 직후</td></tr>
+    <tr><td>클릭 · 열람</td><td><code>mail_opened</code></td><td>클라이언트</td><td>유저가 메일 열람 / 보상 수령 시</td></tr>
+  </table></div>
+
+  <div class="note warn">
+    <p><b>흔한 실수 세 가지</b></p>
+    <p>① <code>message_id</code>를 속성에 넣지 않음 — 이벤트는 쌓이지만 발송 건과 연결되지 않아 퍼널이 비어 있습니다.</p>
+    <p>② 채널 설정의 이벤트명과 코드의 이벤트명 불일치 — 오탈자 하나로 퍼널이 0건이 됩니다.</p>
+    <p>③ 트래킹 플랜에 이벤트 미등록 — 데이터는 들어오지만 분석 화면에서 선택할 수 없습니다.</p>
+  </div>
+</section>
+
+<section id="s10">
+  <h2><span class="n">10</span>배포 (Kubernetes)</h2>
+  <p class="sub">신규 인프라 없이 기존 서비스에 경로 추가</p>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">k8s manifests</span><button class="copy" type="button">복사</button></div>
+    <pre><code><span class="c"># 시크릿 토큰 — 채널에 등록한 값과 반드시 동일</span>
+<span class="k">apiVersion</span>: v1
+<span class="k">kind</span>: Secret
+<span class="k">metadata</span>:
+  <span class="k">name</span>: engage-webhook
+<span class="k">stringData</span>:
+  <span class="k">secret</span>: <span class="s">"&lt;openssl rand -hex 32 로 생성한 값&gt;"</span>
+---
+<span class="c"># Deployment에 환경변수 주입</span>
+        <span class="k">env</span>:
+          - <span class="k">name</span>: WEBHOOK_SECRET
+            <span class="k">valueFrom</span>:
+              <span class="k">secretKeyRef</span>: { name: engage-webhook, key: secret }
+---
+<span class="c"># Ingress에 경로 추가</span>
+      - <span class="k">path</span>: /engage/webhook
+        <span class="k">pathType</span>: Prefix
+        <span class="k">backend</span>:
+          <span class="k">service</span>:
+            <span class="k">name</span>: api
+            <span class="k">port</span>: { number: 80 }</code></pre>
+  </div>
+  <p>발송 트래픽이 크고 기존 API에 영향을 주고 싶지 않다면, 전용 Deployment로 분리하고 HPA를 설정하는 구성을 권장합니다. 발송은 짧은 시간에 집중되는 스파이크성 부하이므로, 최소 레플리카보다 <strong>스케일 아웃 속도</strong>가 중요합니다.</p>
+</section>
+
+<section id="s11">
+  <h2><span class="n">11</span>검증 절차</h2>
+  <p class="sub">배포 → 채널 연결 → 실제 발송 순으로 단계별 확인</p>
+
+  <h3>1단계 · 서버 단독 검증</h3>
+  <div class="codewrap">
+    <div class="codehead"><span class="fn">verify.sh</span><button class="copy" type="button">복사</button></div>
+    <pre><code>BODY=<span class="s">'{"message_id":"test_1","user_id":"TEST_ACCOUNT","channel":"webhook",
+"timestamp":0,"content":{"title":"테스트","body":"본문",
+"extra":{"reward_id":"comeback_pack_01","expire_days":"7"}}}'</span>
+
+SIG=$(printf <span class="s">'%s'</span> <span class="s">"$BODY"</span> | openssl dgst -sha256 -hmac <span class="s">"$WEBHOOK_SECRET"</span> | awk <span class="s">'{print $2}'</span>)
+
+curl -X POST https://&lt;도메인&gt;/engage/webhook \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -H <span class="s">"X-Signature: $SIG"</span> \
+  -d <span class="s">"$BODY"</span></code></pre>
+  </div>
+  <ul class="chk">
+    <li>정상 응답 반환 (<code>{"code":0}</code>)</li>
+    <li>테스트 계정 우편함에 전달물 도착 (보상 첨부 포함)</li>
+    <li><strong>동일 요청 재전송 시 중복 지급되지 않음</strong> — 가장 중요한 항목</li>
+    <li>서명을 틀리게 보내면 401 반환</li>
+  </ul>
+
+  <h3>2단계 · 채널 연결 검증</h3>
+  <ul class="chk">
+    <li>채널 생성 후 테스트 허용목록에 QA 계정 등록</li>
+    <li>채널 테스트 발송으로 실제 전달 확인</li>
+    <li>receipt가 플랫폼에 기록되는지 확인</li>
+  </ul>
+
+  <h3>3단계 · 트래킹 검증</h3>
+  <ul class="chk">
+    <li><code>mail_delivered</code> 이벤트가 유입되고 <code>message_id</code> 속성이 채워져 있음</li>
+    <li>QA 계정으로 메일 열람 후 <code>mail_opened</code> 이벤트 유입 확인</li>
+    <li>도달 퍼널에서 발송 → 도달 → 열람이 단계별로 집계됨</li>
+  </ul>
+
+  <h3>4단계 · 소규모 발송</h3>
+  <p>전체 대상이 아닌 일부(예: 5%)에 먼저 발송해 실패율과 지연을 확인한 뒤 본 발송을 진행하세요. 문제가 있어도 영향 범위를 제한할 수 있습니다.</p>
+</section>
+
+<section id="s12">
+  <h2><span class="n">12</span>체크리스트</h2>
+  <p class="sub">구현 전 확정 사항과 완료 기준</p>
+
+  <h4>착수 전 확정</h4>
+  <ul class="chk">
+    <li>엔드포인트 도메인 · 경로 결정 (자사 API 컨벤션에 맞춰)</li>
+    <li>컨텐츠 템플릿 필드 표 확정 — 서버 DTO와 동일한 이름</li>
+    <li>전송 ID로 사용할 유저 속성 결정 — 서버가 계정 조회 가능한 키</li>
+    <li>시크릿 토큰 생성 및 안전한 경로로 서버팀 전달</li>
+    <li>서명 헤더명 · 서명 대상 · receipt 회신 주소를 매뉴얼에서 확인</li>
+    <li>도달 · 열람 이벤트명 결정</li>
+  </ul>
+
+  <h4>서버 구현 완료 기준</h4>
+  <ul class="chk">
+    <li>POST 수신 · 서명 검증 · 파싱 · 큐 적재 · 즉시 200 응답</li>
+    <li><code>message_id</code> 기준 멱등성 보장</li>
+    <li>자사 발송 로직 연동 + <code>message_id</code>를 레코드에 저장</li>
+    <li>성공 · 실패 receipt 회신</li>
+    <li>도달 이벤트 리포트</li>
+  </ul>
+
+  <h4>클라이언트 구현 완료 기준</h4>
+  <ul class="chk">
+    <li>메일 데이터에 <code>message_id</code> 전달 경로 확보</li>
+    <li>열람 · 수령 시 이벤트 리포트 (<code>message_id</code> 속성 포함)</li>
+  </ul>
+
+  <h4>플랫폼 설정 완료 기준</h4>
+  <ul class="chk">
+    <li>채널 생성 (URL · 전송 ID · 시크릿 토큰 · 컨텐츠 템플릿)</li>
+    <li>도달 퍼널 설정 ON + 이벤트명 등록</li>
+    <li>트래킹 플랜에 신규 이벤트 2종 등록</li>
+    <li>테스트 허용목록 · 발송 빈도 · 방해금지 설정</li>
+  </ul>
+
+  <h3>필드나 이벤트를 추가할 때</h3>
+  <p>예를 들어 이동 링크(<code>deep_link</code>)를 추가한다면 <strong>양쪽을 함께</strong> 변경해야 합니다. 채널의 컨텐츠 템플릿에 행을 추가하고, 서버에서 <code>Extra.GetValueOrDefault("deep_link")</code>를 읽도록 구현합니다. 이벤트도 마찬가지로 코드의 이벤트명과 채널 설정, 트래킹 플랜 세 곳이 모두 일치해야 합니다. <strong>한쪽만 바꾸면 값이 조용히 무시됩니다</strong> — 자동 매핑이 아니라 이름 약속이기 때문입니다.</p>
+</section>
+
+<footer>
+  Webhook 채널 수신 서버 구현 가이드 · 코드는 C# / ASP.NET Core 및 각 플랫폼 SDK 기준 참조 구현입니다. 서명 규격, 응답 형식, receipt 회신 주소는 사용 중인 환경의 채널 매뉴얼을 확인해 맞추시기 바랍니다.
+</footer>
+
+</div>
+
+<script>
+document.querySelectorAll('.copy').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var code = btn.closest('.codewrap').querySelector('code');
+    navigator.clipboard.writeText(code.innerText).then(function(){
+      var old = btn.textContent;
+      btn.textContent = '복사됨';
+      setTimeout(function(){ btn.textContent = old; }, 1400);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
