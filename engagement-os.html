@@ -2522,6 +2522,81 @@ function tourRouteLabel(st){
  }
  return TOUR.key==="config"?"설정 센터":TOUR.key==="experiment"?"실험":"운영 모듈";
 }
+function tourCoreRole(st){
+ var t=(st.t||"").replace(/^[0-9]+\.\s*/,""),route=tourRouteLabel(st);
+
+ /* 실험: 클릭한 UI가 아니라 그 UI가 담당하는 실험 설계 역할을 설명합니다. */
+ if(TOUR.key==="experiment"){
+  if(/리포트|표본 수 추이|지표 추이|최종 결정/.test(t))return "실험 결과가 우연인지 실제 개선인지 판단해 확대·유지·중단을 결정합니다.";
+  if(/작업 기록|제출 이력/.test(t))return "실험 설정을 누가 언제 어떻게 바꿨는지 남겨 결과를 다시 검증할 수 있게 합니다.";
+  if(/핵심 지표/.test(t))return "실험의 승패를 결정할 단 하나의 성공 기준을 연결합니다.";
+  if(/보조 지표|통계 지표/.test(t))return "핵심 지표가 변한 이유와 예상하지 못한 부작용을 함께 확인합니다.";
+  if(/준비 확인/.test(t))return "잘못된 트래픽·그룹·Feature·지표 설정이 사용자에게 적용되기 전에 차단합니다.";
+  if(/초안 저장/.test(t))return "미완성 실험 설계를 실행하지 않은 채 안전하게 보관합니다.";
+  if(/제출/.test(t))return "완성된 실험 설계를 검토 가능한 상태로 넘기고 실행 전 통제 절차를 시작합니다.";
+  if(/실험 트래픽/.test(t))return "전체 사용자 중 실험 변화에 노출할 범위를 제한해 위험과 표본 크기를 조절합니다.";
+  if(/오디언스|조건 추가|초기화/.test(t))return "가설을 검증할 자격이 있는 사용자만 실험에 참여시킵니다.";
+  if(/균등 분배|대조군 배분|실험군 배분|절대 백분율/.test(t))return "비교 가능한 표본이 되도록 대조군과 실험군의 사용자 비율을 통제합니다.";
+  if(/대조군/.test(t))return "현재 서비스 경험을 기준선으로 유지해 변경안의 순수한 효과를 비교합니다.";
+  if(/실험군/.test(t))return "검증하려는 변경값을 사용자에게 전달해 대조군과의 성과 차이를 만듭니다.";
+  if(/종료|실행 일수|표본 수/.test(t))return "결과를 보기 전에 실험 종료 기준을 고정해 성급하거나 유리한 시점의 판정을 막습니다.";
+  if(/가설/.test(t))return "변경점과 기대 효과, 성공 지표를 실험 전에 고정해 결과 판정 기준을 만듭니다.";
+  if(/실험 타입/.test(t))return "AE와 외부 시스템 중 누가 사용자를 실험군으로 나눌지 결정합니다.";
+  if(/실험 이름|실험 생성|생성된 실험|기본 정보|실험 설정 요약|‘편집’/.test(t))return "가설·대상·변경값·지표·종료 조건을 하나의 실행 가능한 실험으로 묶습니다.";
+  if(/지표 방향/.test(t))return "지표의 상승과 하락 중 어느 쪽을 성공으로 판정할지 정합니다.";
+  if(/계산 정의/.test(t))return "어떤 사용자 행동을 어떤 방식으로 집계할지 고정해 실험 성과를 같은 기준으로 측정합니다.";
+  if(/지표 타입/.test(t))return "측정하려는 행동에 맞는 집계 구조를 선택해 올바른 성과 지표를 만듭니다.";
+  if((/지표/.test(route)||/지표/.test(t))&&/지표명|표시 이름|관리 그룹|지표 그룹|지표 생성|지표 관리|기존 지표/.test(t))return "실험의 성공과 부작용을 판정할 재사용 가능한 측정 기준을 정의합니다.";
+  if(/분할 단위/.test(t))return "같은 사용자가 실험 기간 내내 같은 그룹에 머물도록 고정합니다.";
+  if(/분할 모드/.test(t))return "사용자를 어느 시스템에서 일관되게 대조군과 실험군으로 배정할지 정합니다.";
+  if(/레이어|트래픽/.test(t))return "서로 영향을 줄 수 있는 실험들이 같은 사용자에게 겹쳐 노출되지 않도록 통제합니다.";
+  if(/기본값/.test(t))return "실험값 조회가 실패해도 현재 서비스가 안전하게 동작하도록 기준값을 제공합니다.";
+  if(/접속 측/.test(t))return "Feature 값을 실제로 소비할 앱 또는 서버와 AE의 전달 경로를 맞춥니다.";
+  if(/파라미터 타입/.test(t))return "AE와 서비스 코드가 실험값을 같은 자료형으로 해석하도록 보장합니다.";
+  if(/파라미터 이름/.test(t))return "AE의 실험값과 앱·서버 코드를 하나의 고유 키로 연결합니다.";
+  if(/Feature/.test(route)||/Feature|표시 이름|그룹과 비고|기존 .*검색/.test(t))return "사용자 그룹마다 다르게 전달할 변경값을 코드 수정 없이 통제할 수 있게 합니다.";
+  if(/실험.*메뉴/.test(t))return "변경안의 효과를 사용자 그룹 간 비교로 검증하는 전체 작업 공간을 엽니다.";
+ }
+
+ /* 설정 센터: 값이나 버튼보다 지속 배포·통제라는 핵심 역할을 우선합니다. */
+ if(TOUR.key==="config"){
+  if(/분석|측정/.test(t))return "설정값 변경이 사용자 행동과 핵심 지표에 어떤 영향을 줬는지 확인합니다.";
+  if(/롤백/.test(t))return "문제가 생긴 설정값을 직전의 안전한 버전으로 빠르게 되돌립니다.";
+  if(/배포/.test(t))return "검증된 설정값을 선택한 사용자에게 적용하고 적용 범위를 단계적으로 확대합니다.";
+  if(/생명주기|작업 기록/.test(t))return "설정 변경의 승인·적용·중단 상태와 변경 이력을 통제합니다.";
+  if(/대상 인원|타겟 오디언스/.test(t))return "설정값을 적용할 사용자만 골라 위험을 제한하고 단계적으로 확대합니다.";
+  if(/설정 전략/.test(t))return "어떤 설정값을 누구에게 언제까지 적용할지 하나의 배포 규칙으로 묶습니다.";
+  if(/사용자·환경 파라미터/.test(t))return "사용자별 값과 테스트·운영 환경별 값을 수신 시스템에 정확히 전달합니다.";
+  if(/채널/.test(t))return "AE의 설정값을 실제 앱이나 자사 서버까지 전달하는 배포 경로를 만듭니다.";
+  if(/사용 설정|연동/.test(t))return "정의한 설정 항목을 실제 배포 경로와 연결해 서비스에서 조회할 수 있게 합니다.";
+  if(/템플릿 활성화/.test(t))return "검증이 끝난 설정 구조만 운영 전략에서 사용할 수 있도록 통제합니다.";
+  if(/템플릿/.test(t))return "함께 배포할 파라미터들을 하나의 버전 관리 가능한 설정 구조로 묶습니다.";
+  if(/파라미터/.test(t))return "서비스 코드가 읽을 설정값의 이름·타입·기본 동작을 정의합니다.";
+  if(/설정 항목|도입 흐름|의존성/.test(t))return "같은 목적과 배포 주기를 가진 원격 설정값을 하나의 관리 단위로 묶습니다.";
+ }
+
+ /* 운영: 전달 채널 구축부터 실제 작업 제출까지의 비즈니스 역할입니다. */
+ if(/피로도/.test(t))return "한 사용자에게 메시지가 과도하게 쌓이지 않도록 발송 횟수를 제한합니다.";
+ if(/승인자/.test(t))return "대규모 발송이나 보상 지급 전에 담당자 검토를 거쳐 오발송을 막습니다.";
+ if(/화이트리스트|리허설/.test(t))return "실제 발송 경로를 소수의 QA 계정으로 먼저 검증해 운영 사고를 막습니다.";
+ if(/분석 설정|기준 이벤트|퍼널|발송 후/.test(t))return "발송부터 도달·클릭·전환까지 어디에서 성과와 문제가 생겼는지 측정합니다.";
+ if(/시각|시간대|푸시 시점/.test(t))return "사용자가 메시지를 받아야 할 정확한 시점과 반복 주기를 통제합니다.";
+ if(/대상 조건|예상 인원/.test(t))return "메시지가 필요한 사용자만 골라 비용과 피로도를 줄입니다.";
+ if(/콘텐츠|컨텐츠 템플릿/.test(t))return "운영자가 입력한 메시지와 행동 값을 앱·서버가 읽을 동일한 데이터 구조로 전달합니다.";
+ if(/검증 게이트|안전/.test(t))return "테스트·리허설·소규모 발송을 순서대로 통과시켜 대규모 사고를 막습니다.";
+ if(/초안 저장|제출/.test(t))return "완성되지 않은 작업과 검토가 끝난 작업을 분리해 실제 발송을 통제합니다.";
+ if(/운영 작업|그룹·캠페인|작업 설명/.test(t))return "대상·시점·콘텐츠·채널·성과 기준을 실제 실행 가능한 발송 단위로 묶습니다.";
+ if(/도달 위치|채널 결정/.test(t))return "사용자가 메시지를 볼 위치에 맞춰 가장 적합한 전달 방식을 선택합니다.";
+ if(/URL/.test(t))return "AE의 요청을 자사 서버의 보상·메일·외부 업무 로직으로 연결합니다.";
+ if(/전송 ID/.test(t))return "메시지나 보상을 받아야 할 사용자를 자사 서비스의 계정과 정확히 연결합니다.";
+ if(/검증|시크릿|암호화/.test(t))return "AE가 보낸 정상 요청만 서버가 처리하도록 인증해 위조와 중복 처리를 막습니다.";
+ if(/커스텀 파라미터/.test(t))return "화면에 보이지 않는 라우팅·환경 정보를 메시지와 함께 서버에 전달합니다.";
+ if(/채널 이름/.test(t))return "운영자가 올바른 앱·환경·용도의 전달 경로를 선택할 수 있게 구분합니다.";
+ if(/채널|저장/.test(t))return "AE에서 만든 메시지를 앱·푸시 서비스·자사 서버까지 반복해서 전달할 통로를 구축합니다.";
+ if(/전체 흐름|도입/.test(t))return "메시지의 목적부터 전달 경로·안전장치·성과 측정까지 운영 전 과정을 설계합니다.";
+
+ return route+"에서 현재 단계가 담당하는 업무 목적과 다음 단계에 필요한 조건을 확인합니다.";
+}
 function tourBeginnerMeta(st){
  var t=st.t||"",x=TOUR.key==="experiment"?currentExpScenario():null;
  var m={
@@ -2646,11 +2721,11 @@ function tourBeginnerMeta(st){
   m.example="버튼을 누르기 전 필수 입력값을 위에서 아래로 한 번 검토합니다.";
   m.caution="실제 서비스에서는 생성·저장·제출이 데이터를 바꾸지만, 이 가이드는 연습 화면만 전환합니다.";
  }
+ m.plain=tourCoreRole(st);
  return m;
 }
 function tourOneLineText(st,beginner){
- var title=(st.t||"").replace(/^[0-9]+\.\s*/,""),plain=(beginner.plain||"").split(/[.!?]/)[0];
- return title+" — "+plain;
+ return beginner.plain||tourCoreRole(st);
 }
 function paintStep(st){
  var dock=tourDockMode(st),dockLeft=dock==="left",dockBottom=dock==="bottom";
@@ -2672,8 +2747,8 @@ function paintStep(st){
   '<div class="tour-phases">'+phaseLabels.map(function(n,i){return '<span class="'+(phase.i===i?"on":"")+'">'+n+'</span>';}).join("")+'</div></div>'+
   '<div class="tour-scroll"><div class="tour-route"><b>현재 화면</b><span class="arr">›</span><span>'+tourRouteLabel(st)+'</span></div>'+
   '<h4>'+st.t+'</h4>'+
-  '<div class="tour-one-line"><b>기능</b><span>'+tourOneLineText(st,beginner)+'</span></div>'+
-  '<div class="tour-beginner"><div><div class="bk">쉽게 말하면</div><div class="bv">'+beginner.plain+'</div></div><div class="example"><div class="bk">입력·확인 예시</div><div class="bv">'+beginner.example+'</div></div><div class="caution"><div class="bk">주의하세요</div><div class="bv">'+beginner.caution+'</div></div></div>'+
+  '<div class="tour-one-line"><b>핵심 역할</b><span>'+tourOneLineText(st,beginner)+'</span></div>'+
+  '<div class="tour-beginner"><div><div class="bk">이 기능의 핵심 역할</div><div class="bv">'+beginner.plain+'</div></div><div class="example"><div class="bk">입력·확인 예시</div><div class="bv">'+beginner.example+'</div></div><div class="caution"><div class="bk">주의하세요</div><div class="bv">'+beginner.caution+'</div></div></div>'+
   '<div class="tour-team"><div class="dev"><b>개발팀</b><span>'+(st.dev||"별도 확인 사항이 없습니다.")+'</span></div><div class="biz"><b>사업팀</b><span>'+(st.biz||"별도 결정 사항이 없습니다.")+'</span></div></div>'+
   '</div>'+
   '<div class="tfoot"><div class="prog"><span style="width:'+pct+'%"></span></div><div class="tbtns">'+
