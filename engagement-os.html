@@ -2483,7 +2483,8 @@ function showStep(){
  if(st.seed&&!S.channels.webhook.length&&!S.channels.push.length&&!S.channels.client.length){
   S.channels.webhook.push({name:"ingame-mail",url:"https://api.example.com/engage/webhook",sendId:"유저 속성 · #account_id"});
   log("가이드: 데모 채널을 자동 생성했습니다","hi");}
- if(st.ddOpen)openDD=st.ddOpen;
+ /* 드롭다운은 해당 단계에서만 열어 둡니다. 초기화하지 않으면 이후 단계 화면을 가립니다. */
+ openDD=st.ddOpen||null;
  if(st.go){S.sec=st.go[0];document.body.setAttribute("data-sec",S.sec);
   document.getElementById("sideTitle").textContent=S.sec==="engage"?"운영 설정":S.sec==="experiment"?"실험":"설정 센터";
   S.nav=st.go[1];paintTop();paintSide();}
