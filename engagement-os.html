@@ -66,9 +66,9 @@ button{font-family:var(--sans);}
 @media (max-width:1180px){.shell{grid-template-columns:260px minmax(0,1fr);} .rail{grid-column:1/-1;position:static;}}
 @media (max-width:760px){.shell{grid-template-columns:minmax(0,1fr);} .side{display:none;}}
 .side{border-right:1px solid var(--line);padding:0 12px 20px;background:var(--panel);}
-body[data-sec="experiment"] .side{display:none;}
-body[data-sec="experiment"] .shell{grid-template-columns:minmax(0,1fr) 300px;}
-@media (max-width:1180px){body[data-sec="experiment"] .shell{grid-template-columns:minmax(0,1fr);}}
+body[data-sec="experiment"] .side,body[data-nav="feature"] .side{display:none;}
+body[data-sec="experiment"] .shell,body[data-nav="feature"] .shell{grid-template-columns:minmax(0,1fr) 300px;}
+@media (max-width:1180px){body[data-sec="experiment"] .shell,body[data-nav="feature"] .shell{grid-template-columns:minmax(0,1fr);}}
 .side h1{font-size:14px;font-weight:400;line-height:25px;color:var(--ink-2);margin:0;padding:14px 0 14px 12px;}
 .side button{display:flex;align-items:center;gap:10px;width:100%;height:40px;text-align:left;font-size:14px;color:var(--ink-2);background:none;border:none;border-radius:8px;padding:0 12px 0 8px;cursor:pointer;}
 .side button:hover{background:var(--sub);}
@@ -727,19 +727,19 @@ var NAVDD={
  engage:[["운영 일정",[["워크스페이스","◵","#EEF0FE","#4C5BE0"],["운영 캠페인","▦","#FFF1E8","#D9722F"]]],
   ["사용자 도달",[["운영 작업","✉","#EAF2FF","#2F72D9"],["플로우 캔버스","⛃","#EFEBFE","#7C5CE0"]]],
   ["기본 설정",[["운영 설정","⚙","#E9F5F2","#0E8477"]]]],
- config:[["설정 관리",[["설정 항목","☰","#E9F5F2","#0E8477"],["채널","▧","#EEF0FE","#4C5BE0"]]],
-  ["배포",[["설정 전략","◈","#EFEBFE","#7C5CE0"],["데이터 분석","⊞","#EAF2FF","#2F72D9"]]]],
- experiment:[["핵심 모듈",[["실험 목록","◫","#EFEBFE","#7C5CE0"],["트래픽 레이어","≋","#E9F5F2","#0E8477"]]],["기본 설정",[["지표 관리","↗","#FFF1E8","#D9722F"],["피처 관리","F","#EEF0FE","#4C5BE0"]]]]};
+ config:[["",[["피처 관리","F","#EEF0FE","#4C5BE0"],["시나리오 관리","☰","#E9F5F2","#0E8477"],["채널 관리","▧","#EFEBFE","#7C5CE0"]]]],
+ experiment:[["핵심 모듈",[["실험 목록","◫","#EFEBFE","#7C5CE0"],["트래픽 레이어","≋","#E9F5F2","#0E8477"]]],["기본 설정",[["지표 관리","↗","#FFF1E8","#D9722F"]]]]};
 var NAVROUTE={"운영 작업":["engage","task"],"운영 설정":["engage","channel"],"워크스페이스":["engage","channel"],
  "운영 캠페인":["engage","task"],"플로우 캔버스":["engage","task"],
+ "피처 관리":["config","feature"],"시나리오 관리":["config","citem"],"채널 관리":["config","cchan"],
  "설정 항목":["config","citem"],"채널":["config","cchan"],"설정 전략":["config","cstrategy"],"데이터 분석":["config","cdata"],
- "피처 관리":["experiment","feature"],"실험 목록":["experiment","explist"],"트래픽 레이어":["experiment","layer"],"지표 관리":["experiment","metric"]};
+ "실험 목록":["experiment","explist"],"트래픽 레이어":["experiment","layer"],"지표 관리":["experiment","metric"]};
 var openDD=null;
 var SIDE={
  engage:[["channel","채널","☰"],["fatigue","피로도 제어","◴"],["approver","승인자","✓"],
   ["allow","화이트리스트","☷"],["analytics","분석 설정","⊞"],["l10n","현지화","◍"],["cparam","클라이언트 파라미터","▢"],["ctable","설정 테이블 관리","▦"]],
  config:[["citem","설정 항목","☰"],["cchan","채널","▧"],["cstrategy","설정 전략","◈"],["cdata","데이터 분석","⊞"]],
- experiment:[["explist","실험 목록","◫"],["feature","피처 관리","F"],["layer","트래픽 레이어","≋"],["metric","지표 관리","↗"]]};
+ experiment:[["explist","실험 목록","◫"],["layer","트래픽 레이어","≋"],["metric","지표 관리","↗"]]};
 var S={sec:"engage",nav:"channel",chTab:"webhook",cfgTab:"list",cfgDetailTab:"templates",expView:"list",expArchived:false,expScenario:null,app:"game",locked:false,tab:"home",
  channels:{webhook:[{name:"Return Reward Push Channel",url:"https://api.example.com/engage/webhook",sendId:"유저 속성 · #account_id"},{name:"in-game pop",url:"https://api.example.com/engage/in-game",sendId:"유저 속성 · #account_id"}],push:[],client:[],wechat:[],douyin:[]},cfgChans:[],accOpen:{},
  notifs:[],inapp:null,mail:{game:[],shop:[]},cfg:{game:{},shop:{}},
@@ -848,7 +848,7 @@ function paintTop(){document.getElementById("topnav").innerHTML=TOPNAV.map(funct
  var h='<div class="navwrap '+(openDD===n[0]?"is-menu-open":"")+'">'+
   '<button id="topnav-'+n[0]+'" aria-current="'+cur+'" class="'+(openDD===n[0]?"is-open":"")+'" aria-expanded="'+(openDD===n[0])+'"'+(dd?' onclick="setSection(\''+n[0]+'\',true)"':'')+'>'+n[1]+(n[2]?'<span class="car">'+(openDD===n[0]?'▴':'▾')+'</span>':'')+'</button>';
  if(dd){var seen={};h+='<div class="navdd nd-'+n[0]+'">'+dd.map(function(g){
-   return '<div class="grp"><div class="gl">'+g[0]+'</div>'+g[1].map(function(it){
+   return '<div class="grp">'+(g[0]?'<div class="gl">'+g[0]+'</div>':'')+g[1].map(function(it){
      var rt=NAVROUTE[it[0]],id=(rt&&!seen[rt[1]])?(seen[rt[1]]=1,'id="dd-'+rt[1]+'" '):'';
      return '<button '+id+'onclick="navGo(\''+it[0]+'\')"><span class="ti" style="background:'+it[2]+';color:'+it[3]+'">'+it[1]+'</span>'+it[0]+'</button>';}).join("")+'</div>';}).join("")+'</div>';}
  return h+'</div>';}).join("");}
@@ -887,8 +887,9 @@ function resetAll(){S.funnel=[0,0,0,0];S.sends=0;S.notifs=[];S.inapp=null;S.mail
 function paintMain(){var h="";
  document.body.classList.toggle("view-task",S.sec==="engage"&&S.nav==="task");
  document.body.classList.toggle("view-config",S.sec==="config");
+ document.body.setAttribute("data-nav",S.nav);
  if(S.sec==="engage"){h={channel:vChannel,task:vTask,fatigue:vFatigue}[S.nav];h=h?h():vStub(S.nav);}
- else if(S.sec==="config"){h={citem:vCfgItem,cchan:vCfgChan,cstrategy:vCfgStrat,cdata:vCfgData}[S.nav]();}
+ else if(S.sec==="config"){h=(S.nav==="feature"?vFeature:{citem:vCfgItem,cchan:vCfgChan,cstrategy:vCfgStrat,cdata:vCfgData}[S.nav])();}
  else{h={explist:vExpList,feature:vFeature,layer:vLayer,metric:vMetric}[S.nav]();}
  document.getElementById("main").innerHTML=h;mets();}
 
@@ -2046,17 +2047,17 @@ TOURS.webhook=TOURS.webhook.concat(scenarioTaskFlow("wh"));
 TOURS.push=TOURS.push.concat(scenarioTaskFlow("push"));
 TOURS.client=TOURS.client.concat(scenarioTaskFlow("cl"));
 TOURS.experiment=[
- {go:["experiment","explist"],expView:"list",sel:"#topnav-experiment",clickDemo:1,t:"1. 상단 ‘실험’ 메뉴 클릭",d:"상단 메뉴의 <b>실험</b>을 누르면 Atlas 실험 영역으로 이동합니다. 이 영역에서 Feature, 트래픽 레이어, 지표, 실험을 차례로 준비합니다.",dev:"실험 기능과 프로젝트 1196 접근 권한을 확인합니다.",biz:"실제 사용자에게 적용하기 전까지 이 가이드는 화면 조작만 재현합니다.",check:"완료 기준: 실험 하위 메뉴가 펼쳐집니다."},
- {go:["experiment","feature"],ddOpen:"experiment",sel:"#dd-feature",clickDemo:1,t:"2. ‘피처 관리’ 클릭",d:"Feature는 실험군별로 다르게 전달할 <b>설정값</b>입니다. 상단 <b>실험</b> 메뉴를 펼쳐 피처 관리로 이동합니다.",dev:"앱·서버에서 조회할 키이므로 코드 담당자와 이름을 합의합니다.",biz:"문구, 색상, 가격, 기능 켜기처럼 바꿀 한 가지를 정합니다.",check:"완료 기준: 피처 관리 목록이 열렸습니다."},
- {go:["experiment","feature"],sel:".scenario-asset-row",t:"3. 기존 Feature 검색·확인",d:"새로 만들기 전에 같은 목적의 Feature가 있는지 검색합니다. 현재 시나리오 표시는 이번 가이드에서 만들 값을 보여주는 예시입니다.",dev:"이미 코드에 배포된 키가 있다면 중복 생성하지 않습니다.",biz:"같은 의미의 자산을 여러 이름으로 만들지 않습니다.",check:"완료 기준: 재사용 여부를 결정했습니다."},
- {go:["experiment","feature"],sel:"#expCreate",clickDemo:1,t:"4. ‘피처 생성’ 클릭",d:"목록 오른쪽 위의 피처 생성 버튼을 클릭하면 빈 생성 창이 열립니다.",dev:"생성 권한이 없으면 프로젝트 관리자에게 요청합니다.",biz:"이 단계는 창을 여는 동작이며 아직 저장되지 않습니다.",check:"완료 기준: 빈 피처 생성 창을 열 준비가 됐습니다."},
- {go:["experiment","feature"],expModal:"feature",expProgress:0,expAction:"featureKey",sel:"#ex-feature-name",t:"5. Feature 파라미터 이름 입력",d:"코드가 값을 요청할 때 사용하는 정확한 키입니다. 영문 소문자·숫자·밑줄을 사용합니다.",dev:"SDK 조회 키와 글자 하나까지 같아야 합니다.",biz:"생성 뒤 변경 비용이 크므로 의미가 드러나는 이름을 씁니다.",check:"완료 기준: 중복되지 않는 키가 입력됐습니다."},
- {go:["experiment","feature"],expModal:"feature",expProgress:1,expAction:"featureLabel",sel:"#ex-feature-label",t:"6. 표시 이름 입력",d:"표시 이름은 운영자가 목록에서 보는 이름입니다. 시스템 키보다 쉬운 업무 용어로 적습니다.",dev:"코드 동작에는 영향이 없지만 문서 용어와 맞춥니다.",biz:"이름만 보고 무엇을 바꾸는지 알 수 있어야 합니다.",check:"완료 기준: 쉬운 표시 이름이 입력됐습니다."},
- {go:["experiment","feature"],expModal:"feature",expProgress:2,expAction:"featureType",sel:"#ex-feature-type",clickDemo:1,t:"7. 파라미터 타입 선택",d:"문자열·숫자·정수·불리언 중 실제 값과 같은 타입을 고릅니다.",dev:"코드 변수 타입과 AE 타입이 다르면 조회 실패나 형변환 오류가 납니다.",biz:"문구·색상은 문자열, 개수는 정수, 비율은 숫자, 켜기/끄기는 불리언입니다.",check:"완료 기준: 실험 값과 타입이 일치합니다."},
- {go:["experiment","feature"],expModal:"feature",expProgress:3,expAction:"featureDefault",sel:"#ex-feature-default",t:"8. 기본값 입력",d:"기본값은 네트워크 실패·미배정 때 사용하는 안전값입니다. 현재 서비스 값과 같게 둡니다.",dev:"클라이언트와 서버의 폴백 코드도 같은 값이어야 합니다.",biz:"실험 장애가 서비스 장애로 번지지 않는 값을 선택합니다.",check:"완료 기준: 실패 시 안전값이 입력됐습니다."},
- {go:["experiment","feature"],expModal:"feature",expProgress:4,expAction:"featureAccess",sel:"#ex-feature-access",clickDemo:1,t:"9. 접속 측 선택",d:"클라이언트 또는 서버 중 실제로 Feature를 조회하는 위치를 선택합니다. 양쪽에서 읽으면 둘 다 체크합니다.",dev:"선택하지 않은 측에서는 해당 Feature를 조회하지 않도록 구현합니다.",biz:"개발 담당자에게 조회 위치를 확인합니다.",check:"완료 기준: 코드 위치와 접속 측이 같습니다."},
- {go:["experiment","feature"],expModal:"feature",expProgress:5,expAction:"featureFinish",sel:"#ex-feature-finish",t:"10. 그룹과 비고 입력",d:"그룹은 자산을 정리하는 폴더이고 비고는 사용 목적입니다. 권한이나 그룹 배정 값은 아닙니다.",dev:"팀 자산 분류 규칙과 같은 폴더를 사용합니다.",biz:"다른 운영자도 재사용할 수 있게 목적을 남깁니다.",check:"완료 기준: 생성에 필요한 모든 값이 채워졌습니다."},
- {go:["experiment","feature"],expModal:"feature",expProgress:6,sel:"#expModalSave",clickDemo:1,t:"11. ‘생성’ 클릭",d:"입력값을 위에서부터 확인한 뒤 생성 버튼을 클릭합니다. 취소는 저장 없이 창을 닫습니다.",dev:"키·타입·기본값·접속 측을 마지막으로 확인합니다.",biz:"가이드에서는 클릭 모션만 보여 주며 실제 서비스에는 생성하지 않습니다.",check:"완료 기준: 피처 생성 동작을 이해했습니다."},
+ {go:["experiment","explist"],expView:"list",sel:"#topnav-experiment",clickDemo:1,t:"1. 상단 ‘실험’ 메뉴 클릭",d:"상단 메뉴의 <b>실험</b>을 누르면 Atlas 실험 영역으로 이동합니다. 실험 목록·트래픽 레이어·지표 관리가 여기 있고, <b>피처 관리만 설정 센터</b>에 있습니다.",dev:"실험 기능과 프로젝트 1196 접근 권한을 확인합니다.",biz:"실제 사용자에게 적용하기 전까지 이 가이드는 화면 조작만 재현합니다.",check:"완료 기준: 실험 하위 메뉴가 펼쳐집니다."},
+ {go:["config","feature"],ddOpen:"config",sel:"#dd-feature",clickDemo:1,t:"2. ‘피처 관리’ 클릭",d:"Feature는 실험군별로 다르게 전달할 <b>설정값</b>입니다. 피처 관리는 실험이 아니라 <b>설정 센터</b> 안에 있습니다. 상단 설정 센터 메뉴를 펼쳐 이동합니다.",dev:"앱·서버에서 조회할 키이므로 코드 담당자와 이름을 합의합니다.",biz:"문구, 색상, 가격, 기능 켜기처럼 바꿀 한 가지를 정합니다.",check:"완료 기준: 피처 관리 목록이 열렸습니다."},
+ {go:["config","feature"],sel:".scenario-asset-row",t:"3. 기존 Feature 검색·확인",d:"새로 만들기 전에 같은 목적의 Feature가 있는지 검색합니다. 현재 시나리오 표시는 이번 가이드에서 만들 값을 보여주는 예시입니다.",dev:"이미 코드에 배포된 키가 있다면 중복 생성하지 않습니다.",biz:"같은 의미의 자산을 여러 이름으로 만들지 않습니다.",check:"완료 기준: 재사용 여부를 결정했습니다."},
+ {go:["config","feature"],sel:"#expCreate",clickDemo:1,t:"4. ‘피처 생성’ 클릭",d:"목록 오른쪽 위의 피처 생성 버튼을 클릭하면 빈 생성 창이 열립니다.",dev:"생성 권한이 없으면 프로젝트 관리자에게 요청합니다.",biz:"이 단계는 창을 여는 동작이며 아직 저장되지 않습니다.",check:"완료 기준: 빈 피처 생성 창을 열 준비가 됐습니다."},
+ {go:["config","feature"],expModal:"feature",expProgress:0,expAction:"featureKey",sel:"#ex-feature-name",t:"5. Feature 파라미터 이름 입력",d:"코드가 값을 요청할 때 사용하는 정확한 키입니다. 영문 소문자·숫자·밑줄을 사용합니다.",dev:"SDK 조회 키와 글자 하나까지 같아야 합니다.",biz:"생성 뒤 변경 비용이 크므로 의미가 드러나는 이름을 씁니다.",check:"완료 기준: 중복되지 않는 키가 입력됐습니다."},
+ {go:["config","feature"],expModal:"feature",expProgress:1,expAction:"featureLabel",sel:"#ex-feature-label",t:"6. 표시 이름 입력",d:"표시 이름은 운영자가 목록에서 보는 이름입니다. 시스템 키보다 쉬운 업무 용어로 적습니다.",dev:"코드 동작에는 영향이 없지만 문서 용어와 맞춥니다.",biz:"이름만 보고 무엇을 바꾸는지 알 수 있어야 합니다.",check:"완료 기준: 쉬운 표시 이름이 입력됐습니다."},
+ {go:["config","feature"],expModal:"feature",expProgress:2,expAction:"featureType",sel:"#ex-feature-type",clickDemo:1,t:"7. 파라미터 타입 선택",d:"문자열·숫자·정수·불리언 중 실제 값과 같은 타입을 고릅니다.",dev:"코드 변수 타입과 AE 타입이 다르면 조회 실패나 형변환 오류가 납니다.",biz:"문구·색상은 문자열, 개수는 정수, 비율은 숫자, 켜기/끄기는 불리언입니다.",check:"완료 기준: 실험 값과 타입이 일치합니다."},
+ {go:["config","feature"],expModal:"feature",expProgress:3,expAction:"featureDefault",sel:"#ex-feature-default",t:"8. 기본값 입력",d:"기본값은 네트워크 실패·미배정 때 사용하는 안전값입니다. 현재 서비스 값과 같게 둡니다.",dev:"클라이언트와 서버의 폴백 코드도 같은 값이어야 합니다.",biz:"실험 장애가 서비스 장애로 번지지 않는 값을 선택합니다.",check:"완료 기준: 실패 시 안전값이 입력됐습니다."},
+ {go:["config","feature"],expModal:"feature",expProgress:4,expAction:"featureAccess",sel:"#ex-feature-access",clickDemo:1,t:"9. 접속 측 선택",d:"클라이언트 또는 서버 중 실제로 Feature를 조회하는 위치를 선택합니다. 양쪽에서 읽으면 둘 다 체크합니다.",dev:"선택하지 않은 측에서는 해당 Feature를 조회하지 않도록 구현합니다.",biz:"개발 담당자에게 조회 위치를 확인합니다.",check:"완료 기준: 코드 위치와 접속 측이 같습니다."},
+ {go:["config","feature"],expModal:"feature",expProgress:5,expAction:"featureFinish",sel:"#ex-feature-finish",t:"10. 그룹과 비고 입력",d:"그룹은 자산을 정리하는 폴더이고 비고는 사용 목적입니다. 권한이나 그룹 배정 값은 아닙니다.",dev:"팀 자산 분류 규칙과 같은 폴더를 사용합니다.",biz:"다른 운영자도 재사용할 수 있게 목적을 남깁니다.",check:"완료 기준: 생성에 필요한 모든 값이 채워졌습니다."},
+ {go:["config","feature"],expModal:"feature",expProgress:6,sel:"#expModalSave",clickDemo:1,t:"11. ‘생성’ 클릭",d:"입력값을 위에서부터 확인한 뒤 생성 버튼을 클릭합니다. 취소는 저장 없이 창을 닫습니다.",dev:"키·타입·기본값·접속 측을 마지막으로 확인합니다.",biz:"가이드에서는 클릭 모션만 보여 주며 실제 서비스에는 생성하지 않습니다.",check:"완료 기준: 피처 생성 동작을 이해했습니다."},
 
  {go:["experiment","layer"],ddOpen:"experiment",sel:"#dd-layer",clickDemo:1,t:"12. ‘트래픽 레이어’ 클릭",d:"트래픽 레이어는 같은 사용자가 충돌하는 실험에 동시에 들어가지 않도록 관리하는 배타 영역입니다.",dev:"같은 화면·기능을 바꾸는 실험은 같은 레이어를 재사용합니다.",biz:"실험끼리 영향을 주고받지 않게 기능 영역을 나눕니다.",check:"완료 기준: 트래픽 레이어 목록이 열렸습니다."},
  {go:["experiment","layer"],sel:"#expCreate",clickDemo:1,t:"13. ‘새로운 트래픽 레이어 작성’ 클릭",d:"오른쪽 위 작성 버튼을 눌러 빈 레이어 창을 엽니다.",dev:"기존 레이어의 분할 단위와 점유율을 먼저 확인합니다.",biz:"새 영역이 아니라면 기존 레이어 재사용을 우선합니다.",check:"완료 기준: 새 레이어 작성 창을 열 준비가 됐습니다."},
