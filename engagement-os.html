@@ -155,6 +155,34 @@ table.at tr.scenario-asset-row td:first-child{box-shadow:inset 3px 0 0 var(--pri
 .trend{height:180px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(to bottom,transparent 32%,var(--line) 33%,transparent 34%,transparent 65%,var(--line) 66%,transparent 67%);position:relative;overflow:hidden}.trend svg{width:100%;height:100%}
 .exp-modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.exp-type{border:1px solid var(--line);border-radius:8px;padding:14px;cursor:pointer}.exp-type.on{border-color:var(--pri);background:var(--pri-soft)}.exp-type b{display:block;color:var(--ink)}.exp-type span{font-size:12px;color:var(--ink-3)}
 .atlas-card input:not([type]),.drawer input:not([type]),.atlas-editbar input:not([type]){width:100%;height:32px;font-family:var(--sans);font-size:14px;color:var(--ink-2);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:0 8px}
+/* 실험 편집 — 실물 플로우 캔버스 (좌: 노드 흐름, 우: 설정 패널) */
+.exp-editwrap{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start;}
+.exp-canvas{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:36px 20px 30px;overflow-x:auto;}
+.fcol{display:flex;flex-direction:column;width:628px;margin:0 auto;}
+.fnode{background:var(--panel);border:1px solid var(--line-2);border-radius:10px;padding:14px 16px;width:340px;margin-left:37px;box-shadow:0 1px 4px rgba(20,30,60,.05);position:relative;z-index:1;}
+.fnode h3{font-size:14px;font-weight:500;color:var(--ink);margin:0;}
+.fhead{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.fchip{font-size:12px;color:var(--ink-3);}
+.fselect{margin-top:10px;height:32px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border:1px solid var(--line-2);border-radius:8px;font-size:14px;color:var(--ink-2);}
+.fconn{width:46px;height:38px;background:#E9EBF2;clip-path:polygon(0 0,100% 0,70% 100%,30% 100%);margin-left:184px;flex:none;}
+.fbranch{width:628px;height:56px;flex:none;display:block;}
+.fbranch path{fill:none;stroke:#E9EBF2;stroke-width:26;}
+.exp-grouprow{display:flex;gap:14px;align-items:stretch;position:relative;z-index:1;}
+.gcard{width:200px;border:1px solid var(--line-2);border-radius:10px;background:var(--panel);padding:12px 13px;display:flex;flex-direction:column;gap:8px;}
+.gcard .ghead{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--ink);white-space:nowrap;}
+.gcard .ghead .bdg{font-size:10.5px;padding:1px 6px;}
+.gcard .dot{width:8px;height:8px;border-radius:2px;background:#7C5CE0;flex:none;}
+.gcard.variant .dot{background:#C9BCF2;}
+.gcard textarea{min-height:54px;font-size:12.5px;}
+.gcard .gfeat{font-size:12.5px;color:var(--ink-2);}
+.gcard .allocwrap{margin-left:auto;display:flex;align-items:center;gap:3px;font-size:13px;color:var(--ink-3);}
+.gcard .allocwrap input{width:44px;height:28px;text-align:right;padding:0 6px;}
+.gcard.add{align-items:center;justify-content:center;border-style:dashed;color:var(--ink-3);cursor:pointer;background:var(--sub);font-size:13px;font-family:var(--sans);}
+.allocsum{display:flex;width:414px;height:10px;border-radius:6px;overflow:hidden;}
+.exp-side{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+.exp-side .mrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink-2);}
+.exp-side .mrow:first-of-type{border-top:none;}
+@media(max-width:1100px){.exp-editwrap{grid-template-columns:1fr;}}
 @media(max-width:900px){.atlas-counters{grid-template-columns:repeat(3,1fr)}.atlas-count:nth-child(3){border-right:0}.atlas-layout{grid-template-columns:1fr}.atlas-anchor{display:none}.report-grid,.metric-role{grid-template-columns:1fr 1fr}}
 
 /* 아코디언(메시지 푸시) */
@@ -1142,19 +1170,60 @@ function vExpEdit(){
  var p=ts&&ts.editProgress!=null?ts.editProgress:99;
  function val(n,v){return p>=n?v:"";}
  function checked(n){return p>=n?" checked":"";}
- var audience=p>=3?'<div class="ch" id="editAudienceCondition"><span class="andt">AND</span>사용자 충족 · 계정 ID 값 있음 <button class="btn btn-txt" id="editAudienceClear">비우기</button></div>':'<div class="empty" style="padding:16px">아직 대상 조건이 없습니다.</div>';
- var core=p>=13?'<div class="tip" id="editCoreMetric">'+x.metricLabel+' · '+x.metric+'</div>':'<button class="btn btn-def" id="editCoreAdd">⊕ 추가</button>';
- var support=p>=14?'<div class="tip" id="editSecondaryMetric">오류율 · error_rate</div>':'<button class="btn btn-def" id="editSecondaryAdd">⊕ 추가</button>';
- return '<div class="atlas-editbar"><button class="btn btn-txt" onclick="S.expView=\'detail\';paintMain()">‹</button><span class="bdg" style="background:#EEF0FE;color:#4C5BE0">피처 실험</span><span class="name">[0016] '+x.title+'</span><span class="sub2">그룹: 기본 폴더</span><div class="actions"><button class="btn btn-def" id="expDraft">초안 저장</button><button class="btn btn-pri" id="expSubmit">저장 후 제출</button></div></div>'+
-  '<section class="atlas-card" id="editTraffic"><h3>실험 트래픽</h3><div class="traffic-card"><b>공유 레이어 · '+x.layer+'</b><div class="traffic-bar"><span style="width:'+(p>=1?"50":"0")+'%"></span></div><div class="atlas-slider" id="editTrafficSlider"><span>실험 할당</span><div class="track"><span style="width:'+(p>=1?"50":"0")+'%"></span></div><b>'+(p>=1?"50":"0")+'%</b></div><div class="sub2">레이어에서 남은 트래픽 '+(p>=1?"50":"100")+'%</div></div></section>'+
-  '<section class="atlas-card" id="editAudience"><h3>오디언스 조건</h3><div class="cond">'+audience+'<button class="btn btn-def" id="editAudienceAdd">＋ 조건 추가</button></div></section>'+
-  '<section class="atlas-card" id="editGroups"><h3>실험 변수 · '+x.feature+'</h3><div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn btn-def" id="editEqualize">트래픽 균등 분배</button></div><div class="exp-groups">'+
-   '<div class="exp-group control" id="editControl"><h4>대조군</h4><label class="fl">트래픽 배분</label><input id="editControlAlloc" value="'+val(4,"50%")+'" placeholder="0%"><label class="fl">설명</label><input id="editControlDesc" value="'+val(5,"현재 서비스 값")+'" placeholder="설명 정보를 입력하세요"><label class="fl">'+x.feature+'</label><input id="editControlValue" value="'+val(6,x.control)+'" placeholder="피처 값"></div>'+
-   '<div class="exp-group" id="editVariant"><h4>실험군 A</h4><label class="fl">트래픽 배분</label><input id="editVariantAlloc" value="'+val(7,"50%")+'" placeholder="0%"><label class="fl">설명</label><input id="editVariantDesc" value="'+val(8,"변경안")+'" placeholder="설명 정보를 입력하세요"><label class="fl">'+x.feature+'</label><input id="editVariantValue" value="'+val(9,x.variant)+'" placeholder="피처 값"></div></div>'+
-   '<div class="row" style="margin-top:12px"><button class="btn btn-def" id="editAddGroup">＋ 실험군 추가</button><label class="rd" id="editAbsolute"><input type="checkbox"'+checked(10)+'> 절대 백분율 사용</label></div></section>'+
-  '<section class="atlas-card" id="editHypothesis"><h3>가설·종료 조건</h3><label class="fl">실험 가설 <span class="sub2">(선택 사항)</span></label><textarea id="editExperimentHypothesis" placeholder="만약 [통제 가능한 변경]이라면, [핵심 유저 동기/제약/인지 메커니즘]에 영향을 주므로 [정량적 지표]가 [명확한 방향]으로 변화할 것이다.">'+val(11,x.hypothesis)+'</textarea><label class="fl">종료 조건</label><div class="rd"><label id="editEndPeriod"><input type="radio"'+checked(12)+'> 실험 기간</label><input id="editEndDays" style="width:90px" value="'+val(12,"30")+'" placeholder="일"><span>일 후 실험이 자동으로 종료됩니다</span><label id="editEndSample"><input type="radio" disabled> 표본 수</label></div>'+
-   '<div class="tip guide-only" id="editSampleCalc" style="margin-top:12px"><b>기간을 먼저 정하지 말고, 필요한 표본부터 계산하세요.</b> 필요 표본은 <b>현재 지표값</b>과 <b>탐지하려는 최소 변화폭(MDE)</b>으로 정해집니다. 변화폭이 절반이면 필요 표본은 약 4배가 됩니다.<div class="metric-role" style="margin-top:10px"><div><b>1) 현재값 확인</b><span>대조군 기준 지표가 지금 몇 %인지</span></div><div><b>2) MDE 결정</b><span>몇 %p 개선되면 적용할 가치가 있는지</span></div><div><b>3) 군당 표본</b><span>표본 계산기·데이터 담당자로 산출</span></div><div><b>4) 기간 환산</b><span>군당 표본 ÷ 일일 유입 = 필요 일수</span></div></div><div class="sub2" style="margin-top:10px">나온 일수는 <b>주 단위로 올림</b>합니다 — 요일 효과를 최소 한 주기 포함해야 하기 때문입니다. 예시의 30일도 이 계산 결과여야 하며 관행으로 정한 숫자가 아닙니다.</div></div></section>'+
-  '<section class="atlas-card" id="editMetrics"><h3>통계 지표</h3><div class="two"><div><label class="fl"><span class="rq">*</span>핵심 지표</label>'+core+'</div><div><label class="fl">보조 지표</label>'+support+'</div></div><div class="tip guide-only" id="editGuardNote" style="margin-top:12px"><b>가드레일은 어디에 넣나</b> — 실제 화면의 슬롯은 핵심·보조 둘뿐입니다. 가드레일(악화되면 중단할 지표)은 <b>역방향 지표를 보조 지표 슬롯에 추가</b>해 관리하고, 중단 임계치는 팀 문서에 남깁니다.</div><div class="tip" id="editReadiness" style="margin-top:14px"><b>제출 전 준비 확인</b> — 트래픽 1~100%, 대조군 정확히 1개, 그룹 합계 100%, 피처 활성화, 핵심 지표 1개가 필요합니다.</div></section>';
+ var tv=p>=1?50:0;
+ var audience=p>=3
+  ?'<div class="fhead" style="margin-top:10px"><span style="font-size:13px;color:var(--ink-2)">유저 충족</span><button class="btn btn-txt" id="editAudienceClear">🗑 비우기</button></div>'+
+   '<div class="tip" style="margin-top:8px">현재 타겟 유저 조건은 <span class="lnk">실시간 계산</span> 을(를) 지원합니다.</div>'+
+   '<div id="editAudienceCondition" style="margin-top:8px;display:flex;gap:6px"><span class="bdg" style="background:var(--sub)">👤 계정 ID</span><span class="bdg" style="background:var(--sub)">값 있음</span></div>'+
+   '<button class="btn btn-txt" style="margin-top:8px;padding-left:0">＋ 조건 추가</button>'
+  :'<div class="empty" style="padding:14px 0 4px">아직 대상 조건이 없습니다.</div>';
+ var core=p>=13?'<div class="tip" id="editCoreMetric" style="margin:0">'+x.metricLabel+' · '+x.metric+'</div>':'<button class="btn btn-txt" id="editCoreAdd">⊕ 추가</button>';
+ var support=p>=14?'<div class="tip" id="editSecondaryMetric" style="margin:0">오류율 · error_rate</div>':'<button class="btn btn-txt" id="editSecondaryAdd">⊕ 추가</button>';
+ return '<div class="atlas-editbar"><button class="btn btn-txt" onclick="S.expView=\'detail\';paintMain()">‹</button><span class="bdg" style="background:#EEF0FE;color:#4C5BE0">피처 실험</span><span class="name">[0016] '+x.title+'</span><span class="sub2">그룹: 기본 폴더 ⌄</span><div class="actions"><button class="btn btn-def" id="expDraft">초안 저장</button><button class="btn btn-pri" id="expSubmit">저장 후 제출</button></div></div>'+
+  '<div class="exp-editwrap">'+
+  '<div class="exp-canvas"><div class="fcol">'+
+   '<section class="fnode" id="editTraffic"><div class="fhead"><h3>실험 트래픽</h3><span class="fchip">공유 레이어 ⌄</span></div>'+
+    '<div class="fselect">'+x.layer+'<span class="sub2">⌄</span></div>'+
+    '<div class="traffic-bar" style="margin-top:10px"><span style="width:'+tv+'%"></span></div><div class="sub2" style="text-align:right;margin-top:4px">남은 '+(100-tv)+'%</div>'+
+    '<label class="fl">실험에 할당된 레이어 트래픽 백분율</label>'+
+    '<div class="atlas-slider" id="editTrafficSlider"><div class="track"><span style="width:'+tv+'%"></span></div><b>'+tv+'%</b></div></section>'+
+   '<div class="fconn"></div>'+
+   '<section class="fnode" id="editAudience"><div class="fhead"><h3>오디언스 조건</h3><button class="btn btn-txt" id="editAudienceAdd">⊕ 추가</button></div>'+audience+'</section>'+
+   '<div class="fconn"></div>'+
+   '<section class="fnode"><h3>실험 변수</h3><div class="fselect">'+x.feature+'<span class="sub2">⌄</span></div></section>'+
+   '<svg class="fbranch" viewBox="0 0 628 56" aria-hidden="true"><path d="M207,-13 L207,10 C207,34 100,30 100,56"/><path d="M207,-13 L207,10 C207,34 314,30 314,56"/></svg>'+
+   '<div style="display:flex;justify-content:flex-end;margin:-40px 0 8px"><button class="btn btn-def" id="editEqualize">트래픽 균등 분배</button></div>'+
+   '<div class="exp-grouprow">'+
+    '<div class="gcard control" id="editControl"><div class="ghead"><span class="dot"></span><b>대조군</b><span class="bdg" style="background:#EEF0FE;color:#4C5BE0">대조군</span><span class="allocwrap"><input id="editControlAlloc" value="'+val(4,"50")+'" placeholder="0"><span>%</span></span></div>'+
+     '<textarea id="editControlDesc" placeholder="설명 정보를 입력하세요">'+val(5,"현재 서비스 값")+'</textarea>'+
+     '<div class="gfeat">▣ '+x.feature+'</div><input id="editControlValue" value="'+val(6,x.control)+'" placeholder="값 입력"></div>'+
+    '<div class="gcard variant" id="editVariant"><div class="ghead"><span class="dot"></span><b>실험군 A</b><span class="allocwrap"><input id="editVariantAlloc" value="'+val(7,"50")+'" placeholder="0"><span>%</span></span></div>'+
+     '<textarea id="editVariantDesc" placeholder="설명 정보를 입력하세요">'+val(8,"변경안")+'</textarea>'+
+     '<div class="gfeat">▣ '+x.feature+'</div><input id="editVariantValue" value="'+val(9,x.variant)+'" placeholder="값 입력"></div>'+
+    '<button class="gcard add" id="editAddGroup">＋ 실험군 추가</button>'+
+   '</div>'+
+   '<div style="display:flex;align-items:flex-end;gap:16px;margin-top:14px">'+
+    '<div><div style="display:flex;width:414px;font-size:12px;color:var(--ink-3);margin-bottom:4px"><span style="width:50%">'+(p>=4?"50%":"—")+'</span><span style="width:50%">'+(p>=7?"50%":"—")+'</span></div>'+
+     '<div class="allocsum"><div style="width:50%;background:#7C5CE0"></div><div style="width:50%;background:#C9BCF2"></div></div></div>'+
+    '<label class="rd" id="editAbsolute" style="font-size:13px;white-space:nowrap"><input type="checkbox"'+checked(10)+'> 절대 백분율 <span class="sub2">(실험 트래픽 * 실험군 비율)</span></label>'+
+   '</div>'+
+  '</div></div>'+
+  '<aside class="exp-side">'+
+   '<label class="fl" style="margin-top:0">실험 가설 <span class="sub2">(선택 사항)</span></label>'+
+   '<textarea id="editExperimentHypothesis" placeholder="만약 [통제 가능한 변경]이라면, [핵심 유저 동기/제약/인지 메커니즘]에 영향을 주므로 [정량적 지표]가 [명확한 방향]으로 변화할 것이다.">'+val(11,x.hypothesis)+'</textarea>'+
+   '<div class="sub2" style="text-align:right;margin-top:4px">'+(p>=11?x.hypothesis.length:0)+' / 800</div>'+
+   '<label class="fl">종료 조건</label>'+
+   '<div style="display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--ink-2)">'+
+    '<label id="editEndPeriod" style="display:flex;align-items:center;gap:6px"><input type="radio"'+checked(12)+'> 실험 기간:</label>'+
+    '<div style="display:flex;align-items:center;gap:8px;padding-left:22px;flex-wrap:wrap"><input id="editEndDays" style="width:64px" value="'+val(12,"30")+'" placeholder="일"><span class="sub2">일 후 실험이 자동으로 종료됩니다</span></div>'+
+    '<label id="editEndSample" style="display:flex;align-items:center;gap:6px;color:var(--ink-3)"><input type="radio" disabled> 표본 수</label>'+
+   '</div>'+
+   '<div class="tip guide-only" id="editSampleCalc" style="margin-top:12px"><b>기간을 먼저 정하지 말고, 필요한 표본부터 계산하세요.</b> 필요 표본은 <b>현재 지표값</b>과 <b>탐지하려는 최소 변화폭(MDE)</b>으로 정해집니다. 변화폭이 절반이면 필요 표본은 약 4배가 됩니다.<div class="metric-role" style="margin-top:10px;grid-template-columns:1fr 1fr"><div><b>1) 현재값 확인</b><span>대조군 기준 지표가 지금 몇 %인지</span></div><div><b>2) MDE 결정</b><span>몇 %p 개선되면 적용할 가치가 있는지</span></div><div><b>3) 군당 표본</b><span>표본 계산기·데이터 담당자로 산출</span></div><div><b>4) 기간 환산</b><span>군당 표본 ÷ 일일 유입 = 필요 일수</span></div></div><div class="sub2" style="margin-top:10px">나온 일수는 <b>주 단위로 올림</b>합니다 — 요일 효과를 최소 한 주기 포함해야 하기 때문입니다. 예시의 30일도 이 계산 결과여야 하며 관행으로 정한 숫자가 아닙니다.</div></div>'+
+   '<label class="fl">통계 지표</label>'+
+   '<div id="editMetrics"><div class="mrow"><span><span class="rq">*</span>핵심 지표</span>'+core+'</div><div class="mrow"><span>보조 지표</span>'+support+'</div></div>'+
+   '<div class="tip guide-only" id="editGuardNote" style="margin-top:12px"><b>가드레일은 어디에 넣나</b> — 실제 화면의 슬롯은 핵심·보조 둘뿐입니다. 가드레일(악화되면 중단할 지표)은 <b>역방향 지표를 보조 지표 슬롯에 추가</b>해 관리하고, 중단 임계치는 팀 문서에 남깁니다.</div>'+
+   '<div class="tip guide-only" id="editReadiness" style="margin-top:12px"><b>제출 전 준비 확인</b> — 트래픽 1~100%, 대조군 정확히 1개, 그룹 합계 100%, 피처 활성화, 핵심 지표 1개가 필요합니다.</div>'+
+  '</aside></div>';
 }
 function vExpReport(){
  var x=currentExpScenario();
@@ -2343,8 +2412,8 @@ function animateTourStep(st){
  if(TOUR.key==="experiment"&&st.expEditAction){
   var ee=currentExpScenario(),ea=st.expEditAction;
   var editText={
-   controlAlloc:["#editControlAlloc","50%"],controlDesc:["#editControlDesc","현재 서비스 값"],controlValue:["#editControlValue",ee.control],
-   variantAlloc:["#editVariantAlloc","50%"],variantDesc:["#editVariantDesc","변경안"],variantValue:["#editVariantValue",ee.variant],
+   controlAlloc:["#editControlAlloc","50"],controlDesc:["#editControlDesc","현재 서비스 값"],controlValue:["#editControlValue",ee.control],
+   variantAlloc:["#editVariantAlloc","50"],variantDesc:["#editVariantDesc","변경안"],variantValue:["#editVariantValue",ee.variant],
    editHypothesis:["#editExperimentHypothesis",ee.hypothesis],endDays:["#editEndDays","30"]
   }[ea];
   if(editText)tourType(editText[0],editText[1],280,38);
