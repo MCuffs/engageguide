@@ -283,6 +283,23 @@ code.k{font-family:var(--mono);font-size:12px;background:var(--sub);border:1px s
 /* ─── 가이드 투어 ─── */
 #tourblock{position:fixed;inset:0;z-index:899;background:transparent;}
 #tourindex{display:none;position:fixed;left:12px;top:68px;bottom:12px;width:224px;z-index:902;flex-direction:column;background:#fff;border:1px solid #DDE1EA;border-radius:12px;box-shadow:0 10px 32px rgba(15,23,42,.14);overflow:hidden;}
+.st-scrim{position:fixed;inset:0;z-index:940;background:rgba(15,20,34,.55);display:flex;align-items:center;justify-content:center;animation:viewFade .25s ease;}
+.st-home{width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow-y:auto;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(10,16,40,.35);padding:30px 34px 22px;}
+.st-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.st-head h2{margin:0 0 6px;font-size:22px;color:#1F2430;}
+.st-head p{margin:0;font-size:13.5px;color:#6A7180;}
+.st-x{background:none;border:none;font-size:16px;color:#9AA0AE;cursor:pointer;padding:4px 6px;}
+.st-group{margin:22px 0 10px;font-size:12px;font-weight:700;letter-spacing:.07em;color:#9AA0AE;}
+.st-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.st-card{display:flex;align-items:center;gap:12px;text-align:left;background:#fff;border:1px solid #E3E6EC;border-radius:12px;padding:13px 15px;cursor:pointer;font-family:var(--sans);transition:border-color .15s,box-shadow .15s;}
+.st-card:hover{border-color:var(--pri);box-shadow:0 6px 20px rgba(60,80,255,.14);}
+.st-ic{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex:none;}
+.st-body{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.st-body b{font-size:14px;color:#1F2430;}
+.st-body span{font-size:12px;color:#79808E;line-height:1.45;}
+.st-count{margin-left:auto;flex:none;font-size:11.5px;font-weight:600;color:var(--pri);background:var(--pri-soft);border-radius:999px;padding:3px 9px;}
+.st-foot{margin-top:20px;padding-top:14px;border-top:1px solid #EEF0F4;font-size:12px;color:#9AA0AE;text-align:center;}
+@media(max-width:640px){.st-grid{grid-template-columns:1fr;}}
 .tix-head{flex:none;display:flex;justify-content:space-between;align-items:baseline;padding:13px 14px 11px;font-size:13px;font-weight:600;color:#1F2430;border-bottom:1px solid #ECEEF3;}
 .tix-head span{font-size:11px;font-weight:400;color:#8A8F9E;}
 .tix-body{flex:1;overflow-y:auto;padding:6px 8px 10px;}
@@ -602,8 +619,8 @@ body.guide-active .guide-only.depflow{display:flex!important;}
 body.guide-active .guide-only.twostep{display:grid!important;}
 body.guide-active .guide-only.life{display:flex!important;}
 .task-real .dotst i{background:var(--ink);}
-.tourlaunch{position:fixed;right:22px;bottom:20px;z-index:80;}
-.tourlaunch>#tourBtn{height:36px;border-radius:99px;box-shadow:0 8px 24px rgba(44,55,130,.18);background:var(--panel);}
+.tourlaunch{position:fixed;right:24px;bottom:24px;z-index:80;}
+.tourlaunch #tourBtn{height:48px;padding:0 26px;font-size:15.5px;font-weight:600;border-radius:999px;box-shadow:0 10px 28px rgba(60,80,255,.38);}
 .tourmenu{top:auto;bottom:44px;right:0;}
 
 /* 실제 설정 센터 좌측 트리 */
@@ -669,7 +686,7 @@ body.view-config .side h1{height:48px;margin:0;padding:0 12px;display:flex;align
   <div class="brand"><span class="sp"></span>AE Agent <span class="ch">›</span><span class="spk">✦</span></div>
   <div class="nav" id="topnav"></div>
   <div class="topright">
-    <div class="tourlaunch"><button class="btn btn-def" onclick="toggleTourMenu(event)" id="tourBtn">💡 사용 설명</button><div class="tourmenu hidden" id="tourMenu"><button onclick="openGuideHome('engage')"><b>운영 모듈 한눈에 보기</b><span>Webhook · 메시지 푸시 · Client 푸시 시나리오 선택</span></button><button onclick="startTour('config')"><b>설정 센터 시작하기</b><span>파라미터 → 활성화 → 전략 → 롤백 · 20개 체크포인트</span></button><button onclick="openExperimentHome()"><b>실험 시작하기</b><span>모든 클릭과 입력을 빠짐없이 재현 · 72단계</span></button></div></div><span class="tico">⌕</span><span class="tico bell">◌</span><span class="tico">⚙</span>
+    <div class="tourlaunch"><button class="btn btn-pri" id="tourBtn" onclick="openStartHome()">▶ 튜토리얼 시작</button><div class="tourmenu hidden" id="tourMenu"></div></div><span class="tico">⌕</span><span class="tico bell">◌</span><span class="tico">⚙</span>
     <div class="projchip"><span class="av" id="avat">C</span>
       <select id="projSel" onchange="setApp(this.value)" aria-label="프로젝트">
         <option value="game">Card DEMO (Presentation)</option><option value="shop">데일리마켓</option>
@@ -684,6 +701,7 @@ body.view-config .side h1{height:48px;margin:0;padding:0 12px;display:flex;align
 <div id="drawerHost"></div>
 <div id="wizHost"></div>
 <div id="guideHomeHost"></div>
+<div id="startHome"></div>
 
 <script>
 var APPS={
@@ -1716,6 +1734,32 @@ function openGuideHomeExpanded(k){
   '</section></div>';
 }
 /* 세 가지 사용 목적만 고르는 간결한 시나리오 선택 화면 */
+var START_TUTORIALS=[
+ ["운영 모듈",[
+  ["운영 작업 전체 흐름","채널 구축부터 안전장치·작업 생성·측정까지","24단계","startTour('engage')","✉","#EAF2FF","#2F72D9"],
+  ["Webhook — 인게임 우편 보상","7일 미접속 유저에게 복귀 보상 지급","23단계","startScenario('webhook')","⛓","#EFEBFE","#7C5CE0"],
+  ["메시지 푸시 — 복귀 알림","앱 밖 유저를 잠금화면 알림으로 부르기","19단계","startScenario('push')","▤","#FFF1E8","#D9722F"],
+  ["Client 푸시 — 결제 팝업","결제 직전 유저에게 한정 할인 팝업","19단계","startScenario('client')","▣","#E9F5F2","#0E8477"]]],
+ ["설정 센터",[
+  ["설정 센터 도입","설정 항목 → 파라미터 → 템플릿 → 전략 → 롤백","20단계","startTour('config')","⚙","#E9F5F2","#0E8477"]]],
+ ["실험 (Atlas)",[
+  ["게임 — 전투 밸런스 실험","보스 HP를 낮추면 리텐션이 오를까","80단계","startExperimentScenario('game_balance')","◆","#EFEBFE","#7C5CE0"],
+  ["커머스 — 결제 버튼 실험","CTA 색을 바꾸면 전환율이 오를까","80단계","startExperimentScenario('commerce_cta')","◈","#EAF2FF","#2F72D9"],
+  ["구독 — 온보딩 실험","온보딩을 3단계로 줄이면 완주율이 오를까","80단계","startExperimentScenario('subscription_onboarding')","◎","#FFF1E8","#D9722F"]]]];
+function openStartHome(){
+ var h='<div class="st-scrim"><section class="st-home" role="dialog" aria-label="튜토리얼 선택">'+
+  '<div class="st-head"><div><h2>무엇을 배워볼까요?</h2><p>실제 AE 콘솔을 그대로 재현한 환경에서, 한 단계씩 따라 하는 튜토리얼입니다.</p></div>'+
+  '<button class="st-x" onclick="closeStartHome()" aria-label="닫고 둘러보기">✕</button></div>';
+ START_TUTORIALS.forEach(function(g){
+  h+='<div class="st-group">'+g[0]+'</div><div class="st-grid">'+
+   g[1].map(function(c){return '<button class="st-card" onclick="closeStartHome();'+c[3]+'">'+
+    '<span class="st-ic" style="background:'+c[5]+';color:'+c[6]+'">'+c[4]+'</span>'+
+    '<span class="st-body"><b>'+c[0]+'</b><span>'+c[1]+'</span></span>'+
+    '<span class="st-count">'+c[2]+'</span></button>';}).join("")+'</div>';});
+ h+='<div class="st-foot">카드를 클릭하면 바로 시작됩니다 · 진행 중 좌측 인덱스로 아무 단계나 이동할 수 있습니다</div></section></div>';
+ document.getElementById("startHome").innerHTML=h;
+}
+function closeStartHome(){document.getElementById("startHome").innerHTML="";}
 function openGuideHome(k){
  document.getElementById("tourMenu").classList.add("hidden");
  if(k!=="engage"){startTour(k);return;}
@@ -2371,7 +2415,7 @@ document.addEventListener("click",function(e){
  if(openDD&&!(e.target.closest&&e.target.closest(".navwrap"))){openDD=null;paintTop();}
 });
 function startTour(k){
- document.getElementById("tourMenu").classList.add("hidden");
+ document.getElementById("tourMenu").classList.add("hidden");closeStartHome();closeGuideHome();
  document.body.classList.add("guide-active");
  TOUR.on=true;TOUR.key=k;TOUR.list=TOURS[k];TOUR.i=0;
  TOUR.created={};TOUR.list.forEach(function(st,i){if(st.creates)TOUR.created[st.creates]=i;});TOUR.manualDock=null;TOUR.drag=null;TOUR.resize=null;TOUR.floatPos=null;TOUR.floatSize=null;
@@ -2397,7 +2441,7 @@ function ensureScenarioChannel(kind){
   S.channels.webhook.unshift({name:"ingame-mail-prod",url:"https://api.example.com/engage/webhook",sendId:"유저 속성 · #account_id"});
 }
 function endTour(){clearTourMotion();TOUR.on=false;document.body.classList.remove("guide-active","guide-left","guide-right","guide-bottom");closeDrawer();
- ["tourblock","spot","tourcard","tourindex"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none";});paintMain();}
+ ["tourblock","spot","tourcard","tourindex"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none";});paintMain();openStartHome();}
 function buildTourIndex(){
  var el=document.getElementById("tourindex");if(!el)return;
  var save=TOUR.i,last=null;
@@ -2860,7 +2904,7 @@ document.addEventListener("keydown",function(e){
 });
 window.addEventListener("resize",function(){if(TOUR.on)paintStep(TOUR.list[TOUR.i]);});
 
-paintTop();setSection("engage");log("콘솔 로드 — 실측 디자인 토큰 적용","hi");phone();
+paintTop();setSection("engage");openStartHome();
 </script>
 
 </body>
