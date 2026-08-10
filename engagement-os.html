@@ -291,6 +291,19 @@ code.k{font-family:var(--mono);font-size:12px;background:var(--sub);border:1px s
 .tix-item{display:block;width:100%;text-align:left;background:none;border:none;border-radius:7px;padding:5px 8px;font-family:var(--sans);font-size:11.8px;line-height:1.45;color:#4A5060;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tix-item:hover{background:#F2F4F9;color:#1F2430;}
 .tix-item.on{background:var(--pri);color:#fff;font-weight:500;}
+/* 화면 전환 페이드 — 위치가 변하지 않아 스포트라이트 측정과 충돌하지 않습니다 */
+@keyframes viewFade{from{opacity:0}to{opacity:1}}
+#main.view-anim{animation:viewFade .3s ease;}
+.side.view-anim{animation:viewFade .3s ease;}
+.scrim{animation:viewFade .22s ease;}
+.scrim .drawer{animation:viewFade .3s ease;}
+.tcreate{animation:viewFade .28s ease;}
+.navdd{animation:viewFade .16s ease;}
+.guide-home-scrim{animation:viewFade .22s ease;}
+body{transition:margin-left .3s ease;}
+@media(prefers-reduced-motion:reduce){
+ #main.view-anim,.side.view-anim,.scrim,.scrim .drawer,.tcreate,.navdd,.guide-home-scrim{animation:none;}
+ body{transition:none;}#spot{transition:none;}}
 body.guide-active{margin-left:248px;}
 /* scrollIntoView(start)가 sticky 상단바(내비 56 + 편집바) 뒤로 대상을 숨기지 않게 합니다. */
 html{scroll-padding-top:128px;scroll-padding-bottom:24px;}
@@ -835,7 +848,14 @@ function paintMain(){var h="";
  if(S.sec==="engage"){h={channel:vChannel,task:vTask,fatigue:vFatigue}[S.nav];h=h?h():vStub(S.nav);}
  else if(S.sec==="config"){h=(S.nav==="feature"?vFeature:{citem:vCfgItem,cchan:vCfgChan,cstrategy:vCfgStrat,cdata:vCfgData}[S.nav])();}
  else{h={explist:vExpList,feature:vFeature,layer:vLayer,metric:vMetric}[S.nav]();}
- document.getElementById("main").innerHTML=h;mets();}
+ document.getElementById("main").innerHTML=h;mets();
+ var vk=[S.sec,S.nav,S.expView,S.chTab,S.cfgTab,S.cfgDetailTab,!!S.composing,!!S.expArchived,S.expStatus].join("|");
+ if(vk!==paintMain._vk){
+  var changedSec=paintMain._vk&&paintMain._vk.split("|")[0]!==S.sec;
+  paintMain._vk=vk;
+  var m=document.getElementById("main");m.classList.remove("view-anim");void m.offsetWidth;m.classList.add("view-anim");
+  if(changedSec){var sd=document.querySelector(".side");if(sd){sd.classList.remove("view-anim");void sd.offsetWidth;sd.classList.add("view-anim");}}
+ }}
 
 /* ── 채널 ── */
 var PROV=[["FCM","🔥","Firebase Cloud Messaging · Android"],["Aurora Mobile","🔷","极光推送 · 중국 Android"],["APNs","🍎","Apple Push Notification service · iOS"]];
@@ -2356,7 +2376,7 @@ function startTour(k){
  document.getElementById("tourcard").style.removeProperty("--tour-h");
  ["tourblock","spot","tourcard","tourindex"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=(id==="tourcard"||id==="tourindex")?"flex":"block";});
  buildTourIndex();
- showStep();
+ setTimeout(showStep,310);
 }
 function ensureScenarioChannel(kind){
  if(kind==="push"&&!S.channels.push.some(function(c){return c.name==="android-push-prod";}))
