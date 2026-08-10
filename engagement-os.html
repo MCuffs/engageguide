@@ -326,6 +326,7 @@ body.guide-bottom .scrim>.drawer{max-height:calc(100vh - min(36vh,390px) - 28px)
 .cs-x{background:none;border:none;font-size:13px;color:#8A8F9E;cursor:pointer;padding:2px 4px;}
 .cs-title{margin:0 0 7px;font-size:14.5px;font-weight:600;color:#1F2430;line-height:1.4;}
 .cs-role{font-size:12.8px;line-height:1.62;color:#434A58;background:#F6F7FB;border:1px solid #E7EAF2;border-radius:9px;padding:9px 11px;}
+.cs-role.none{background:none;border:none;color:#B9BEC9;padding:0 2px;}
 .cs-btns{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px;}
 .cs-btns .btn{height:30px;padding:4px 14px;font-size:13px;}
 #tourcard .tour-head{padding:20px 22px 16px;background:#fff;border-bottom:1px solid #EEEFF4;flex:none;cursor:grab;user-select:none;touch-action:none;}
@@ -2818,11 +2819,18 @@ function paintStep(st){
   sp.style.width=(r.width+pad*2)+"px";sp.style.height=(r.height+pad*2)+"px";}
  else{sp.style.opacity=0;sp.style.top="50%";sp.style.left="50%";sp.style.width="0px";sp.style.height="0px";}
  var phase=tourPhaseMeta(),beginner=tourBeginnerMeta(st);
- var role=(typeof tourOneLineText==="function"?tourOneLineText(st,beginner):"")||beginner.plain||"";
+ function roleOf(step){var b=tourBeginnerMeta(step);return ((typeof tourOneLineText==="function"?tourOneLineText(step,b):"")||b.plain||"").trim();}
+ /* 같은 문장은 투어에서 처음 등장한 단계에서만 보여주고, 이후 재등장하면 '-'로 줄입니다 */
+ if(!TOUR._roleFirst||TOUR._roleList!==TOUR.list){
+  TOUR._roleList=TOUR.list;TOUR._roleFirst={};
+  TOUR.list.forEach(function(step,idx){var t=roleOf(step);if(!(t in TOUR._roleFirst))TOUR._roleFirst[t]=idx;});
+ }
+ var role=roleOf(st);
+ if(!role||TOUR._roleFirst[role]!==TOUR.i)role="-";
  cd.innerHTML='<div class="cs-top"><span class="cs-step">STEP '+(TOUR.i+1)+'/'+TOUR.list.length+' · '+phase.n+'</span>'+
   '<button class="cs-x" onclick="endTour()" aria-label="가이드 종료">✕</button></div>'+
   '<h4 class="cs-title">'+st.t+'</h4>'+
-  '<div class="cs-role">'+role+'</div>'+
+  (role==="-"?'<div class="cs-role none">-</div>':'<div class="cs-role">'+role+'</div>')+
   '<div class="cs-btns">'+(TOUR.i>0?'<button class="btn btn-def" onclick="tourPrev()">이전</button>':'')+
   '<button class="btn btn-pri" onclick="tourNext()">'+(TOUR.i===TOUR.list.length-1?(st.submitDemo?"작업 제출 완료":"가이드 완료"):"다음")+'</button></div>';
  /* 강조 요소 바로 아래에 붙이고, 공간이 없으면 위로 올립니다 */
