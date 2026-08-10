@@ -317,8 +317,17 @@ body.guide-bottom .scrim>.drawer{max-height:calc(100vh - min(36vh,390px) - 28px)
 #spot{position:fixed;z-index:900;border-radius:12px;pointer-events:none;
  box-shadow:0 0 0 9999px rgba(11,16,28,.52),0 0 0 3px #6D7CFF,0 10px 40px rgba(31,51,202,.28);
  transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1);}
-#tourcard{position:fixed;z-index:901;width:min(416px,calc(100vw - 24px));height:100vh;overflow:hidden;background:#fff;border:0;
- border-left:1px solid #E7E9F0;box-shadow:-10px 0 36px rgba(22,30,58,.14);display:flex;flex-direction:column;}
+#tourcard{position:fixed;z-index:901;width:min(400px,calc(100vw - 24px));background:#fff;border:1px solid #DDE1EA;border-radius:12px;box-shadow:0 14px 44px rgba(15,23,42,.22);padding:13px 15px 12px;display:none;animation:viewFade .18s ease;}
+#tourcard.below::before,#tourcard.above::after{content:"";position:absolute;left:var(--arrow-x,24px);margin-left:-7px;border:7px solid transparent;}
+#tourcard.below::before{top:-14px;border-bottom-color:#fff;filter:drop-shadow(0 -1px 0 #DDE1EA);}
+#tourcard.above::after{bottom:-14px;border-top-color:#fff;filter:drop-shadow(0 1px 0 #DDE1EA);}
+.cs-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.cs-step{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--pri);}
+.cs-x{background:none;border:none;font-size:13px;color:#8A8F9E;cursor:pointer;padding:2px 4px;}
+.cs-title{margin:0 0 7px;font-size:14.5px;font-weight:600;color:#1F2430;line-height:1.4;}
+.cs-role{font-size:12.8px;line-height:1.62;color:#434A58;background:#F6F7FB;border:1px solid #E7EAF2;border-radius:9px;padding:9px 11px;}
+.cs-btns{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px;}
+.cs-btns .btn{height:30px;padding:4px 14px;font-size:13px;}
 #tourcard .tour-head{padding:20px 22px 16px;background:#fff;border-bottom:1px solid #EEEFF4;flex:none;cursor:grab;user-select:none;touch-action:none;}
 #tourcard.dragging .tour-head{cursor:grabbing;}
 #tourcard .tour-headline{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;}
@@ -2512,8 +2521,7 @@ function rectOf(st){
  if(st.center)return null;
  var el=tourTarget(st);
  if(!el)return null;
- var bottomDock=document.body.classList.contains("guide-bottom"),tourCard=document.getElementById("tourcard"),isFloat=!!(tourCard&&tourCard.classList.contains("floating"));
- el.scrollIntoView({block:bottomDock&&!isFloat?"start":"center",behavior:"instant"});
+ el.scrollIntoView({block:"center",behavior:"instant"});
  var r=el.getBoundingClientRect();
  if(el.tagName==="LABEL"&&el.nextElementSibling){
   var n=el.nextElementSibling.getBoundingClientRect();
@@ -2522,16 +2530,6 @@ function rectOf(st){
  }
  /* 전체 폭 섹션은 가이드 카드를 제외한 실제 가시 영역만 강조합니다. */
  var minLeft=8,maxRight=window.innerWidth-8,minTop=8,maxBottom=window.innerHeight-8;
- var card=document.getElementById("tourcard");
- if(card&&card.style.display!=="none"){
-  if(bottomDock){
-   if(!card.classList.contains("floating"))maxBottom=Math.min(maxBottom,window.innerHeight-(card.offsetHeight||Math.min(window.innerHeight*.38,410))-10);
-  }else{
-   var guideWidth=card.offsetWidth||416;
-   if(document.body.classList.contains("guide-left"))minLeft=Math.max(minLeft,guideWidth+10);
-   else maxRight=Math.min(maxRight,window.innerWidth-guideWidth-10);
-  }
- }
  var left=Math.max(r.left,minLeft),right=Math.min(r.right,maxRight);
  var top=Math.max(r.top,minTop),bottom=Math.min(r.bottom,maxBottom);
  if(right-left<24||bottom-top<18)return null;
@@ -2813,46 +2811,37 @@ function tourOneLineText(st,beginner){
  return beginner.plain||tourCoreRole(st);
 }
 function paintStep(st){
- var dock=tourDockMode(st),dockLeft=dock==="left",dockBottom=dock==="bottom";
- document.body.classList.toggle("guide-left",dockLeft);
- document.body.classList.toggle("guide-right",dock==="right");
- document.body.classList.toggle("guide-bottom",dockBottom);
+ document.body.classList.remove("guide-left","guide-right","guide-bottom");
  var r=rectOf(st),sp=document.getElementById("spot"),cd=document.getElementById("tourcard");
  var pad=7;
  if(r){sp.style.opacity=1;sp.style.top=(r.top-pad)+"px";sp.style.left=(r.left-pad)+"px";
   sp.style.width=(r.width+pad*2)+"px";sp.style.height=(r.height+pad*2)+"px";}
  else{sp.style.opacity=0;sp.style.top="50%";sp.style.left="50%";sp.style.width="0px";sp.style.height="0px";}
- var pct=Math.round((TOUR.i+1)/TOUR.list.length*100),phase=tourPhaseMeta(),beginner=tourBeginnerMeta(st),isFloating=cd.classList.contains("floating");
- var phaseLabels=TOUR.key==="config"?["구조 이해","항목·템플릿","채널 연동","전략·측정"]:
-  (TOUR.key==="experiment"?["선행 자산","실험 설계","실행 시작","측정·종료"]:(["webhook","push","client"].indexOf(TOUR.key)>=0?["시나리오","채널 설정","운영 작업","검토·제출"]:["목적·채널","채널 구축","안전장치","작업·측정"]));
- cd.innerHTML='<div class="tour-head" onpointerdown="startTourDrag(event)"><div class="tour-headline"><div class="tstep">STEP '+(TOUR.i+1)+' / '+TOUR.list.length+'</div><span class="tour-drag-hint">⠿ 이동</span><div class="tour-mini-title">'+st.t+'</div><div class="tour-head-actions">'+
-  (isFloating?'<button class="tour-tool" onclick="dockTourBottom()" aria-label="가이드를 하단에 고정">↧ 하단 고정</button>':'')+
-  (dockBottom?'':'<button class="tour-tool" onclick="toggleTourDock()" aria-label="가이드 위치 바꾸기">⇄ 위치</button>')+
-  '<button class="tour-close" onclick="endTour()" aria-label="가이드 종료">✕</button></div></div>'+
-  '<div class="tour-phases">'+phaseLabels.map(function(n,i){return '<span class="'+(phase.i===i?"on":"")+'">'+n+'</span>';}).join("")+'</div></div>'+
-  '<div class="tour-scroll"><div class="tour-route"><b>현재 화면</b><span class="arr">›</span><span>'+tourRouteLabel(st)+'</span></div>'+
-  '<h4>'+st.t+'</h4>'+
-  '<div class="tour-one-line"><b>핵심 역할</b><span>'+tourOneLineText(st,beginner)+'</span></div>'+
-  '<div class="tour-beginner"><div><div class="bk">이 기능의 핵심 역할</div><div class="bv">'+beginner.plain+'</div></div></div>'+
-  '<div class="tour-team"><div class="dev"><b>개발팀</b><span>'+(st.dev||"별도 확인 사항이 없습니다.")+'</span></div><div class="biz"><b>사업팀</b><span>'+(st.biz||"별도 결정 사항이 없습니다.")+'</span></div></div>'+
-  '</div>'+
-  '<div class="tfoot"><div class="prog"><span style="width:'+pct+'%"></span></div><div class="tbtns">'+
-  (TOUR.i>0?'<button class="btn btn-def" onclick="tourPrev()">이전</button>':'')+
-  '<button class="btn btn-pri" onclick="tourNext()">'+(TOUR.i===TOUR.list.length-1?(st.submitDemo?"작업 제출 완료":"가이드 완료"):"다음")+'</button></div><div class="tnum">진행 '+pct+'%</div></div>'+
-  '<div class="tour-resize-handle" onpointerdown="startTourResize(event)" aria-label="가이드 크기 조절"></div>';
- /* 설명 카드는 고정하고 실제 화면·강조 영역만 움직여 방향 감각을 유지합니다. */
- if(dockBottom){
-  cd.style.top="auto";cd.style.bottom="0";cd.style.left="0";cd.style.right="0";cd.style.borderLeft="0";cd.style.borderRight="0";
-  if(isFloating&&TOUR.floatPos){
-   if(TOUR.floatSize)setTourFloatSize(TOUR.floatSize.w,TOUR.floatSize.h);
-   setTourFloatPosition(TOUR.floatPos.x,TOUR.floatPos.y);
-  }
+ var phase=tourPhaseMeta(),beginner=tourBeginnerMeta(st);
+ var role=(typeof tourOneLineText==="function"?tourOneLineText(st,beginner):"")||beginner.plain||"";
+ cd.innerHTML='<div class="cs-top"><span class="cs-step">STEP '+(TOUR.i+1)+'/'+TOUR.list.length+' · '+phase.n+'</span>'+
+  '<button class="cs-x" onclick="endTour()" aria-label="가이드 종료">✕</button></div>'+
+  '<h4 class="cs-title">'+st.t+'</h4>'+
+  '<div class="cs-role">'+role+'</div>'+
+  '<div class="cs-btns">'+(TOUR.i>0?'<button class="btn btn-def" onclick="tourPrev()">이전</button>':'')+
+  '<button class="btn btn-pri" onclick="tourNext()">'+(TOUR.i===TOUR.list.length-1?(st.submitDemo?"작업 제출 완료":"가이드 완료"):"다음")+'</button></div>';
+ /* 강조 요소 바로 아래에 붙이고, 공간이 없으면 위로 올립니다 */
+ cd.style.visibility="hidden";cd.style.display="block";cd.style.top="0px";cd.style.left="0px";
+ var ch=cd.offsetHeight,cw=cd.offsetWidth,vw=innerWidth,vh=innerHeight;
+ if(r){
+  var left=Math.min(Math.max(r.left-pad,12),vw-cw-12);
+  var below=r.bottom+pad+12;
+  if(below+ch<=vh-10){cd.style.top=below+"px";cd.classList.add("below");cd.classList.remove("above");}
+  else{cd.style.top=Math.max(10,r.top-pad-ch-12)+"px";cd.classList.add("above");cd.classList.remove("below");}
+  cd.style.left=left+"px";
+  cd.style.setProperty("--arrow-x",Math.min(Math.max(r.left+r.width/2-left,18),cw-18)+"px");
  }else{
-  cd.style.top="0";cd.style.bottom="0";
-  if(dockLeft){cd.style.left="0";cd.style.right="auto";cd.style.borderLeft="0";cd.style.borderRight="1px solid #E3E6EE";}
-  else{cd.style.left="auto";cd.style.right="0";cd.style.borderLeft="1px solid #E3E6EE";cd.style.borderRight="0";}
+  var ox=document.body.classList.contains("guide-active")?248:0;
+  cd.classList.remove("above","below");
+  cd.style.left=Math.max(12,ox+(vw-ox-cw)/2)+"px";
+  cd.style.top=Math.max(12,(vh-ch)/2)+"px";
  }
- requestAnimationFrame(updateTourSizeMode);
+ cd.style.visibility="visible";
 }
 document.addEventListener("keydown",function(e){
  if(!TOUR.on)return;
