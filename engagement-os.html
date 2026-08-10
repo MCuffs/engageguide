@@ -291,9 +291,15 @@ code.k{font-family:var(--mono);font-size:12px;background:var(--sub);border:1px s
 .tix-item{display:block;width:100%;text-align:left;background:none;border:none;border-radius:7px;padding:5px 8px;font-family:var(--sans);font-size:11.8px;line-height:1.45;color:#4A5060;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tix-item:hover{background:#F2F4F9;color:#1F2430;}
 .tix-item.on{background:var(--pri);color:#fff;font-weight:500;}
-body.guide-active{margin-left:248px;transition:margin-left .22s;}
+body.guide-active{margin-left:248px;}
+/* scrollIntoView(start)가 sticky 상단바(내비 56 + 편집바) 뒤로 대상을 숨기지 않게 합니다. */
+html{scroll-padding-top:128px;scroll-padding-bottom:24px;}
 body.guide-active .tcreate{left:248px;}
 body.guide-bottom #tourindex{bottom:calc(min(36vh,390px) + 12px);}
+/* 하단 가이드 카드가 차지하는 높이만큼 스크롤 여유를 만들어, 어떤 대상도 카드 뒤에 숨지 않게 합니다. */
+body.guide-bottom main{padding-bottom:calc(min(36vh,390px) + 80px);}
+body.guide-bottom .tcreate .tcbody{padding-bottom:calc(min(36vh,390px) + 80px);}
+body.guide-bottom .scrim>.drawer{max-height:calc(100vh - min(36vh,390px) - 28px)!important;height:auto!important;align-self:flex-start!important;margin-top:12px;}
 @media(max-width:1100px){#tourindex{display:none!important;}body.guide-active{margin-left:0;}}
 #spot{position:fixed;z-index:900;border-radius:12px;pointer-events:none;
  box-shadow:0 0 0 9999px rgba(11,16,28,.52),0 0 0 3px #6D7CFF,0 10px 40px rgba(31,51,202,.28);
@@ -2500,11 +2506,6 @@ function rectOf(st){
    else maxRight=Math.min(maxRight,window.innerWidth-guideWidth-10);
   }
  }
- var rail=document.querySelector(".rail");
- if(rail){
-  var rr=rail.getBoundingClientRect();
-  if(rr.width>0&&r.left<rr.left&&r.right>rr.left)maxRight=Math.min(maxRight,rr.left-10);
- }
  var left=Math.max(r.left,minLeft),right=Math.min(r.right,maxRight);
  var top=Math.max(r.top,minTop),bottom=Math.min(r.bottom,maxBottom);
  if(right-left<24||bottom-top<18)return null;
@@ -2797,7 +2798,7 @@ function paintStep(st){
  else{sp.style.opacity=0;sp.style.top="50%";sp.style.left="50%";sp.style.width="0px";sp.style.height="0px";}
  var pct=Math.round((TOUR.i+1)/TOUR.list.length*100),phase=tourPhaseMeta(),beginner=tourBeginnerMeta(st),isFloating=cd.classList.contains("floating");
  var phaseLabels=TOUR.key==="config"?["구조 이해","항목·템플릿","채널 연동","전략·측정"]:
-  (TOUR.key==="experiment"?["선행 자산","실험 설계","제출·이력","리포트"]:(["webhook","push","client"].indexOf(TOUR.key)>=0?["시나리오","채널 설정","운영 작업","검토·제출"]:["목적·채널","채널 구축","안전장치","작업·측정"]));
+  (TOUR.key==="experiment"?["선행 자산","실험 설계","실행 시작","측정·종료"]:(["webhook","push","client"].indexOf(TOUR.key)>=0?["시나리오","채널 설정","운영 작업","검토·제출"]:["목적·채널","채널 구축","안전장치","작업·측정"]));
  cd.innerHTML='<div class="tour-head" onpointerdown="startTourDrag(event)"><div class="tour-headline"><div class="tstep">STEP '+(TOUR.i+1)+' / '+TOUR.list.length+'</div><span class="tour-drag-hint">⠿ 이동</span><div class="tour-mini-title">'+st.t+'</div><div class="tour-head-actions">'+
   (isFloating?'<button class="tour-tool" onclick="dockTourBottom()" aria-label="가이드를 하단에 고정">↧ 하단 고정</button>':'')+
   (dockBottom?'':'<button class="tour-tool" onclick="toggleTourDock()" aria-label="가이드 위치 바꾸기">⇄ 위치</button>')+
