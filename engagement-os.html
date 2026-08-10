@@ -62,13 +62,12 @@ button{font-family:var(--sans);}
 }
 
 /* ─── 셸 ─── */
-.shell{display:grid;grid-template-columns:260px minmax(0,1fr) 300px;min-height:calc(100vh - 56px);}
-@media (max-width:1180px){.shell{grid-template-columns:260px minmax(0,1fr);} .rail{grid-column:1/-1;position:static;}}
+.shell{display:grid;grid-template-columns:260px minmax(0,1fr);min-height:calc(100vh - 56px);}
+@media (max-width:1180px){.shell{grid-template-columns:260px minmax(0,1fr);}}
 @media (max-width:760px){.shell{grid-template-columns:minmax(0,1fr);} .side{display:none;}}
 .side{border-right:1px solid var(--line);padding:0 12px 20px;background:var(--panel);}
 body[data-sec="experiment"] .side,body[data-nav="feature"] .side{display:none;}
-body[data-sec="experiment"] .shell,body[data-nav="feature"] .shell{grid-template-columns:minmax(0,1fr) 300px;}
-@media (max-width:1180px){body[data-sec="experiment"] .shell,body[data-nav="feature"] .shell{grid-template-columns:minmax(0,1fr);}}
+body[data-sec="experiment"] .shell,body[data-nav="feature"] .shell{grid-template-columns:minmax(0,1fr);}
 .side h1{font-size:14px;font-weight:400;line-height:25px;color:var(--ink-2);margin:0;padding:14px 0 14px 12px;}
 .side button{display:flex;align-items:center;gap:10px;width:100%;height:40px;text-align:left;font-size:14px;color:var(--ink-2);background:none;border:none;border-radius:8px;padding:0 12px 0 8px;cursor:pointer;}
 .side button:hover{background:var(--sub);}
@@ -253,72 +252,6 @@ table.pt input,table.pt select{height:32px;font-size:13px;}
 .db{padding:0 24px 16px;flex:1;overflow-y:auto;}
 .df{display:flex;justify-content:flex-end;gap:10px;padding:14px 24px 18px;}
 
-/* 우측 단말 */
-.rail{border-left:1px solid var(--line);padding:16px 14px;background:var(--panel);position:sticky;top:56px;align-self:start;max-height:calc(100vh - 56px);overflow-y:auto;}
-.railh{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px;}
-.railh .dt{width:7px;height:7px;border-radius:50%;background:var(--green);}
-.appsw{display:flex;gap:5px;margin-bottom:10px;}
-.appsw button{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12.5px;font-weight:500;height:30px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:var(--ink-2);cursor:pointer;}
-.appsw button[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink);}
-.appsw button:focus-visible{outline:2px solid var(--pri);outline-offset:2px;}
-.phone{background:#0B0D12;border-radius:26px;padding:6px;}
-.screen{position:relative;background:#F2F4F8;border-radius:21px;height:412px;overflow:hidden;display:flex;flex-direction:column;}
-.statusbar{display:flex;justify-content:space-between;padding:6px 13px 2px;font-size:9.5px;color:#5C6474;font-weight:600;flex:none;}
-.lock{position:absolute;inset:0;background:linear-gradient(170deg,#1A2233,#2C3850 60%,#3A4866);display:flex;flex-direction:column;padding:10px;z-index:5;}
-.lock .clk{color:#fff;text-align:center;margin:20px 0 14px;}
-.lock .clk .h{font-size:36px;font-weight:300;line-height:1;}
-.lock .clk .d{font-size:10px;opacity:.72;margin-top:4px;}
-.notif{background:rgba(255,255,255,.95);border-radius:11px;padding:9px 10px;margin-bottom:7px;cursor:pointer;border:none;text-align:left;width:100%;font-family:var(--sans);display:block;box-sizing:border-box;}
-.notif:hover{background:#fff;}
-.notif:focus-visible{outline:2px solid #93A7FF;outline-offset:2px;}
-.notif .ap{display:flex;align-items:center;gap:5px;font-size:9px;color:#6C7383;font-weight:600;margin-bottom:2px;}
-.notif .ic{width:11px;height:11px;border-radius:3px;background:var(--pri);display:inline-block;}
-.notif .ti{display:block;font-size:11.5px;font-weight:700;color:#161A24;line-height:1.32;}
-.notif .bo{display:block;font-size:10.5px;color:#4C5364;line-height:1.4;margin-top:2px;}
-.lock .hx{margin-top:auto;text-align:center;font-size:9.5px;color:rgba(255,255,255,.55);padding-bottom:4px;}
-.appbar{background:#fff;padding:8px 12px;border-bottom:1px solid #E7EAF1;flex:none;}
-.appbar .nm{font-size:12.5px;font-weight:700;color:#161A24;}
-.appbar .sb{font-size:9.5px;color:#8A91A2;}
-.content{flex:1;overflow-y:auto;padding:10px;}
-.tabbar{display:flex;background:#fff;border-top:1px solid #E7EAF1;flex:none;}
-.tabbar button{flex:1;background:none;border:none;padding:6px 0 8px;font-size:9px;color:#969DAE;cursor:pointer;font-weight:600;}
-.tabbar button[aria-pressed="true"]{color:var(--pri);}
-.tabbar .ti{display:block;font-size:13px;margin-bottom:1px;}
-.bnr{border-radius:9px;padding:12px 11px;margin-bottom:9px;color:#fff;}
-.bnr .t{font-size:12.5px;font-weight:700;line-height:1.3;}
-.bnr .s{font-size:10px;opacity:.9;margin-top:2px;}
-.gc{background:#fff;border-radius:9px;padding:9px 10px;margin-bottom:7px;border:1px solid #EAEDF3;}
-.gc .t{font-size:11.5px;font-weight:600;color:#161A24;}
-.gc .s{font-size:10px;color:#7B8293;margin-top:2px;}
-.pr{font-size:11.5px;font-weight:700;color:#161A24;}
-.pr s{color:#A8AEBC;font-weight:400;font-size:10px;margin-right:4px;}
-.dsc{display:inline-block;background:#FFE8E3;color:#B03A16;font-size:9px;font-weight:700;border-radius:4px;padding:1px 5px;margin-left:4px;}
-.emx{text-align:center;color:#9FA5B4;font-size:10.5px;padding:26px 10px;line-height:1.7;}
-.mail{background:#fff;border-radius:9px;padding:9px 10px;margin-bottom:7px;border:1px solid #EAEDF3;border-left:3px solid var(--pri);}
-.mail .t{font-size:11.5px;font-weight:700;color:#161A24;}
-.mail .b{font-size:10px;color:#5F6677;margin-top:2px;line-height:1.45;}
-.mail .rw{font-size:9.5px;color:var(--pri);font-weight:700;margin-top:4px;}
-.mail .via{font-size:8.5px;color:#A8AEBC;font-family:var(--mono);margin-top:4px;}
-.ovl{position:absolute;inset:0;background:rgba(10,12,18,.5);display:flex;align-items:center;justify-content:center;z-index:6;padding:18px;}
-.pop{background:#fff;border-radius:13px;padding:15px 14px;width:100%;text-align:center;}
-.pop .t{font-size:13px;font-weight:700;color:#161A24;}
-.pop .b{font-size:10.5px;color:#535A6B;margin:5px 0 12px;line-height:1.5;}
-.pop button{width:100%;background:var(--pri);color:#fff;border:none;border-radius:8px;padding:8px;font-size:11.5px;font-weight:700;cursor:pointer;}
-.strip{position:absolute;top:28px;left:8px;right:8px;background:var(--pri);color:#fff;border-radius:9px;padding:8px 10px;z-index:6;}
-.strip .t{font-size:11px;font-weight:700;}
-.strip .b{font-size:9.5px;opacity:.9;}
-.strip button{position:absolute;top:5px;right:7px;background:none;border:none;color:rgba(255,255,255,.85);font-size:13px;cursor:pointer;line-height:1;padding:2px 3px;}
-.mets{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:10px;}
-.met{background:var(--sub);border:1px solid var(--line);border-radius:8px;padding:8px 9px;}
-.met .l{font-size:10px;color:var(--ink-3);}
-.met .v{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.25;color:var(--ink);}
-.met.on{border-color:var(--pri);background:var(--pri-soft);}
-.met.on .v{color:var(--pri);}
-.logbox{font-family:var(--mono);font-size:11px;line-height:1.7;max-height:120px;overflow-y:auto;background:var(--sub);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:9px;}
-.logbox div{color:var(--ink-2);}
-.logbox .t{color:var(--ink-4);}
-.logbox .ok{color:var(--green);} .logbox .no{color:var(--red);} .logbox .hi{color:var(--pri);}
-.logbox .em{color:var(--ink-3);font-style:italic;}
 .tip{border:1px solid var(--line);background:var(--pri-soft);border-radius:8px;padding:12px 15px;font-size:13px;margin-top:14px;line-height:1.6;color:var(--ink-2);}
 .tip b{color:var(--pri);}
 .tip.w{background:#FDF4E7;border-color:#F0DFC4;}
@@ -623,23 +556,13 @@ pre.code{background:#141B2E;color:#D8DEF0;border-radius:8px;padding:12px 14px;fo
 .mpn .b{font-size:10.5px;color:#4C5364;line-height:1.4;margin-top:2px;word-break:break-word;}
 
 /* ─── 실제 콘솔 모드: 교육 보조 UI는 투어에서만 노출 ─── */
-.rail{display:none;}
 .shell{grid-template-columns:260px minmax(0,1fr);}
 @media(max-width:760px){.shell{grid-template-columns:minmax(0,1fr)}.side{display:none}}
 body.view-task .shell{grid-template-columns:minmax(0,1fr);}
 body.view-task .side{display:none;}
 body.view-task main{padding:22px 24px 60px;}
-body.guide-active .rail{display:block;position:fixed;right:16px;top:72px;width:300px;max-height:calc(100vh - 88px);
- overflow:auto;z-index:850;border:1px solid var(--line);border-radius:12px;box-shadow:0 18px 48px rgba(22,28,54,.2);}
-/* Atlas 실험 가이드에서는 Engage 전용 테스트 단말을 노출하지 않습니다. */
-body.guide-active[data-sec="experiment"] .rail{display:none!important;}
-/* 작업 작성 투어에서는 가이드와 테스트 단말 사이에 폼 전용 공간을 확보합니다. */
 body.guide-active.guide-left .tcreate{left:min(416px,calc(100vw - 24px));}
-body.guide-active.guide-left .tcreate .tcbar{padding-right:330px;}
-body.guide-active.guide-left .tcreate .tcbody{grid-template-columns:minmax(0,1fr);padding-right:334px;}
-body.guide-active.guide-left .tcreate .stepper{display:none;}
 @media(max-width:1050px){
- body.guide-active .rail{display:none;}
  body.guide-active.guide-left .tcreate .tcbar{padding-right:18px;}
  body.guide-active.guide-left .tcreate .tcbody{padding-right:18px;}
 }
@@ -728,23 +651,6 @@ body.view-config .side h1{height:48px;margin:0;padding:0 12px;display:flex;align
 <div class="shell">
   <div class="side"><h1 id="sideTitle">운영 설정</h1><div id="sideNav"></div></div>
   <main id="main"></main>
-  <div class="rail">
-    <div class="railh"><span class="dt"></span>테스트 단말</div>
-    <div class="appsw">
-      <button id="app-game" aria-pressed="true" onclick="setApp('game')">🎮 게임</button>
-      <button id="app-shop" aria-pressed="false" onclick="setApp('shop')">🛍 커머스</button>
-    </div>
-    <div class="phone"><div class="screen" id="screen"></div></div>
-    <div style="display:flex;gap:5px;margin-top:8px">
-      <button class="btn btn-def" style="flex:1;height:28px;font-size:12px;padding:0" onclick="toggleLock()" id="lockBtn">잠금화면</button>
-      <button class="btn btn-def" style="flex:1;height:28px;font-size:12px;padding:0" onclick="clearPhone()">알림 지우기</button>
-    </div>
-    <div class="mets">
-      <div class="met" id="m0"><div class="l">실제 발송</div><div class="v" id="v1">0</div></div>
-      <div class="met" id="m1"><div class="l">클릭</div><div class="v" id="v3">0</div></div>
-    </div>
-    <div class="logbox" id="logbox"></div>
-  </div>
 </div>
 <div id="drawerHost"></div>
 <div id="wizHost"></div>
@@ -877,14 +783,8 @@ function hl(k){return HELP[k]?'<i class="hm" tabindex="0" role="button" data-h="
 })();
 
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];});}
-function log(m,c){var d=new Date(),p=n=>String(n).padStart(2,"0");
- S.log.unshift({t:p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()),m:m,c:c||""});
- if(S.log.length>40)S.log.pop();
- var el=document.getElementById("logbox");
- el.innerHTML=S.log.length?S.log.map(l=>'<div><span class="t">'+l.t+'</span> <span class="'+l.c+'">'+esc(l.m)+'</span></div>').join(""):'<div class="em">동작 기록</div>';}
-function mets(){document.getElementById("v1").textContent=S.funnel[1];document.getElementById("v3").textContent=S.funnel[3];
- document.getElementById("m0").classList.toggle("on",S.funnel[1]>0);document.getElementById("m1").classList.toggle("on",S.funnel[3]>0);
- var f=document.getElementById("fnLive");if(f)f.innerHTML=funnel(true);}
+function log(){}
+function mets(){var f=document.getElementById("fnLive");if(f)f.innerHTML=funnel(true);}
 function paintTop(){document.getElementById("topnav").innerHTML=TOPNAV.map(function(n){
  var cur=(n[0]==="engage"&&S.sec==="engage")||(n[0]==="config"&&S.sec==="config");
  var dd=NAVDD[n[0]];
@@ -918,14 +818,9 @@ function paintSide(){
 }
 function go(n){S.nav=n;paintSide();paintMain();}
 function setApp(a){S.app=a;S.tab="home";
- document.getElementById("app-game").setAttribute("aria-pressed",a==="game");
- document.getElementById("app-shop").setAttribute("aria-pressed",a==="shop");
  document.getElementById("projSel").value=a;document.getElementById("avat").textContent=APPS[a].av;
- paintMain();phone();}
-function toggleLock(){S.locked=!S.locked;S.inapp=null;phone();}
-function clearPhone(){S.notifs=[];S.inapp=null;phone();}
-function resetAll(){S.funnel=[0,0,0,0];S.sends=0;S.notifs=[];S.inapp=null;S.mail={game:[],shop:[]};S.log=[];
- document.getElementById("logbox").innerHTML='<div class="em">동작 기록</div>';mets();phone();}
+ paintMain();}
+function resetAll(){S.funnel=[0,0,0,0];S.sends=0;S.notifs=[];S.inapp=null;S.mail={game:[],shop:[]};S.log=[];mets();}
 
 function paintMain(){var h="";
  document.body.classList.toggle("view-task",S.sec==="engage"&&S.nav==="task");
@@ -1386,7 +1281,7 @@ function vTask(){
  var pv=kind[0]==="push"?'<div class="pv"><div class="pl">미리보기 이미지는 참고용입니다</div><div class="mph"><div class="mps">'+
   '<div class="mpn"><div class="ap">'+APPS[S.app].name+' · 지금</div><div class="t" id="pv-t">복귀 보상이 도착했어요</div>'+
   '<div class="b" id="pv-b">7일 출석 보상을 확인하세요</div></div></div></div></div>'
-  :'<div class="pv"><div class="pl">우측 테스트 단말에서 결과를 확인하세요</div></div>';
+  :'<div class="pv"><div class="pl">발송 결과는 아래 도달 퍼널에서 확인하세요</div></div>';
  return h+'<div class="tbl attached" style="padding:20px 22px"><div style="font-size:16px;font-weight:600;color:var(--ink);margin-bottom:14px">푸시 콘텐츠</div>'+
   '<label class="fl" style="margin-top:0">채널'+hl("t.chan")+'</label><select onchange="S.taskChan=JSON.parse(this.value);paintMain()">'+
   chans.map(c=>'<option value=\''+JSON.stringify(c)+'\''+(c[1]===kind[1]?" selected":"")+'>'+esc(c[1])+'</option>').join("")+'</select>'+
@@ -1729,41 +1624,7 @@ function vCfgData(){
  '<div class="tip">현재 프로젝트(<b>'+APPS[S.app].name+'</b>)는 '+(S.app==="game"?"IAP 게임":"이커머스")+' 유형에 해당합니다.</div></div>';}
 
 /* ── 폰 ── */
-function phone(){
- var A=APPS[S.app],c=S.cfg[S.app],sc=document.getElementById("screen");
- document.getElementById("lockBtn").textContent=S.locked?"앱 열기":"잠금화면";
- if(S.locked){sc.innerHTML='<div class="lock"><div class="clk"><div class="h">21:40</div><div class="d">8월 3일 일요일</div></div>'+
-  (S.notifs.length?S.notifs.map((n,i)=>'<button class="notif" onclick="clickNotif('+i+')">'+
-   '<span class="ap"><span class="ic"></span>'+APPS[n.app].name+' · 지금</span>'+
-   '<span class="ti">'+esc(n.t)+'</span><span class="bo">'+esc(n.b)+'</span></button>').join("")
-   :'<div style="text-align:center;color:rgba(255,255,255,.5);font-size:10.5px;padding:14px">알림이 없습니다</div>')+
-  '<div class="hx">'+(S.notifs.length?"알림을 눌러 클릭 전환을 확인하세요":"")+'</div></div>';return;}
- var d=parseInt(c.shop_discount,10)||0,body="";
- if(S.tab==="home"){body=(c.event_on==="on"?'<div class="bnr" style="background:linear-gradient(135deg,'+A.grad+')"><div class="t">'+esc(c.banner_title)+'</div><div class="s">'+esc(c.banner_sub)+'</div></div>':'')+
-  A.home.map(x=>'<div class="gc"><div class="t">'+x[0]+'</div><div class="s">'+x[1]+'</div></div>').join("");}
- else if(S.tab==="shop"){body=A.items.map(function(it){var p=it[1],dp=Math.round(p*(100-d)/100);
-  return '<div class="gc"><div class="t">'+it[0]+'</div><div class="s" style="margin-top:5px"><span class="pr">'+
-   (d>0?'<s>'+p.toLocaleString()+'원</s>':'')+dp.toLocaleString()+'원'+(d>0?'<span class="dsc">'+d+'%</span>':'')+'</span></div></div>';}).join("")+
-  (d>0?'<div style="text-align:center;font-size:9.5px;color:#8A91A2;margin-top:8px">설정 센터의 <b>shop_discount</b> 적용가</div>':'');}
- else{var ms=S.mail[S.app];body=ms.length?ms.map(m=>'<div class="mail"><div class="t">'+esc(m.t)+'</div><div class="b">'+esc(m.b)+'</div>'+
-  (m.rw?'<div class="rw">'+A.word+': '+esc(m.rw)+' · '+esc(m.dd)+'일 내 수령</div>':'')+
-  '<div class="via">via webhook · '+m.mid+'</div></div>').join(""):'<div class="emx">'+A.inbox+'이 비어 있습니다<br>Webhook 채널로 발송해 보세요</div>';}
- sc.innerHTML='<div class="statusbar"><span>21:40</span><span>5G ▮▮</span></div>'+
-  '<div class="appbar"><div class="nm">'+A.name+'</div><div class="sb">'+A.sub+'</div></div>'+
-  '<div class="content">'+body+'</div><div class="tabbar">'+
-  A.tabs.map(t=>'<button aria-pressed="'+(S.tab===t[0])+'" onclick="S.tab=\''+t[0]+'\';phone()"><span class="ti">'+t[2]+'</span>'+t[1]+'</button>').join("")+'</div>'+
-  (S.inapp?(S.inapp.type==="popup"
-   ?'<div class="ovl"><div class="pop"><div class="t">'+esc(S.inapp.t)+'</div><div class="b">'+esc(S.inapp.b)+'</div>'+
-    '<button onclick="S.inapp=null;S.funnel[3]++;mets();log(\'인앱 메시지 클릭 → 이벤트 리포트\',\'ok\');phone()">확인</button></div></div>'
-   :'<div class="strip"><div class="t">'+esc(S.inapp.t)+'</div><div class="b">'+esc(S.inapp.b)+'</div>'+
-    '<button onclick="S.inapp=null;phone()" aria-label="닫기">✕</button></div>'):'');
-}
-function clickNotif(i){var n=S.notifs[i];S.funnel[3]++;
- log("푸시 클릭 → 앱이 push_click 이벤트 리포트 (도달 퍼널 4단계)","ok");S.locked=false;
- if(n.mode==="page"){S.tab="shop";log("방식='지정 페이지 열기' → 지정 화면으로 이동");}
- else if(n.mode==="web"){S.tab="home";log("방식='웹페이지 열기' → 브라우저/웹뷰로 이동");}
- else{S.tab="home";log("방식='앱 열기' → 홈 화면만 열림. 유저가 직접 찾아가야 합니다");}
- S.notifs.splice(i,1);mets();phone();}
+function phone(){}
 
 /* ─── 가이드 투어 ─── */
 function openGuideHomeLegacy(k){
@@ -1948,7 +1809,7 @@ engage:[
   dev:"작업 저장과 실행은 별도 동작입니다. 상태 변경 기록을 확인하세요.",
   biz:"승인 중·진행 중·일시 중지·종료·거부 상태별 담당 행동을 사전에 정합니다.",check:"완료 기준: 승인자와 발송 담당자가 제출·실행의 차이를 확인했습니다."},
  {go:["engage","task"],seed:1,closeWizard:true,compose:true,sel:".comp",t:"23. 발송 후 퍼널·장애 진단",
-  d:"작성 후 발송하면 우측 단말에 즉시 반영됩니다. 도달 퍼널에서 단계별 수치를 확인합니다.",
+  d:"작성 후 발송하면 도달 퍼널에 단계별 수치가 집계됩니다.",
   dev:"클릭이 0이면 이벤트명 불일치 또는 <code>message_id</code> 속성 누락을 점검합니다.",
   biz:"전체의 5%에 먼저 발송해 이상 여부를 확인한 뒤 확대합니다. 퍼널 1→2 급감은 정책, 2→3은 토큰, 3→4는 문구 문제입니다."}
 ],
@@ -2627,7 +2488,7 @@ function rectOf(st){
   if(n.height>0&&n.top-r.bottom<40)r={top:r.top,left:Math.min(r.left,n.left),bottom:n.bottom,
    right:Math.max(r.right,n.right),width:Math.max(r.right,n.right)-Math.min(r.left,n.left),height:n.bottom-r.top};
  }
- /* 전체 폭 섹션은 가이드 레일과 테스트 단말을 제외한 실제 가시 영역만 강조합니다. */
+ /* 전체 폭 섹션은 가이드 카드를 제외한 실제 가시 영역만 강조합니다. */
  var minLeft=8,maxRight=window.innerWidth-8,minTop=8,maxBottom=window.innerHeight-8;
  var card=document.getElementById("tourcard");
  if(card&&card.style.display!=="none"){
