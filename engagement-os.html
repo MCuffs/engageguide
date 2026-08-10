@@ -349,6 +349,19 @@ code.k{font-family:var(--mono);font-size:12px;background:var(--sub);border:1px s
 .bell::after{content:"";position:absolute;top:-1px;right:-1px;width:5px;height:5px;border-radius:50%;background:var(--red);}
 /* ─── 가이드 투어 ─── */
 #tourblock{position:fixed;inset:0;z-index:899;background:transparent;}
+#tourindex{display:none;position:fixed;left:12px;top:68px;bottom:12px;width:224px;z-index:902;flex-direction:column;background:#fff;border:1px solid #DDE1EA;border-radius:12px;box-shadow:0 10px 32px rgba(15,23,42,.14);overflow:hidden;}
+.tix-head{flex:none;display:flex;justify-content:space-between;align-items:baseline;padding:13px 14px 11px;font-size:13px;font-weight:600;color:#1F2430;border-bottom:1px solid #ECEEF3;}
+.tix-head span{font-size:11px;font-weight:400;color:#8A8F9E;}
+.tix-body{flex:1;overflow-y:auto;padding:6px 8px 10px;}
+.tix-ph{font-size:10.5px;font-weight:600;letter-spacing:.06em;color:#9AA0AE;margin:12px 6px 4px;text-transform:uppercase;}
+.tix-ph:first-child{margin-top:4px;}
+.tix-item{display:block;width:100%;text-align:left;background:none;border:none;border-radius:7px;padding:5px 8px;font-family:var(--sans);font-size:11.8px;line-height:1.45;color:#4A5060;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tix-item:hover{background:#F2F4F9;color:#1F2430;}
+.tix-item.on{background:var(--pri);color:#fff;font-weight:500;}
+body.guide-active{margin-left:248px;transition:margin-left .22s;}
+body.guide-active .tcreate{left:248px;}
+body.guide-bottom #tourindex{bottom:calc(min(36vh,390px) + 12px);}
+@media(max-width:1100px){#tourindex{display:none!important;}body.guide-active{margin-left:0;}}
 #spot{position:fixed;z-index:900;border-radius:12px;pointer-events:none;
  box-shadow:0 0 0 9999px rgba(11,16,28,.52),0 0 0 3px #6D7CFF,0 10px 40px rgba(31,51,202,.28);
  transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1);}
@@ -926,6 +939,15 @@ function paintMain(){var h="";
 /* ── 채널 ── */
 var PROV=[["FCM","🔥","Firebase Cloud Messaging · Android"],["Aurora Mobile","🔷","极光推送 · 중국 Android"],["APNs","🍎","Apple Push Notification service · iOS"]];
 var CHTABS=[["webhook","Webhook 채널"],["push","메시지 푸시"],["client","클라이언트 채널"],["third","서드파티 플랫폼"]];
+var TOUR_DEMO_CHAN={engage:{tab:"webhook",row:{name:"ingame-mail-prod",url:"https://api.example.com/engage/webhook"}},
+ webhook:{tab:"webhook",row:{name:"ingame-mail-prod",url:"https://api.example.com/engage/webhook"}},
+ push:{tab:"push",row:{name:"android-push-prod",prov:"FCM"}},
+ client:{tab:"client",row:{name:"checkout-popup",sendId:"유저 속성 · #account_id"}}};
+function tourChanList(tab){
+ if(!tourGated("channel"))return S.channels[tab];
+ var d=TOUR_DEMO_CHAN[TOUR.key];
+ return (tourMade("channel")&&d&&d.tab===tab)?[d.row]:[];
+}
 function vChannel(){
  var cur=CHTABS.find(t=>t[0]===S.chTab);
  var h='<div class="phead"><h2>'+cur[1]+hl("chan."+S.chTab)+'</h2><div class="ptabs">'+
@@ -933,7 +955,7 @@ function vChannel(){
   '</div><div class="pact"><div class="srch">🔍<input placeholder="채널 이름 검색"></div>'+
   (S.chTab!=="third"?'<button class="btn btn-pri" id="btnCreate" onclick="openDrawer(\''+({webhook:"wh",push:"fcm",client:"cl"}[S.chTab])+'\')">＋ 채널 생성</button>':'')+'</div></div>';
  if(S.chTab==="push"){
-  h+=PROV.map(function(p,i){var list=S.channels.push.filter(c=>c.prov===p[0]);var op=S.accOpen[p[0]];
+  h+=PROV.map(function(p,i){var list=tourChanList("push").filter(c=>c.prov===p[0]);var op=S.accOpen[p[0]];
    return '<div class="acc"><div class="acch"><span class="tri'+(op?" open":"")+'" onclick="S.accOpen[\''+p[0]+'\']=!S.accOpen[\''+p[0]+'\'];paintMain()">▶</span>'+
     '<span class="nm">'+p[1]+' '+p[0]+' <span class="ct">('+list.length+')</span>'+hl("prov."+p[0])+'</span>'+
     '<span class="rt"><div class="srch" style="width:180px">🔍<input placeholder="검색하십시오"></div>'+
@@ -943,7 +965,7 @@ function vChannel(){
   h+='<div class="acc"><div class="acch"><span class="nm">위챗 구독 메시지 <span class="ct">(0)</span></span><span class="rt"><button class="btn btn-def" disabled>미지원 환경</button></span></div></div>'+
      '<div class="acc"><div class="acch"><span class="nm">틱톡 게임 카드 <span class="ct">(0)</span></span><span class="rt"><button class="btn btn-def" disabled>미지원 환경</button></span></div></div>'+
      '<div class="tip"><b>SMS는 제공되지 않습니다</b> — AE 채널은 Webhook · FCM · Aurora · APNs · 클라이언트 · 위챗 · 틱톡입니다. 문자를 보내려면 Webhook으로 자사 서버를 거쳐 SMS 사업자에 연결해야 합니다.</div>';
- }else{ h+=listTable(S.channels[S.chTab],S.chTab); }
+ }else{ h+=listTable(tourChanList(S.chTab),S.chTab); }
  return h;
 }
 function listTable(list,kind){
@@ -1131,12 +1153,13 @@ function vExpList(){
   '<div class="pact">'+
   '<div class="srch">⌕<input placeholder="실험 ID/이름 검색"></div><button class="btn btn-pri" id="expCreate" onclick="openExpModal(\'experiment\')">실험 생성</button></div></div>';
  if(S.expArchived)return h+'<div class="tbl"><table class="at"><thead><tr>'+["실험 ID","실험 이름","그룹","실험 타입","종료 조건","실험 변수","트래픽 레이어","분할 단위","작업"].map(x=>'<th>'+x+'</th>').join("")+'</tr></thead></table><div class="empty">실험이 없습니다</div></div>';
- h+='<div class="atlas-counters" id="expStatus">'+[["전체",1],["실행 중",0],["일시 중지됨",0],["실행 대기",0],["종료됨",0],["초안",1]].map(x=>'<div class="atlas-count"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join("")+'</div>'+
+ var hasExp=!tourGated("experiment")||tourMade("experiment");
+ h+='<div class="atlas-counters" id="expStatus">'+[["전체",hasExp?1:0],["실행 중",0],["일시 중지됨",0],["실행 대기",0],["종료됨",0],["초안",hasExp?1:0]].map(x=>'<div class="atlas-count"><span>'+x[0]+'</span><b>'+x[1]+'</b></div>').join("")+'</div>'+
   '<div class="tbl"><div class="tblscroll"><table class="at" style="min-width:1500px"><thead><tr>'+
   ["실험 ID","실험 이름","그룹","실험 타입","실험 상태","종료 조건","실험 가설","실험 변수","트래픽 레이어","분할 단위","생성자","마지막 수정자","작업"].map(x=>'<th>'+x+'</th>').join("")+
-  '</tr></thead><tbody><tr><td>0016</td><td><span class="lnk" id="expRow" onclick="S.expView=\'detail\';paintMain()">'+expName+'</span></td><td>기본 폴더</td><td>피처 실험</td>'+
+  '</tr></thead><tbody>'+(hasExp?'<tr><td>0016</td><td><span class="lnk" id="expRow" onclick="S.expView=\'detail\';paintMain()">'+expName+'</span></td><td>기본 폴더</td><td>피처 실험</td>'+
   '<td><span class="atlas-status"><i></i>초안</span></td><td>실험 기간: 30일</td><td>'+expHyp+'</td><td>'+expFeature+'</td><td><b>'+expLayer+'</b><div class="sub2">트래픽 배타 · 50% 점유</div></td>'+
-  '<td>#user_id</td><td>Jung Minsu<div class="sub2">2026-07-22 09:02:41</div></td><td>Jung Minsu<div class="sub2">2026-07-22 09:02:41</div></td><td><div class="ico-act"><span>✎</span><span>⋮</span></div></td></tr></tbody></table></div></div>';
+  '<td>#user_id</td><td>Jung Minsu<div class="sub2">2026-07-22 09:02:41</div></td><td>Jung Minsu<div class="sub2">2026-07-22 09:02:41</div></td><td><div class="ico-act"><span>✎</span><span>⋮</span></div></td></tr>':'<tr><td colspan="13"><div class="empty">실험이 없습니다. 선행 자산을 만든 뒤 「＋ 실험 생성」으로 시작합니다.</div></td></tr>')+'</tbody></table></div></div>';
  return h;
 }
 var EXP_STATUS={draft:["초안","var(--sub)","var(--ink-2)"],pending:["실행 대기","#FFF1E8","#D9722F"],
@@ -1236,11 +1259,12 @@ function vFeature(){
  var x=S.expScenario?currentExpScenario():null,a=x?expScenarioAssets(x):null;
  var key=a?a.features[0][0]:"hp";
  var data=a?a.features:[["hp","-","문자열","100","클라이언트","-"]];
+ if(tourGated("feature"))data=tourMade("feature")&&a?[a.features[0]]:[];
  var rows=data.map(function(r,i){
   return '<tr class="'+(i===0&&x?"scenario-asset-row":"")+'"><td><div class="asset-main">'+r[0]+(i===0&&x?'<span class="bdg">현재 시나리오</span>':'')+'</div></td><td>'+r[1]+'</td><td><span class="atlas-status"><i></i>'+(i===0?"초안":"활성화됨")+'</span></td><td>'+r[2]+'</td><td>'+r[3]+'</td><td>'+(i===0?"2개":"1개")+'</td><td>기본 폴더</td><td>'+r[4]+'</td><td>'+r[5]+'</td><td>Jung Minsu<div class="sub2">2026-08-03 18:2'+(7-i)+'</div></td><td><div class="ico-act"><span>✎</span><span>⋮</span></div></td></tr>';
  }).join("");
  return expHead("피처 관리","파라미터 이름/표시 이름 검색","피처 생성","openExpModal('feature')")+
-  '<div class="tbl"><div class="tblscroll"><table class="at" style="min-width:1250px"><thead><tr>'+["피처 파라미터 이름","표시 이름","상태","파라미터 타입","기본값","값 할당 규칙","그룹","접속 측","비고","생성자","작업"].map(x=>'<th>'+x+'</th>').join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
+  '<div class="tbl"><div class="tblscroll"><table class="at" style="min-width:1250px"><thead><tr>'+["피처 파라미터 이름","표시 이름","상태","파라미터 타입","기본값","값 할당 규칙","그룹","접속 측","비고","생성자","작업"].map(x=>'<th>'+x+'</th>').join("")+'</tr></thead>'+(rows?'<tbody>'+rows+'</tbody>':'')+'</table></div>'+(rows?'':'<div class="empty">피처가 없습니다<br><span class="sub2">오른쪽 위 「피처 생성」으로 첫 피처를 만듭니다.</span></div>')+'</div>'+
   '<section class="atlas-card guide-only" id="expSdk" style="margin-top:14px"><h3>코드 연동 — 여기까지 해야 실험이 돕니다</h3>'+
   '<div class="tip"><b>콘솔에서 피처를 만들어도, 앱·서버가 값을 읽는 코드가 없으면 실험은 동작하지 않습니다.</b> 피처를 만든 직후이자 실험을 만들기 전에 개발팀이 아래 두 가지를 구현하고 배포해야 합니다.</div>'+
   '<div class="two" style="margin-top:12px"><div><label class="fl" style="margin-top:0">① 값 조회 + 기본값 폴백</label><pre class="code">// 조회 키는 콘솔의 피처 파라미터 이름과 글자까지 동일\nvar v = AE.getFeature("'+key+'", DEFAULT);\napplyToUI(v);  // 실패·미배정이면 DEFAULT 유지</pre></div>'+
@@ -1250,16 +1274,18 @@ function vFeature(){
 function vLayer(){
  var x=S.expScenario?currentExpScenario():null,a=x?expScenarioAssets(x):null;
  var data=a?a.layers:[["test","#user_id","50%","1개","-"]];
+ if(tourGated("layer"))data=tourMade("layer")&&a?[a.layers[0]]:[];
  var rows=data.map(function(r,i){
   var pct=parseInt(r[2],10)||0;
   return '<tr class="'+(i===0&&x?"scenario-asset-row":"")+'"><td>00'+(20+i)+'</td><td><div class="asset-main">'+r[0]+(i===0&&x?'<span class="bdg">현재 시나리오</span>':'')+'</div></td><td>기본 폴더</td><td><div class="prog"><span style="width:'+pct+'%"></span></div><div class="sub2">사용함 '+r[2]+'</div></td><td>'+r[1]+'</td><td>'+r[3]+'</td><td>'+r[4]+'</td><td><div class="ico-act"><span>✎</span><span>⋮</span></div></td></tr>';
  }).join("");
  return expHead("트래픽 레이어","트래픽 레이어 이름/ID 검색","새로운 트래픽 레이어 작성","openExpModal('layer')")+
-  '<div class="tbl"><table class="at"><thead><tr>'+["트래픽 레이어 ID","트래픽 레이어 이름","그룹","트래픽 현황","분할 단위","연결된 실험 수","비고","작업"].map(x=>'<th>'+x+'</th>').join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  '<div class="tbl"><table class="at"><thead><tr>'+["트래픽 레이어 ID","트래픽 레이어 이름","그룹","트래픽 현황","분할 단위","연결된 실험 수","비고","작업"].map(x=>'<th>'+x+'</th>').join("")+'</tr></thead>'+(rows?'<tbody>'+rows+'</tbody>':'')+'</table>'+(rows?'':'<div class="empty">트래픽 레이어가 없습니다<br><span class="sub2">오른쪽 위 「새로운 트래픽 레이어 작성」으로 만듭니다.</span></div>')+'</div>';
 }
 function vMetric(){
  var x=S.expScenario?currentExpScenario():null,a=x?expScenarioAssets(x):null;
  var data=a?a.metrics:[];
+ if(tourGated("metric"))data=tourMade("metric")&&a?[a.metrics[0]]:[];
  var rows=data.map(function(r,i){
   return '<tr class="'+(i===0?"scenario-asset-row":"")+'"><td><div class="asset-main">'+r[0]+(i===0?'<span class="bdg">현재 시나리오</span>':'')+'</div></td><td>'+r[1]+'</td><td>이벤트 지표</td><td>'+r[3]+'</td><td>기본 폴더</td><td>'+r[4]+'</td><td>'+(i===0?"1개":"0개")+'</td><td>'+x.title+' 판정용</td><td>Jung Minsu</td><td><div class="ico-act"><span>✎</span><span>⋮</span></div></td></tr>';
  }).join("");
@@ -1299,9 +1325,12 @@ function vTask(){
  var h='<div class="phead"><h2>운영 작업</h2><div class="pact"><div class="srch">🔍<input placeholder="검색"></div>'+
   '<button class="btn btn-def">⊟ 내보내기 대상'+hl("t.export")+'</button>'+
   (chans.length?'<button class="btn btn-pri" id="btnTask" onclick="openTaskWizard()">＋ 작업 생성'+hl("t.new")+'</button>':'')+'</div></div>';
- var st=[["전체",9,"var(--ink-3)"],["진행 중",0,"var(--green)"],["일시 중지 중",0,"var(--purple)"],["종료됨",0,"var(--ink-4)"],["초안",9,"var(--ink-3)"]];
- var st2=[["승인 중",0,"var(--pri)"],["거부",0,"var(--red)"]];
- h+='<div class="quota">ⓘ 작업 수 현황: [전체 작업: <b>9/200</b>], [트리거 작업: <b>1/30</b>], [클라이언트 도달 작업: <b>0/30</b>]</div>'+
+ var showroom=!TOUR.on;
+ var taskRows=showroom?TASK_ROWS:(S.submittedTask?[["0038",S.submittedTask.name,S.submittedTask.chanName||"생성한 채널","수동","korea_csm@thinkingai.io","2026-08-06 15:00:00","-"]]:[]);
+ var taskSt=showroom?"초안":"승인 중";
+ var st=[["전체",taskRows.length,"var(--ink-3)"],["진행 중",0,"var(--green)"],["일시 중지 중",0,"var(--purple)"],["종료됨",0,"var(--ink-4)"],["초안",showroom?9:0,"var(--ink-3)"]];
+ var st2=[["승인 중",showroom?0:taskRows.length,"var(--pri)"],["거부",0,"var(--red)"]];
+ h+='<div class="quota">ⓘ 작업 수 현황: [전체 작업: <b>'+taskRows.length+'/200</b>], [트리거 작업: <b>'+(showroom?1:0)+'/30</b>], [클라이언트 도달 작업: <b>0/30</b>]</div>'+
  '<div class="counters"><div class="grp">'+st.map(c=>'<div class="cnt"><div class="l"><i style="background:'+c[2]+'"></i>'+c[0]+'</div><div class="v">'+c[1]+'</div></div>').join("")+'</div>'+
   '<div class="divx"></div><div class="grp">'+st2.map(c=>'<div class="cnt"><div class="l"><i style="background:'+c[2]+'"></i>'+c[0]+'</div><div class="v">'+c[1]+'</div></div>').join("")+'</div></div>';
  if(S.submittedTask)h+='<div class="tip" id="taskSubmitResult" style="margin:0 0 16px;border-color:#B9E4D3;background:#F1FBF7;color:#17684E">'+
@@ -1314,14 +1343,14 @@ function vTask(){
   '</div>';
  if(!S.composing) return h+'<div class="tbl attached"><div class="tblscroll"><table class="at task-real" style="min-width:1780px"><thead><tr>'+
   ['작업 이름','소속 캠페인','소속 그룹','작업 상태','도달 채널','푸시 타입','최근 푸시','실험 타입','A/B 테스트 상태','작업 주기','푸시 콘텐츠','생성자','마지막 수정 시간','작업'].map(c=>'<th>'+c+'</th>').join("")+
-  '</tr></thead><tbody>'+TASK_ROWS.map(function(r){
+  '</tr></thead><tbody>'+(taskRows.length?taskRows.map(function(r){
    return '<tr><td style="min-width:260px"><span class="lnk">'+esc(r[1])+'</span><div class="sub2">ID：'+r[0]+'</div></td>'+
-    '<td>-</td><td>기본 폴더</td><td><span class="dotst"><i></i>초안</span></td>'+
+    '<td>-</td><td>기본 폴더</td><td><span class="dotst"><i></i>'+taskSt+'</span></td>'+
     '<td style="min-width:200px">'+esc(r[2])+'<div><span class="bdg bdg-c">Webhook</span></div></td>'+
     '<td style="min-width:140px">'+esc(r[3])+'</td><td>-</td><td>-</td><td>비활성화</td><td style="min-width:220px">'+esc(r[6])+'</td>'+
     '<td>-</td><td>'+esc(r[4])+'</td><td style="min-width:170px">'+r[5]+'</td>'+
     '<td><div class="ico-act"><span title="편집">✎</span><span title="복사">▣</span><span title="더보기">⋮</span></div></td></tr>';
-  }).join("")+'</tbody></table></div></div>';
+  }).join(""):'<tr><td colspan="14"><div class="empty">작업이 없습니다. 채널을 만든 뒤 「＋ 작업 생성」으로 첫 작업을 만듭니다.</div></td></tr>')+'</tbody></table></div></div>';
  // 작성 화면
  var kind=S.taskChan&&chans.some(c=>c[1]===S.taskChan[1])?S.taskChan:chans[0];S.taskChan=kind;
  var body="";
@@ -1617,8 +1646,8 @@ function vCfgItem(){
   '</div></div>'+
   '<div class="depflow guide-only" id="cfgDeps"><div class="depnode"><b>1. 설정 항목</b>조회 키와 소유 범위</div><span class="deparrow">›</span><div class="depnode"><b>2. 파라미터</b>타입·기본값·필수 여부</div><span class="deparrow">›</span><div class="depnode"><b>3. 템플릿</b>실제 paramId 연결·활성화</div><span class="deparrow">›</span><div class="depnode"><b>4. 설정 채널</b>테스트/운영 환경 연결</div><span class="deparrow">›</span><div class="depnode"><b>5. 전략</b>대상 예측·승인·배포</div><span class="deparrow">›</span><div class="depnode"><b>6. 분석/롤백</b>효과 확인·즉시 복구</div></div>'+
   '<div class="folder-label"><span class="tree-badge" style="background:#36A98F">↗</span>기본 폴더</div>'+
-  '<div class="config-real-card" id="cfgExisting" onclick="S.cfgTab=\'detail\';S.cfgDetailTab=\'templates\';paintMain()"><div class="avatar">1</div>'+
-   '<div><div class="name">11</div><div class="id">s</div><div class="meta"><span class="type">설정 파일</span><br>가져오기 방식　<span class="link">🔗 연동</span><br>비고　-</div></div></div>';
+  (tourGated("cfgitem")&&!tourMade("cfgitem")?'<div class="empty" style="padding:36px 0">설정 항목이 없습니다<br><span class="sub2">오른쪽 위 「＋ 설정 항목 만들기」로 첫 항목을 만듭니다.</span></div>':'<div class="config-real-card" id="cfgExisting" onclick="S.cfgTab=\'detail\';S.cfgDetailTab=\'templates\';paintMain()"><div class="avatar">1</div>'+
+   '<div><div class="name">'+(TOUR.on&&TOUR.key==="config"?"상점 가격 정책":"11")+'</div><div class="id">'+(TOUR.on&&TOUR.key==="config"?"shop_pricing":"s")+'</div><div class="meta"><span class="type">설정 파일</span><br>가져오기 방식　<span class="link">🔗 연동</span><br>비고　-</div></div></div>');
  var tabs=[["basic","기본 정보"],["templates","템플릿 관리"],["params","파라미터 관리"],["use","사용 설정"],["analysis","분석 설정"]];
  var body="";
  if(S.cfgDetailTab==="basic")body='<div class="sec"><label class="fl" style="margin-top:0">설정 항목 이름</label><input value="11">'+
@@ -1874,7 +1903,7 @@ engage:[
   d:"화면에 노출되지 않고 유저 속성이 자동으로 실려 나가는 값입니다. 다중 서버 환경에서 서버 ID 전달 등에 사용합니다.",
   dev:"해당 값으로 라우팅·분기 처리를 구현합니다.",
   biz:"서버가 대상을 특정하는 데 추가 정보가 필요한지 개발팀에 확인 후 설정합니다. 불필요하면 비워둡니다."},
- {drawer:"wh",sel:".df",t:"12. 저장",
+ {drawer:"wh",sel:".df",creates:"channel",t:"12. 저장",
   d:"채널 검증이 ON이면 서명 규약이 함께 저장됩니다. 여기까지가 통로 구축입니다.",
   dev:"서버 배포 완료 후 저장하는 것이 안전합니다.",
   biz:"저장 직후 목록에서 「테스트 발송」 아이콘으로 도달을 먼저 확인하세요."},
@@ -1944,7 +1973,7 @@ config:[
   d:"ID는 SDK 조회 키입니다. 생성 후 변경하면 앱이 설정을 찾지 못할 수 있습니다.",
   dev:"SDK 조회 코드에 동일한 ID를 하드코딩합니다. 명명 규칙을 함께 정하세요.",
   biz:"<code>home_config</code>처럼 서비스 단위로 명명하고 개발 합의 없이 확정하지 않습니다.",check:"완료 기준: 코드와 콘솔의 ID가 글자 단위로 같습니다."},
- {drawer:"cfgitem",h:"c.biztype",t:"5. 비즈니스 타입과 그룹",
+ {drawer:"cfgitem",h:"c.biztype",creates:"cfgitem",t:"5. 비즈니스 타입과 그룹",
   d:"실제 데모 프로젝트에서는 <b>설정 파일</b>만 활성화되어 있고 독립 파라미터는 비활성입니다.",
   dev:"설정 파일은 JSON 파싱과 기본값 폴백을 구현합니다.",
   biz:"기본 폴더 또는 담당 조직의 그룹을 선택하고 비고에 목적을 기록합니다.",check:"완료 기준: 현재 프로젝트에서 선택 가능한 타입을 확인했습니다."},
@@ -2043,7 +2072,7 @@ TOURS.push=[
   d:"발송·성공·도달·클릭 단계별로 어디에서 이탈했는지 확인합니다.",
   dev:"푸시 클릭 이벤트와 토큰 갱신을 구현합니다.",
   biz:"클릭률과 재접속률을 함께 봅니다."},
- {drawer:"fcm",sel:".df",t:"8. 저장 후 테스트 발송",
+ {drawer:"fcm",sel:".df",creates:"channel",t:"8. 저장 후 테스트 발송",
   d:"채널을 저장한 뒤 QA 단말로 테스트 발송해 잠금화면 노출과 클릭 이동을 확인합니다.",
   dev:"토큰·딥링크·클릭 이벤트를 확인합니다.",
   biz:"문구가 잘리지 않는지 실제 단말에서 확인합니다.",check:"완료 기준: QA 단말에서 알림 수신과 클릭 이동이 모두 성공했습니다."}
@@ -2081,7 +2110,7 @@ TOURS.client=[
   d:"제목·본문·버튼 문구처럼 운영자가 작업마다 바꿀 값을 템플릿으로 만듭니다.",
   dev:"필드 이름 그대로 읽어 UI에 렌더링합니다.",
   biz:"결제 할인 팝업에는 제목·본문·CTA 세 필드를 사용합니다."},
- {drawer:"cl",sel:".df",t:"8. 저장 후 앱에서 확인",
+ {drawer:"cl",sel:".df",creates:"channel",t:"8. 저장 후 앱에서 확인",
   d:"채널 저장 후 실행 중인 QA 앱으로 테스트해 팝업 위치·닫기·클릭 이동을 확인합니다.",
   dev:"백그라운드·포그라운드 상태를 각각 테스트합니다.",
  biz:"결제 흐름을 방해하지 않는지 확인합니다.",check:"완료 기준: QA 앱에서 팝업 노출과 CTA 이동이 모두 성공했습니다."}
@@ -2141,7 +2170,7 @@ TOURS.client=TOURS.client.concat(scenarioTaskFlow("cl"));
 TOURS.experiment=[
  {go:["experiment","explist"],expView:"list",sel:"#topnav-experiment",clickDemo:1,t:"1. 상단 ‘실험’ 메뉴 클릭",d:"상단 메뉴의 <b>실험</b>을 누르면 실험 영역(제품명 <b>Atlas</b>)으로 이동합니다. 실험 목록·트래픽 레이어·지표 관리가 여기 있고, <b>피처 관리만 설정 센터</b>에 있습니다.<br>운영 모듈의 A/B 테스트와는 다릅니다 — 운영 A/B는 <b>보낼 메시지</b>를 비교하고, 여기 실험은 <b>앱이 읽는 설정값</b>을 비교합니다.",dev:"실험(Atlas) 기능이 프로젝트에 활성화돼 있는지, 담당자에게 접근 권한이 있는지 확인합니다.",biz:"실제 사용자에게 적용하기 전까지 이 가이드는 화면 조작만 재현합니다.",check:"완료 기준: 실험 하위 메뉴가 펼쳐집니다."},
  {go:["config","feature"],ddOpen:"config",sel:"#dd-feature",clickDemo:1,t:"2. ‘피처 관리’ 클릭",d:"피처는 실험군별로 다르게 전달할 <b>설정값</b>입니다. 피처 관리는 실험이 아니라 <b>설정 센터</b> 안에 있습니다. 상단 설정 센터 메뉴를 펼쳐 이동합니다.",dev:"앱·서버에서 조회할 키이므로 코드 담당자와 이름을 합의합니다.",biz:"문구, 색상, 가격, 기능 켜기처럼 바꿀 한 가지를 정합니다.",check:"완료 기준: 피처 관리 목록이 열렸습니다."},
- {go:["config","feature"],sel:".scenario-asset-row",t:"3. 기존 피처 검색·확인",d:"새로 만들기 전에 같은 목적의 피처가 있는지 검색합니다. 현재 시나리오 표시는 이번 가이드에서 만들 값을 보여주는 예시입니다.<br>목록의 <b>「값 할당 규칙」</b> 열은 이 피처에 값을 내려보내는 경로가 몇 개인지를 뜻합니다 — 실험이 걸려 있거나 설정 전략이 연결되면 숫자가 올라갑니다. <b>2개 이상이면 이미 다른 실험이 이 값을 쓰고 있다는 신호</b>이므로 그대로 재사용하면 충돌합니다.",dev:"이미 코드에 배포된 키가 있다면 중복 생성하지 않습니다.",biz:"같은 의미의 자산을 여러 이름으로 만들지 않습니다.",check:"완료 기준: 재사용 여부를 결정했습니다."},
+ {go:["config","feature"],sel:".srch",t:"3. 기존 피처 검색·확인",d:"새로 만들기 전에 같은 목적의 피처가 있는지 검색합니다. 지금은 목록이 비어 있으므로 새로 생성합니다.<br>목록의 <b>「값 할당 규칙」</b> 열은 이 피처에 값을 내려보내는 경로가 몇 개인지를 뜻합니다 — 실험이 걸려 있거나 설정 전략이 연결되면 숫자가 올라갑니다. <b>2개 이상이면 이미 다른 실험이 이 값을 쓰고 있다는 신호</b>이므로 그대로 재사용하면 충돌합니다.",dev:"이미 코드에 배포된 키가 있다면 중복 생성하지 않습니다.",biz:"같은 의미의 자산을 여러 이름으로 만들지 않습니다.",check:"완료 기준: 재사용 여부를 결정했습니다."},
  {go:["config","feature"],sel:"#expCreate",clickDemo:1,t:"4. ‘피처 생성’ 클릭",d:"목록 오른쪽 위의 피처 생성 버튼을 클릭하면 빈 생성 창이 열립니다.",dev:"생성 권한이 없으면 프로젝트 관리자에게 요청합니다.",biz:"이 단계는 창을 여는 동작이며 아직 저장되지 않습니다.",check:"완료 기준: 빈 피처 생성 창을 열 준비가 됐습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:0,expAction:"featureKey",sel:"#ex-feature-name",t:"5. 피처 파라미터 이름 입력",d:"코드가 값을 요청할 때 사용하는 정확한 키입니다. 영문 소문자·숫자·밑줄을 사용합니다.",dev:"SDK 조회 키와 글자 하나까지 같아야 합니다.",biz:"생성 뒤 변경 비용이 크므로 의미가 드러나는 이름을 씁니다.",check:"완료 기준: 중복되지 않는 키가 입력됐습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:1,expAction:"featureLabel",sel:"#ex-feature-label",t:"6. 표시 이름 입력",d:"표시 이름은 운영자가 목록에서 보는 이름입니다. 시스템 키보다 쉬운 업무 용어로 적습니다.",dev:"코드 동작에는 영향이 없지만 문서 용어와 맞춥니다.",biz:"이름만 보고 무엇을 바꾸는지 알 수 있어야 합니다.",check:"완료 기준: 쉬운 표시 이름이 입력됐습니다."},
@@ -2149,7 +2178,7 @@ TOURS.experiment=[
  {go:["config","feature"],expModal:"feature",expProgress:3,expAction:"featureDefault",sel:"#ex-feature-default",t:"8. 기본값 입력",d:"기본값은 네트워크 실패·미배정 때 사용하는 안전값입니다. 현재 서비스 값과 같게 둡니다.",dev:"클라이언트와 서버의 폴백 코드도 같은 값이어야 합니다.",biz:"실험 장애가 서비스 장애로 번지지 않는 값을 선택합니다.",check:"완료 기준: 실패 시 안전값이 입력됐습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:4,expAction:"featureAccess",sel:"#ex-feature-access",clickDemo:1,t:"9. 접속 측 선택",d:"클라이언트 또는 서버 중 실제로 피처를 조회하는 위치를 선택합니다. 양쪽에서 읽으면 둘 다 체크합니다.",dev:"선택하지 않은 측에서는 해당 피처를 조회하지 않도록 구현합니다.",biz:"개발 담당자에게 조회 위치를 확인합니다.",check:"완료 기준: 코드 위치와 접속 측이 같습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:5,expAction:"featureFinish",sel:"#ex-feature-finish",t:"10. 그룹과 비고 입력",d:"그룹은 자산을 정리하는 폴더이고 비고는 사용 목적입니다. 권한이나 그룹 배정 값은 아닙니다.",dev:"팀 자산 분류 규칙과 같은 폴더를 사용합니다.",biz:"다른 운영자도 재사용할 수 있게 목적을 남깁니다.",check:"완료 기준: 생성에 필요한 모든 값이 채워졌습니다."},
- {go:["config","feature"],expModal:"feature",expProgress:6,sel:"#expModalSave",clickDemo:1,t:"11. ‘생성’ 클릭",d:"입력값을 위에서부터 확인한 뒤 생성 버튼을 클릭합니다. 취소는 저장 없이 창을 닫습니다.",dev:"키·타입·기본값·접속 측을 마지막으로 확인합니다.",biz:"가이드에서는 클릭 모션만 보여 주며 실제 서비스에는 생성하지 않습니다.",check:"완료 기준: 피처 생성 동작을 이해했습니다."},
+ {go:["config","feature"],expModal:"feature",expProgress:6,sel:"#expModalSave",clickDemo:1,creates:"feature",t:"11. ‘생성’ 클릭",d:"입력값을 위에서부터 확인한 뒤 생성 버튼을 클릭합니다. 취소는 저장 없이 창을 닫습니다.",dev:"키·타입·기본값·접속 측을 마지막으로 확인합니다.",biz:"가이드에서는 클릭 모션만 보여 주며 실제 서비스에는 생성하지 않습니다.",check:"완료 기준: 피처 생성 동작을 이해했습니다."},
 
  {go:["config","feature"],sel:"#expSdk",t:"12. 코드 연동 — 값 조회 구현",d:"여기가 초보자가 가장 많이 빠뜨리는 지점입니다. <b>콘솔에서 피처를 만들어도 앱·서버가 값을 읽는 코드가 없으면 실험은 아무 일도 하지 않습니다.</b> 조회 키는 콘솔의 피처 파라미터 이름과 글자까지 같아야 하고, 조회 실패 시 기본값으로 폴백해야 합니다.",dev:"조회 코드와 폴백을 구현하고, 값을 노출한 시점에 노출 이벤트를 1회 리포트합니다.",biz:"실험 일정은 콘솔 설정이 아니라 <b>이 코드가 배포되는 날</b>을 기준으로 잡습니다.",check:"완료 기준: 조회 코드와 기본값 폴백이 구현됐습니다."},
  {go:["config","feature"],sel:"#expSdk",t:"13. 코드 배포와 구버전 대기",d:"코드를 배포해도 구버전 앱을 쓰는 사용자에게는 값이 반영되지 않습니다. 구버전 비중이 충분히 줄어든 뒤 실험을 시작해야 결과가 희석되지 않습니다.",dev:"버전별 사용 비중을 확인하고, 강제 업데이트가 필요한지 판단합니다.",biz:"이 단계를 건너뛰면 실험은 ‘실행 중’인데 두 군의 지표가 똑같이 나옵니다. 원인 파악에 가장 오래 걸리는 실패입니다.",check:"완료 기준: 조회 코드가 배포됐고 반영 가능한 버전 비중을 확인했습니다."},
@@ -2162,7 +2191,7 @@ TOURS.experiment=[
  {go:["experiment","layer"],expModal:"layer",expProgress:2,expAction:"layerMode",sel:"#ex-layer-mode",clickDemo:1,t:"17. 분할 모드 선택",d:"원격 분할은 AE가 서버에서 그룹을 계산합니다. 실제 화면에서 로컬 분할은 사용할 수 없는 상태이므로 원격을 선택합니다.",dev:"SDK 지원 방식과 네트워크 실패 시 폴백을 확인합니다.",biz:"특별한 로컬 요건이 없다면 원격 분할을 사용합니다.",check:"완료 기준: 원격 분할이 선택됐습니다."},
  {go:["experiment","layer"],expModal:"layer",expProgress:3,expAction:"layerUnit",sel:"#ex-layer-unit",clickDemo:1,t:"18. 분할 단위 선택",d:"분할 단위는 사용자를 항상 같은 군에 고정하는 식별자입니다. 로그인 중심은 #account_id, 기기 중심 게임은 #user_id를 주로 씁니다.",dev:"실험 기간 동안 바뀌지 않고 모든 조회 경로에서 동일해야 합니다.",biz:"재접속해도 같은 그룹을 유지하는 기준을 고릅니다.",check:"완료 기준: 안정적인 식별자를 선택했습니다."},
  {go:["experiment","layer"],expModal:"layer",expProgress:4,expAction:"layerNote",sel:"#ex-layer-finish",t:"19. 비고 입력",d:"비고에는 이 레이어가 보호하는 화면·기능과 배타 이유를 적습니다.",dev:"연결될 실험들의 분할 단위가 같은지 확인합니다.",biz:"다른 담당자가 재사용 가능 여부를 판단할 수 있게 씁니다.",check:"완료 기준: 레이어 목적이 기록됐습니다."},
- {go:["experiment","layer"],expModal:"layer",expProgress:5,sel:"#expModalSave",clickDemo:1,t:"20. ‘저장’ 클릭",d:"이름·그룹·분할 모드·분할 단위·비고를 확인하고 저장합니다.",dev:"저장 뒤 레이어 ID를 실험 기록에 남깁니다.",biz:"가이드에서는 실제 저장 없이 클릭만 재현합니다.",check:"완료 기준: 레이어 저장 동작을 이해했습니다."},
+ {go:["experiment","layer"],expModal:"layer",expProgress:5,sel:"#expModalSave",clickDemo:1,creates:"layer",t:"20. ‘저장’ 클릭",d:"이름·그룹·분할 모드·분할 단위·비고를 확인하고 저장합니다.",dev:"저장 뒤 레이어 ID를 실험 기록에 남깁니다.",biz:"가이드에서는 실제 저장 없이 클릭만 재현합니다.",check:"완료 기준: 레이어 저장 동작을 이해했습니다."},
 
  {go:["experiment","metric"],ddOpen:"experiment",sel:"#dd-metric",clickDemo:1,t:"21. ‘지표 관리’ 클릭",d:"지표는 실험 결과를 판단하는 계산식입니다. 상단 <b>실험</b> 메뉴를 펼쳐 지표 관리로 이동합니다.",dev:"원본 이벤트가 정상 수집되는지 먼저 확인합니다.",biz:"핵심 지표 한 개부터 명확히 정합니다.",check:"완료 기준: 지표 관리 목록이 열렸습니다."},
  {go:["experiment","metric"],sel:"#expCreate",clickDemo:1,t:"22. ‘지표 생성’ 클릭",d:"오른쪽 위 지표 생성 버튼을 눌러 빈 생성 창을 엽니다.",dev:"동일 계산식의 기존 지표가 없는지 검색합니다.",biz:"공통 지표는 재사용해 결과 정의를 통일합니다.",check:"완료 기준: 빈 지표 생성 창을 열 준비가 됐습니다."},
@@ -2173,7 +2202,7 @@ TOURS.experiment=[
  {go:["experiment","metric"],expModal:"metric",expProgress:4,expAction:"metricCalc",sel:"#ex-metric-calc",clickDemo:1,t:"27. 계산 정의 선택",d:"어떤 이벤트를 어떤 집계 방식으로 계산할지 정합니다. 화면의 <code>A100</code>은 선택한 이벤트에 AE가 붙인 <b>계산식 슬롯 번호</b>이며, A는 첫 번째 계산식, 100은 집계 방식 코드입니다. 직접 입력하는 값이 아니라 이벤트를 고르면 자동으로 붙습니다.",dev:"집계 기간·사용자 식별자·중복 제거 방식을 재현할 수 있어야 합니다.",biz:"분자와 분모를 문장으로 설명할 수 있어야 합니다.",check:"완료 기준: 계산식을 설명할 수 있습니다."},
  {go:["experiment","metric"],expModal:"metric",expProgress:5,expAction:"metricDirection",sel:"#ex-metric-direction",clickDemo:1,t:"28. 지표 방향 선택",d:"정방향은 커질수록 좋고 역방향은 작아질수록 좋습니다. 전환율은 정방향, 오류율은 역방향입니다.",dev:"리포트의 상승·하락 해석과 맞는지 확인합니다.",biz:"좋은 변화의 방향을 미리 고정합니다.",check:"완료 기준: 성공 방향이 정해졌습니다."},
  {go:["experiment","metric"],expModal:"metric",expProgress:6,expAction:"metricNote",sel:"#ex-metric-finish",t:"29. 지표 설명 입력",d:"이 숫자로 어떤 결정을 할지 한 문장으로 적습니다.",dev:"계산식과 방향을 데이터 담당자와 검토합니다.",biz:"결과를 보는 사람이 추가 질문 없이 이해할 수 있게 씁니다.",check:"완료 기준: 판단 목적이 기록됐습니다."},
- {go:["experiment","metric"],expModal:"metric",expProgress:7,sel:"#expModalSave",clickDemo:1,t:"30. ‘생성’ 클릭",d:"이름·표시 이름·폴더·타입·계산·방향·설명을 확인하고 생성합니다.",dev:"생성 뒤 지표 ID와 계산 버전을 기록합니다.",biz:"가이드에서는 실제 생성 없이 클릭을 재현합니다.",check:"완료 기준: 지표 생성 동작을 이해했습니다."},
+ {go:["experiment","metric"],expModal:"metric",expProgress:7,sel:"#expModalSave",clickDemo:1,creates:"metric",t:"30. ‘생성’ 클릭",d:"이름·표시 이름·폴더·타입·계산·방향·설명을 확인하고 생성합니다.",dev:"생성 뒤 지표 ID와 계산 버전을 기록합니다.",biz:"가이드에서는 실제 생성 없이 클릭을 재현합니다.",check:"완료 기준: 지표 생성 동작을 이해했습니다."},
 
  {go:["experiment","explist"],expView:"list",ddOpen:"experiment",sel:"#dd-explist",clickDemo:1,t:"31. ‘실험 목록’ 클릭",d:"선행 자산을 준비했으므로 상단 <b>실험</b> 메뉴에서 실험 목록으로 이동합니다.",dev:"피처·레이어·지표 ID를 준비합니다.",biz:"이제 가설과 대상, 그룹을 하나의 실험으로 묶습니다.",check:"완료 기준: 실험 목록이 열렸습니다."},
  {go:["experiment","explist"],expView:"list",sel:"#expStatus",t:"32. 상태 필터 이해",d:"전체, 실행 중, 일시 중지, 실행 대기, 종료, 초안 필터로 실험 상태를 구분합니다. 저장만 한 실험은 초안입니다.",dev:"상태에 따라 피처 배정이 실제 노출되는지 구분합니다.",biz:"초안 저장과 사용자 적용은 같은 동작이 아닙니다.",check:"완료 기준: 상태별 의미를 설명할 수 있습니다."},
@@ -2182,7 +2211,7 @@ TOURS.experiment=[
  {go:["experiment","explist"],expView:"list",expModal:"experiment",expProgress:1,expAction:"expGroup",sel:"#ex-exp-group",clickDemo:1,t:"35. 실험 그룹 선택",d:"실험을 정리할 자산 폴더입니다. 사용자 그룹이 아닙니다.",dev:"프로젝트 권한·폴더 규칙을 확인합니다.",biz:"처음에는 기본 폴더를 선택합니다.",check:"완료 기준: 관리 폴더가 선택됐습니다."},
  {go:["experiment","explist"],expView:"list",expModal:"experiment",expProgress:2,expAction:"expType",sel:"#ex-exp-type",clickDemo:1,t:"36. 실험 타입 선택",d:"AE가 피처 값을 분기하면 피처 실험, 외부 시스템이 이미 분기했다면 외부 실험을 선택합니다.",dev:"이번 흐름은 AE 피처 조회를 사용하므로 피처 실험입니다.",biz:"그룹 배정 주체를 기준으로 선택합니다.",check:"완료 기준: 실험 타입이 구현 방식과 같습니다."},
  {go:["experiment","explist"],expView:"list",expModal:"experiment",expProgress:3,expAction:"hypothesis",sel:"#ex-hypothesis",t:"37. 실험 가설 입력",d:"무엇을 바꾸면 → 어떤 이유로 → 어떤 지표가 어느 방향으로 변한다를 한 문장으로 적습니다.",dev:"변경점이 피처 값으로 구현 가능한지 확인합니다.",biz:"결과를 보기 전에 성공 기준을 합의합니다.",check:"완료 기준: 변경점·이유·지표 방향이 포함됐습니다."},
- {go:["experiment","explist"],expView:"list",expModal:"experiment",expProgress:4,sel:"#expModalSave",clickDemo:1,t:"38. ‘확인’ 클릭",d:"기본 정보를 검토하고 확인을 누르면 실험 초안이 만들어집니다. 취소는 저장 없이 닫습니다.",dev:"생성된 실험 ID를 기록합니다.",biz:"가이드에서는 실제 환경에 초안을 만들지 않습니다.",check:"완료 기준: 실험 생성 동작을 이해했습니다."},
+ {go:["experiment","explist"],expView:"list",expModal:"experiment",expProgress:4,sel:"#expModalSave",clickDemo:1,creates:"experiment",t:"38. ‘확인’ 클릭",d:"기본 정보를 검토하고 확인을 누르면 실험 초안이 만들어집니다. 취소는 저장 없이 닫습니다.",dev:"생성된 실험 ID를 기록합니다.",biz:"가이드에서는 실제 환경에 초안을 만들지 않습니다.",check:"완료 기준: 실험 생성 동작을 이해했습니다."},
  {go:["experiment","explist"],expView:"list",sel:"#expRow",clickDemo:1,t:"39. 생성된 실험 이름 클릭",d:"목록의 실험 이름을 클릭해 상세 화면으로 이동합니다.",dev:"원하는 실험 ID인지 확인한 뒤 엽니다.",biz:"비슷한 이름이 많으면 ID도 함께 확인합니다.",check:"완료 기준: 상세 화면으로 들어갈 준비가 됐습니다."},
  {go:["experiment","explist"],expView:"detail",sel:"#expBasic",t:"40. 기본 정보 확인",d:"이름·그룹·타입·가설·종료 조건·기간을 확인합니다. 잘못된 가설은 뒤의 설정이 맞아도 결과 해석을 흐립니다.",dev:"실험 ID와 피처 버전을 결과 기록에 남깁니다.",biz:"의사결정 질문과 가설이 같은지 확인합니다.",check:"완료 기준: 기본 정보에 오타가 없습니다."},
  {go:["experiment","explist"],expView:"detail",sel:"#expSettings",t:"41. 실험 설정 요약 확인",d:"레이어, 분할 단위, 오디언스, 실험 트래픽, 피처, 그룹 값을 한 번에 보는 영역입니다.",dev:"모든 그룹 값이 같은 타입인지 확인합니다.",biz:"대조군과 실험군이 비교 가능한 조건인지 봅니다.",check:"완료 기준: 연결할 요소의 위치를 찾았습니다."},
@@ -2245,6 +2274,13 @@ TOURS.experiment=[
   st.phi = PH.indexOf(st.ph);
  });
 })();
+/* 투어 중에는 '생성/저장' 단계를 지나기 전까지 해당 자산이 목록에 없습니다.
+   자유 탐색(투어 밖)은 기존 예시 데이터를 그대로 보여줍니다. */
+function tourMade(kind){
+ if(!TOUR.on||!TOUR.created||TOUR.created[kind]==null)return true;
+ return TOUR.i>TOUR.created[kind];
+}
+function tourGated(kind){return TOUR.on&&TOUR.created&&TOUR.created[kind]!=null;}
 var TOUR={on:false,list:null,key:null,i:0,motionTimers:[],manualDock:null,drag:null,resize:null,frame:0,floatPos:null,floatSize:null};
 function clearTourMotion(){
  (TOUR.motionTimers||[]).forEach(function(t){clearTimeout(t);});
@@ -2434,9 +2470,10 @@ document.addEventListener("click",function(e){
 function startTour(k){
  document.getElementById("tourMenu").classList.add("hidden");
  document.body.classList.add("guide-active");
- TOUR.on=true;TOUR.key=k;TOUR.list=TOURS[k];TOUR.i=0;TOUR.manualDock=null;TOUR.drag=null;TOUR.resize=null;TOUR.floatPos=null;TOUR.floatSize=null;
+ TOUR.on=true;TOUR.key=k;TOUR.list=TOURS[k];TOUR.i=0;
+ TOUR.created={};TOUR.list.forEach(function(st,i){if(st.creates)TOUR.created[st.creates]=i;});TOUR.manualDock=null;TOUR.drag=null;TOUR.resize=null;TOUR.floatPos=null;TOUR.floatSize=null;
  if(!document.getElementById("spot")){
-  ["tourblock","spot"].forEach(function(id){var d=document.createElement("div");d.id=id;document.body.appendChild(d);});
+  ["tourblock","spot","tourindex"].forEach(function(id){var d=document.createElement("div");d.id=id;document.body.appendChild(d);});
   var c=document.createElement("div");c.id="tourcard";document.body.appendChild(c);
  }
  document.getElementById("tourcard").classList.remove("floating","dragging","resizing","guide-small");
@@ -2444,7 +2481,8 @@ function startTour(k){
  document.getElementById("tourcard").style.removeProperty("--tour-y");
  document.getElementById("tourcard").style.removeProperty("--tour-w");
  document.getElementById("tourcard").style.removeProperty("--tour-h");
- ["tourblock","spot","tourcard"].forEach(function(id){document.getElementById(id).style.display=id==="tourcard"?"flex":"block";});
+ ["tourblock","spot","tourcard","tourindex"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display=(id==="tourcard"||id==="tourindex")?"flex":"block";});
+ buildTourIndex();
  showStep();
 }
 function ensureScenarioChannel(kind){
@@ -2456,7 +2494,24 @@ function ensureScenarioChannel(kind){
   S.channels.webhook.unshift({name:"ingame-mail-prod",url:"https://api.example.com/engage/webhook",sendId:"유저 속성 · #account_id"});
 }
 function endTour(){clearTourMotion();TOUR.on=false;document.body.classList.remove("guide-active","guide-left","guide-right","guide-bottom");closeDrawer();
- ["tourblock","spot","tourcard"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none";});}
+ ["tourblock","spot","tourcard","tourindex"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none";});paintMain();}
+function buildTourIndex(){
+ var el=document.getElementById("tourindex");if(!el)return;
+ var save=TOUR.i,last=null;
+ var h='<div class="tix-head">플로우 인덱스<span>'+TOUR.list.length+'단계</span></div><div class="tix-body">';
+ TOUR.list.forEach(function(st,i){
+  TOUR.i=i;var ph=tourPhaseMeta().n;
+  if(ph!==last){h+='<div class="tix-ph">'+ph+'</div>';last=ph;}
+  h+='<button class="tix-item" id="tix-'+i+'" onclick="tourJump('+i+')">'+st.t.replace(/</g,"&lt;")+'</button>';
+ });
+ TOUR.i=save;el.innerHTML=h+'</div>';
+}
+function tourJump(i){if(!TOUR.on)return;TOUR.i=i;showStep();}
+function updateTourIndex(){
+ var cur=document.querySelector(".tix-item.on");if(cur)cur.classList.remove("on");
+ var e=document.getElementById("tix-"+TOUR.i);
+ if(e){e.classList.add("on");e.scrollIntoView({block:"nearest"});}
+}
 function tourNext(){
  if(TOUR.i<TOUR.list.length-1){TOUR.i++;showStep();}
  else if(TOUR.list[TOUR.i].submitDemo){wizSubmit();endTour();}
@@ -2623,6 +2678,7 @@ function showStep(){
  if(st.drawer)openDrawer(st.drawer);
  if(st.expModal)openExpModal(st.expModal,st);
  prepareTourDemo(st);
+ updateTourIndex();
  setTimeout(function(){paintStep(st);animateTourStep(st);},120);
 }
 function tourPhaseMeta(){
