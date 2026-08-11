@@ -298,6 +298,15 @@ code.k{font-family:var(--mono);font-size:12px;background:var(--sub);border:1px s
 .st-body b{font-size:14px;color:#1F2430;}
 .st-body span{font-size:12px;color:#79808E;line-height:1.45;}
 .st-count{margin-left:auto;flex:none;font-size:11.5px;font-weight:600;color:var(--pri);background:var(--pri-soft);border-radius:999px;padding:3px 9px;}
+.st-cats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px;}
+.st-cat{display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;background:#fff;border:1px solid #E3E6EC;border-radius:14px;padding:22px 20px 18px;cursor:pointer;font-family:var(--sans);transition:border-color .15s,box-shadow .15s,transform .15s;}
+.st-cat:hover{border-color:var(--pri);box-shadow:0 10px 28px rgba(60,80,255,.16);transform:translateY(-2px);}
+.st-cat-ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.st-cat b{font-size:16px;color:#1F2430;margin-top:4px;}
+.st-cat span{font-size:12.5px;color:#79808E;line-height:1.5;}
+.st-cat em{font-style:normal;font-size:12px;font-weight:600;color:var(--pri);margin-top:6px;}
+.st-back{background:none;border:none;font-size:12.5px;color:var(--pri);cursor:pointer;padding:0 0 6px;font-family:var(--sans);}
+@media(max-width:640px){.st-cats{grid-template-columns:1fr;}}
 .st-foot{margin-top:20px;padding-top:14px;border-top:1px solid #EEF0F4;font-size:12px;color:#9AA0AE;text-align:center;}
 @media(max-width:640px){.st-grid{grid-template-columns:1fr;}}
 .tix-head{flex:none;display:flex;justify-content:space-between;align-items:baseline;padding:13px 14px 11px;font-size:13px;font-weight:600;color:#1F2430;border-bottom:1px solid #ECEEF3;}
@@ -308,6 +317,8 @@ code.k{font-family:var(--mono);font-size:12px;background:var(--sub);border:1px s
 .tix-item{display:block;width:100%;text-align:left;background:none;border:none;border-radius:7px;padding:5px 8px;font-family:var(--sans);font-size:11.8px;line-height:1.45;color:#4A5060;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .tix-item:hover{background:#F2F4F9;color:#1F2430;}
 .tix-item.on{background:var(--pri);color:#fff;font-weight:500;}
+.tix-item .tix-dev{font-style:normal;color:#D9722F;margin-right:4px;}
+.tix-item.on .tix-dev{color:#FFD9B3;}
 /* 화면 전환 페이드 — 위치가 변하지 않아 스포트라이트 측정과 충돌하지 않습니다 */
 @keyframes viewFade{from{opacity:0}to{opacity:1}}
 #main.view-anim{animation:viewFade .3s ease;}
@@ -344,6 +355,8 @@ body.guide-bottom .scrim>.drawer{max-height:calc(100vh - min(36vh,390px) - 28px)
 .cs-title{margin:0 0 7px;font-size:14.5px;font-weight:600;color:#1F2430;line-height:1.4;}
 .cs-role{font-size:12.8px;line-height:1.62;color:#434A58;background:#F6F7FB;border:1px solid #E7EAF2;border-radius:9px;padding:9px 11px;}
 .cs-role.none{background:none;border:none;color:#B9BEC9;padding:0 2px;}
+.cs-devwork{margin-top:8px;font-size:12.3px;line-height:1.58;color:#7A4A12;background:#FDF4E7;border:1px solid #F0DFC4;border-radius:9px;padding:9px 11px;}
+.cs-devwork b{display:block;margin-bottom:3px;font-size:11.5px;letter-spacing:.02em;color:#B26A0E;}
 .cs-btns{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-top:10px;}
 .cs-btns .btn{height:30px;padding:4px 14px;font-size:13px;}
 #tourcard .tour-head{padding:20px 22px 16px;background:#fff;border-bottom:1px solid #EEEFF4;flex:none;cursor:grab;user-select:none;touch-action:none;}
@@ -1746,18 +1759,33 @@ var START_TUTORIALS=[
   ["게임 — 전투 밸런스 실험","보스 HP를 낮추면 리텐션이 오를까","80단계","startExperimentScenario('game_balance')","◆","#EFEBFE","#7C5CE0"],
   ["커머스 — 결제 버튼 실험","CTA 색을 바꾸면 전환율이 오를까","80단계","startExperimentScenario('commerce_cta')","◈","#EAF2FF","#2F72D9"],
   ["구독 — 온보딩 실험","온보딩을 3단계로 줄이면 완주율이 오를까","80단계","startExperimentScenario('subscription_onboarding')","◎","#FFF1E8","#D9722F"]]]];
-function openStartHome(){
- var h='<div class="st-scrim"><section class="st-home" role="dialog" aria-label="튜토리얼 선택">'+
-  '<div class="st-head"><div><h2>무엇을 배워볼까요?</h2><p>실제 AE 콘솔을 그대로 재현한 환경에서, 한 단계씩 따라 하는 튜토리얼입니다.</p></div>'+
-  '<button class="st-x" onclick="closeStartHome()" aria-label="닫고 둘러보기">✕</button></div>';
- START_TUTORIALS.forEach(function(g){
-  h+='<div class="st-group">'+g[0]+'</div><div class="st-grid">'+
+var START_CATS=[
+ ["운영 모듈","푸시·팝업·Webhook으로 사용자에게 도달","✉","#EAF2FF","#2F72D9"],
+ ["설정 센터","앱 설정값을 배포 없이 지속 적용","⚙","#E9F5F2","#0E8477"],
+ ["실험","A/B 실험으로 변경안의 효과를 검증","◆","#EFEBFE","#7C5CE0"]];
+function openStartHome(cat){
+ var h='<div class="st-scrim"><section class="st-home" role="dialog" aria-label="튜토리얼 선택">';
+ if(cat==null){
+  h+='<div class="st-head"><div><h2>무엇을 배워볼까요?</h2><p>실제 AE 콘솔을 그대로 재현한 환경에서, 한 단계씩 따라 하는 튜토리얼입니다.</p></div>'+
+   '<button class="st-x" onclick="closeStartHome()" aria-label="닫고 둘러보기">✕</button></div>'+
+   '<div class="st-cats">'+START_CATS.map(function(c,i){
+    var cnt=START_TUTORIALS[i][1].length;
+    return '<button class="st-cat" onclick="openStartHome('+i+')">'+
+     '<span class="st-cat-ic" style="background:'+c[3]+';color:'+c[4]+'">'+c[2]+'</span>'+
+     '<b>'+c[0]+'</b><span>'+c[1]+'</span><em>튜토리얼 '+cnt+'개 ›</em></button>';}).join("")+'</div>'+
+   '<div class="st-foot">모듈을 선택하면 튜토리얼 목록이 나옵니다</div>';
+ }else{
+  var g=START_TUTORIALS[cat];
+  h+='<div class="st-head"><div><button class="st-back" onclick="openStartHome()">‹ 모듈 선택</button><h2>'+g[0]+'</h2></div>'+
+   '<button class="st-x" onclick="closeStartHome()" aria-label="닫고 둘러보기">✕</button></div>'+
+   '<div class="st-grid" style="margin-top:16px">'+
    g[1].map(function(c){return '<button class="st-card" onclick="closeStartHome();'+c[3]+'">'+
     '<span class="st-ic" style="background:'+c[5]+';color:'+c[6]+'">'+c[4]+'</span>'+
     '<span class="st-body"><b>'+c[0]+'</b><span>'+c[1]+'</span></span>'+
-    '<span class="st-count">'+c[2]+'</span></button>';}).join("")+'</div>';});
- h+='<div class="st-foot">카드를 클릭하면 바로 시작됩니다 · 진행 중 좌측 인덱스로 아무 단계나 이동할 수 있습니다</div></section></div>';
- document.getElementById("startHome").innerHTML=h;
+    '<span class="st-count">'+c[2]+'</span></button>';}).join("")+'</div>'+
+   '<div class="st-foot">카드를 클릭하면 바로 시작됩니다 · 진행 중 좌측 인덱스로 아무 단계나 이동할 수 있습니다</div>';
+ }
+ document.getElementById("startHome").innerHTML=h+'</section></div>';
 }
 function closeStartHome(){document.getElementById("startHome").innerHTML="";}
 function openGuideHome(k){
@@ -1822,7 +1850,7 @@ engage:[
   d:"작업 생성 시 드롭다운에 표시될 이름입니다. 80자 이내.",
   dev:"해당 없음.",
   biz:"용도가 드러나게 작성 — <code>ingame-mail</code>, <code>coupon-issue</code>. 환경별로 나눌 계획이면 <code>-prod</code> 접미사를 붙이세요."},
- {drawer:"wh",h:"f.url",t:"5. URL 입력 — 서버 개발 착수",
+ {devCode:1,drawer:"wh",h:"f.url",t:"5. URL 입력 — 서버 개발 착수",
   d:"AE가 POST를 보낼 <b>자사 서버 주소</b>입니다. 플랫폼이 발급하는 값이 아니라, 개발이 만들어야 생기는 값입니다.",
   dev:"엔드포인트 구현 4항목 — ① 서명 검증 ② <code>message_id</code> 멱등성(Redis/DB 유니크) ③ 큐 적재 후 5초 내 200 응답 ④ receipt 회신. 배포 후 전체 주소 회신.",
   biz:"서버팀에 개발 요청서를 전달합니다. 회신받을 것은 <b>엔드포인트 전체 주소</b>와 <b>완료 예정일</b> 두 가지입니다."},
@@ -1830,19 +1858,19 @@ engage:[
   d:"수신자를 식별할 유저 속성입니다. payload의 <code>push_id</code>에 이 값이 실립니다.",
   dev:"선택한 속성이 유저 속성으로 수집되고 있어야 합니다. Webhook은 <code>#account_id</code>, FCM은 토큰 속성.",
   biz:"드롭다운이 비어 있으면 SDK 리포트가 아직 안 된 상태입니다. 개발 완료 후 다시 여세요."},
- {drawer:"wh",h:"f.verify",t:"7. 채널 검증 · 시크릿 토큰",
+ {devCode:1,drawer:"wh",h:"f.verify",t:"7. 채널 검증 · 시크릿 토큰",
   d:"토큰으로 요청에 서명을 붙여 위조·변조를 차단합니다. 운영 채널은 항상 ON.",
   dev:"가이드 기준 HmacSHA1 서명 검증을 구현합니다. 일반은 시크릿 키+요청 본문, 고급은 타임스탬프+랜덤 문자열까지 검증합니다. 토큰은 환경변수/K8s Secret으로 주입합니다.",
   biz:"터미널에서 <code>openssl rand -hex 32</code> 실행 → 출력값을 이 칸에 입력 → 같은 값을 비밀번호 관리자로 서버팀에 전달."},
- {drawer:"wh",h:"f.crypt",t:"8. 암호화 방식 선택",
+ {devCode:1,drawer:"wh",h:"f.crypt",t:"8. 암호화 방식 선택",
   d:"<b>일반</b>은 키+본문으로 서명, <b>고급</b>은 키+타임스탬프+난수로 재사용 공격까지 차단합니다.",
   dev:"선택한 방식대로 검증 로직을 구현합니다. 불일치 시 모든 요청이 401로 거부됩니다.",
   biz:"기본값(일반)으로 시작하세요. 변경은 서버팀 합의 후에만."},
- {drawer:"wh",h:"f.funnel",t:"9. 도달 퍼널 ON",
+ {devCode:1,drawer:"wh",h:"f.funnel",t:"9. 도달 퍼널 ON",
   d:"① 예약 푸시 → ② 실제 푸시 → ③ 푸시 성공 → ④ 푸시 클릭 4단계로 집계합니다. OFF면 발송 건수만 남고 효과 측정이 불가능합니다.",
   dev:"<b>①~③은 자동 집계이므로 개발이 필요 없습니다.</b> ④ 클릭만 앱이 <code>mail_opened</code> 같은 이벤트를 리포트하고, 속성에 <code>message_id</code>를 포함합니다.",
   biz:"구현이 필요한 것은 <b>4단계 클릭 이벤트 하나</b>입니다. 이름을 개발팀과 확정하고 코드·채널 설정·트래킹 플랜 <b>세 곳을 동일</b>하게 맞춥니다."},
- {drawer:"wh",h:"f.tpl",t:"10. 컨텐츠 템플릿 정의",
+ {devCode:1,drawer:"wh",h:"f.tpl",t:"10. 컨텐츠 템플릿 정의",
   d:"운영자 입력 폼이자 서버가 받을 JSON 키입니다. 왼쪽 「필드」에 적은 이름이 payload 키가 됩니다.",
   dev:"정의된 필드명 그대로 파싱하도록 구현. 자동 매핑이 아니라 이름 약속입니다.",
   biz:"작업마다 바뀌는 값만 필드로 만드세요. 보상 코드는 기존 기획 데이터 코드 체계를 그대로 사용합니다."},
@@ -1916,7 +1944,7 @@ config:[
   d:"설정 항목은 한 비즈니스 시나리오의 최상위 컨테이너입니다.",
   dev:"앱에서 어떤 단위로 설정을 조회할지 검토합니다.",
   biz:"홈, 상점, 온보딩처럼 소유 조직과 배포 주기가 같은 값끼리 묶습니다.",check:"완료 기준: 항목 경계와 소유자가 정해졌습니다."},
- {drawer:"cfgitem",h:"c.item",t:"4. 이름과 설정 항목 ID",
+ {devCode:1,drawer:"cfgitem",h:"c.item",t:"4. 이름과 설정 항목 ID",
   d:"ID는 SDK 조회 키입니다. 생성 후 변경하면 앱이 설정을 찾지 못할 수 있습니다.",
   dev:"SDK 조회 코드에 동일한 ID를 하드코딩합니다. 명명 규칙을 함께 정하세요.",
   biz:"<code>home_config</code>처럼 서비스 단위로 명명하고 개발 합의 없이 확정하지 않습니다.",check:"완료 기준: 코드와 콘솔의 ID가 글자 단위로 같습니다."},
@@ -1924,7 +1952,7 @@ config:[
   d:"실제 데모 프로젝트에서는 <b>설정 파일</b>만 활성화되어 있고 독립 파라미터는 비활성입니다.",
   dev:"설정 파일은 JSON 파싱과 기본값 폴백을 구현합니다.",
   biz:"기본 폴더 또는 담당 조직의 그룹을 선택하고 비고에 목적을 기록합니다.",check:"완료 기준: 현재 프로젝트에서 선택 가능한 타입을 확인했습니다."},
- {go:["config","citem"],cfgView:"detail",cfgDetail:"params",h:"c.param",t:"6. 파라미터를 먼저 생성",
+ {devCode:1,go:["config","citem"],cfgView:"detail",cfgDetail:"params",h:"c.param",t:"6. 파라미터를 먼저 생성",
   d:"파라미터 이름은 클라이언트·서버의 변수명과 동일해야 합니다. 타입과 기본값도 함께 정의합니다.",
   dev:"같은 이름으로 값을 읽고, 값이 없을 때 기본값으로 폴백하는 처리를 구현합니다.",
   biz:"이름·타입·기본값·필수 여부·힌트 문구를 표로 합의합니다.",check:"완료 기준: 누락/타입 오류 때의 기본 동작이 문서화됐습니다."},
@@ -1936,7 +1964,7 @@ config:[
   d:"템플릿은 생성만 해서는 전략에서 사용할 수 없습니다. 필드 연결 검증을 통과한 뒤 상태 스위치를 활성화합니다.",
   dev:"활성화 전 필수 필드·기본값·의존 설정을 검증합니다.",
   biz:"테스트용 템플릿과 직전 롤백 버전을 모두 보관합니다.",check:"완료 기준: 템플릿 상태가 활성이고 전략 생성 가능 상태입니다."},
- {go:["config","citem"],cfgView:"detail",cfgDetail:"use",sel:"#cfgUseLink",t:"9. 사용 설정에서 연동",
+ {devCode:1,go:["config","citem"],cfgView:"detail",cfgDetail:"use",sel:"#cfgUseLink",t:"9. 사용 설정에서 연동",
   d:"가져오기 방식과 멤버·권한을 확인한 뒤 실제 배포 채널에 연결합니다.",
   dev:"운영/테스트 환경의 수신 경로 또는 SDK 연동을 준비합니다.",
   biz:"연동 버튼을 누르기 전에 테스트 환경 담당자를 지정합니다.",check:"완료 기준: 테스트 환경에서 설정 조회가 성공합니다."},
@@ -1944,7 +1972,7 @@ config:[
   d:"설정값을 어디로 내려보낼지 정합니다. 운영 터치 채널과 이름은 같지만 용도가 다릅니다.",
   dev:"Webhook이면 수신 엔드포인트, 클라이언트면 RemoteConfig SDK 연동이 필요합니다.",
   biz:"연동 문서를 먼저 확인하고 운영/테스트 URL 소유자를 기록합니다.",check:"완료 기준: 채널 종류와 구현 담당자가 확정됐습니다."},
- {go:["config","cchan"],sel:"#btnCfgCreate",t:"11. Webhook 채널 생성",
+ {devCode:1,go:["config","cchan"],sel:"#btnCfgCreate",t:"11. Webhook 채널 생성",
   d:"운영 환경과 테스트 환경 URL을 각각 등록합니다. 사용자 파라미터로 유저 속성을 함께 전달할 수 있습니다.",
   dev:"두 환경 모두 엔드포인트를 준비합니다. 설정 반영 실패 시 롤백 처리도 함께 구현하세요.",
   biz:"테스트 환경 URL을 반드시 채우고 채널 검증은 서버 구현 후 켭니다.",check:"완료 기준: 테스트 호출 200 응답과 동일 message ID 멱등성을 확인했습니다."},
@@ -2007,7 +2035,7 @@ TOURS.push=[
   d:"작업에서 알아볼 수 있도록 앱·플랫폼·환경이 드러나는 이름을 사용합니다.",
   dev:"해당 없음.",
   biz:"<code>android-push-prod</code>처럼 명명합니다."},
- {drawer:"fcm",h:"f.sendid",t:"5. 푸시 토큰 속성 선택",
+ {devCode:1,drawer:"fcm",h:"f.sendid",t:"5. 푸시 토큰 속성 선택",
   d:"AE가 어떤 디바이스 토큰으로 보낼지 결정하는 유저 속성입니다.",
   dev:"SDK가 <code>fcm_token</code>을 최신 값으로 리포트해야 합니다.",
   biz:"드롭다운이 비어 있으면 개발 완료 전입니다."},
@@ -2015,7 +2043,7 @@ TOURS.push=[
   d:"Firebase 서비스 계정 JSON을 업로드해 AE가 FCM 전송 권한을 사용하도록 합니다.",
   dev:"Firebase 콘솔에서 새 비공개 키를 만들고 안전하게 전달합니다.",
   biz:"운영 프로젝트의 키인지 파일명을 다시 확인합니다."},
- {drawer:"fcm",h:"f.funnel",t:"7. 도달 퍼널 활성화",
+ {devCode:1,drawer:"fcm",h:"f.funnel",t:"7. 도달 퍼널 활성화",
   d:"발송·성공·도달·클릭 단계별로 어디에서 이탈했는지 확인합니다.",
   dev:"푸시 클릭 이벤트와 토큰 갱신을 구현합니다.",
   biz:"클릭률과 재접속률을 함께 봅니다."},
@@ -2041,7 +2069,7 @@ TOURS.client=[
   d:"노출 위치와 표현 방식이 드러나는 이름을 사용합니다.",
   dev:"해당 없음.",
   biz:"<code>checkout-popup</code>처럼 명명합니다."},
- {drawer:"cl",h:"f.mtype",t:"4. 메시지 타입 입력",
+ {devCode:1,drawer:"cl",h:"f.mtype",t:"4. 메시지 타입 입력",
   d:"앱 코드가 이 값을 보고 팝업·배너 중 어떤 UI를 그릴지 결정합니다.",
   dev:"<code>popup</code> 분기와 미지원 타입 폴백을 구현합니다.",
   biz:"개발팀과 철자까지 동일하게 합의합니다."},
@@ -2049,7 +2077,7 @@ TOURS.client=[
   d:"어떤 로그인 사용자의 앱에 메시지를 노출할지 결정합니다.",
   dev:"<code>#account_id</code>가 로그인 상태와 동일하게 유지되는지 확인합니다.",
   biz:"비로그인 사용자까지 포함할지 결정합니다."},
- {drawer:"cl",h:"f.funnel",t:"6. 노출·클릭 퍼널 활성화",
+ {devCode:1,drawer:"cl",h:"f.funnel",t:"6. 노출·클릭 퍼널 활성화",
   d:"앱이 실제 노출과 클릭 이벤트를 리포트해야 Client 푸시의 성과를 측정할 수 있습니다.",
   dev:"노출·클릭 이벤트에 원본 receipt 속성을 포함합니다.",
   biz:"노출률·클릭률·결제 전환율을 성공 기준으로 사용합니다."},
@@ -2119,16 +2147,16 @@ TOURS.experiment=[
  {go:["config","feature"],ddOpen:"config",sel:"#dd-feature",clickDemo:1,t:"2. ‘피처 관리’ 클릭",d:"피처는 실험군별로 다르게 전달할 <b>설정값</b>입니다. 피처 관리는 실험이 아니라 <b>설정 센터</b> 안에 있습니다. 상단 설정 센터 메뉴를 펼쳐 이동합니다.",dev:"앱·서버에서 조회할 키이므로 코드 담당자와 이름을 합의합니다.",biz:"문구, 색상, 가격, 기능 켜기처럼 바꿀 한 가지를 정합니다.",check:"완료 기준: 피처 관리 목록이 열렸습니다."},
  {go:["config","feature"],sel:".srch",t:"3. 기존 피처 검색·확인",d:"새로 만들기 전에 같은 목적의 피처가 있는지 검색합니다. 지금은 목록이 비어 있으므로 새로 생성합니다.<br>목록의 <b>「값 할당 규칙」</b> 열은 이 피처에 값을 내려보내는 경로가 몇 개인지를 뜻합니다 — 실험이 걸려 있거나 설정 전략이 연결되면 숫자가 올라갑니다. <b>2개 이상이면 이미 다른 실험이 이 값을 쓰고 있다는 신호</b>이므로 그대로 재사용하면 충돌합니다.",dev:"이미 코드에 배포된 키가 있다면 중복 생성하지 않습니다.",biz:"같은 의미의 자산을 여러 이름으로 만들지 않습니다.",check:"완료 기준: 재사용 여부를 결정했습니다."},
  {go:["config","feature"],sel:"#expCreate",clickDemo:1,t:"4. ‘피처 생성’ 클릭",d:"목록 오른쪽 위의 피처 생성 버튼을 클릭하면 빈 생성 창이 열립니다.",dev:"생성 권한이 없으면 프로젝트 관리자에게 요청합니다.",biz:"이 단계는 창을 여는 동작이며 아직 저장되지 않습니다.",check:"완료 기준: 빈 피처 생성 창을 열 준비가 됐습니다."},
- {go:["config","feature"],expModal:"feature",expProgress:0,expAction:"featureKey",sel:"#ex-feature-name",t:"5. 피처 파라미터 이름 입력",d:"코드가 값을 요청할 때 사용하는 정확한 키입니다. 영문 소문자·숫자·밑줄을 사용합니다.",dev:"SDK 조회 키와 글자 하나까지 같아야 합니다.",biz:"생성 뒤 변경 비용이 크므로 의미가 드러나는 이름을 씁니다.",check:"완료 기준: 중복되지 않는 키가 입력됐습니다."},
+ {devCode:1,go:["config","feature"],expModal:"feature",expProgress:0,expAction:"featureKey",sel:"#ex-feature-name",t:"5. 피처 파라미터 이름 입력",d:"코드가 값을 요청할 때 사용하는 정확한 키입니다. 영문 소문자·숫자·밑줄을 사용합니다.",dev:"SDK 조회 키와 글자 하나까지 같아야 합니다.",biz:"생성 뒤 변경 비용이 크므로 의미가 드러나는 이름을 씁니다.",check:"완료 기준: 중복되지 않는 키가 입력됐습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:1,expAction:"featureLabel",sel:"#ex-feature-label",t:"6. 표시 이름 입력",d:"표시 이름은 운영자가 목록에서 보는 이름입니다. 시스템 키보다 쉬운 업무 용어로 적습니다.",dev:"코드 동작에는 영향이 없지만 문서 용어와 맞춥니다.",biz:"이름만 보고 무엇을 바꾸는지 알 수 있어야 합니다.",check:"완료 기준: 쉬운 표시 이름이 입력됐습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:2,expAction:"featureType",sel:"#ex-feature-type",clickDemo:1,t:"7. 파라미터 타입 선택",d:"문자열·숫자·정수·불리언 중 실제 값과 같은 타입을 고릅니다.",dev:"코드 변수 타입과 AE 타입이 다르면 조회 실패나 형변환 오류가 납니다.",biz:"문구·색상은 문자열, 개수는 정수, 비율은 숫자, 켜기/끄기는 불리언입니다.",check:"완료 기준: 실험 값과 타입이 일치합니다."},
- {go:["config","feature"],expModal:"feature",expProgress:3,expAction:"featureDefault",sel:"#ex-feature-default",t:"8. 기본값 입력",d:"기본값은 네트워크 실패·미배정 때 사용하는 안전값입니다. 현재 서비스 값과 같게 둡니다.",dev:"클라이언트와 서버의 폴백 코드도 같은 값이어야 합니다.",biz:"실험 장애가 서비스 장애로 번지지 않는 값을 선택합니다.",check:"완료 기준: 실패 시 안전값이 입력됐습니다."},
+ {devCode:1,go:["config","feature"],expModal:"feature",expProgress:3,expAction:"featureDefault",sel:"#ex-feature-default",t:"8. 기본값 입력",d:"기본값은 네트워크 실패·미배정 때 사용하는 안전값입니다. 현재 서비스 값과 같게 둡니다.",dev:"클라이언트와 서버의 폴백 코드도 같은 값이어야 합니다.",biz:"실험 장애가 서비스 장애로 번지지 않는 값을 선택합니다.",check:"완료 기준: 실패 시 안전값이 입력됐습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:4,expAction:"featureAccess",sel:"#ex-feature-access",clickDemo:1,t:"9. 접속 측 선택",d:"클라이언트 또는 서버 중 실제로 피처를 조회하는 위치를 선택합니다. 양쪽에서 읽으면 둘 다 체크합니다.",dev:"선택하지 않은 측에서는 해당 피처를 조회하지 않도록 구현합니다.",biz:"개발 담당자에게 조회 위치를 확인합니다.",check:"완료 기준: 코드 위치와 접속 측이 같습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:5,expAction:"featureFinish",sel:"#ex-feature-finish",t:"10. 그룹과 비고 입력",d:"그룹은 자산을 정리하는 폴더이고 비고는 사용 목적입니다. 권한이나 그룹 배정 값은 아닙니다.",dev:"팀 자산 분류 규칙과 같은 폴더를 사용합니다.",biz:"다른 운영자도 재사용할 수 있게 목적을 남깁니다.",check:"완료 기준: 생성에 필요한 모든 값이 채워졌습니다."},
  {go:["config","feature"],expModal:"feature",expProgress:6,sel:"#expModalSave",clickDemo:1,creates:"feature",t:"11. ‘생성’ 클릭",d:"입력값을 위에서부터 확인한 뒤 생성 버튼을 클릭합니다. 취소는 저장 없이 창을 닫습니다.",dev:"키·타입·기본값·접속 측을 마지막으로 확인합니다.",biz:"가이드에서는 클릭 모션만 보여 주며 실제 서비스에는 생성하지 않습니다.",check:"완료 기준: 피처 생성 동작을 이해했습니다."},
 
- {go:["config","feature"],sel:"#expSdk",t:"12. 코드 연동 — 값 조회 구현",d:"여기가 초보자가 가장 많이 빠뜨리는 지점입니다. <b>콘솔에서 피처를 만들어도 앱·서버가 값을 읽는 코드가 없으면 실험은 아무 일도 하지 않습니다.</b> 조회 키는 콘솔의 피처 파라미터 이름과 글자까지 같아야 하고, 조회 실패 시 기본값으로 폴백해야 합니다.",dev:"TDExperiment로 값을 조회합니다. <code>automaticExposureTracking</code>이 기본으로 켜져 있어 get 호출 시 노출 이벤트가 자동 업로드되고, 끈 경우에만 <code>exposure()</code>를 직접 호출합니다.",biz:"실험 일정은 콘솔 설정이 아니라 <b>이 코드가 배포되는 날</b>을 기준으로 잡습니다.",check:"완료 기준: 조회 코드와 기본값 폴백이 구현됐습니다."},
- {go:["config","feature"],sel:"#expSdk",t:"13. 코드 배포와 구버전 대기",d:"코드를 배포해도 구버전 앱을 쓰는 사용자에게는 값이 반영되지 않습니다. 구버전 비중이 충분히 줄어든 뒤 실험을 시작해야 결과가 희석되지 않습니다.",dev:"버전별 사용 비중을 확인하고, 강제 업데이트가 필요한지 판단합니다.",biz:"이 단계를 건너뛰면 실험은 ‘실행 중’인데 두 군의 지표가 똑같이 나옵니다. 원인 파악에 가장 오래 걸리는 실패입니다.",check:"완료 기준: 조회 코드가 배포됐고 반영 가능한 버전 비중을 확인했습니다."},
+ {devCode:1,go:["config","feature"],sel:"#expSdk",t:"12. 코드 연동 — 값 조회 구현",d:"여기가 초보자가 가장 많이 빠뜨리는 지점입니다. <b>콘솔에서 피처를 만들어도 앱·서버가 값을 읽는 코드가 없으면 실험은 아무 일도 하지 않습니다.</b> 조회 키는 콘솔의 피처 파라미터 이름과 글자까지 같아야 하고, 조회 실패 시 기본값으로 폴백해야 합니다.",dev:"TDExperiment로 값을 조회합니다. <code>automaticExposureTracking</code>이 기본으로 켜져 있어 get 호출 시 노출 이벤트가 자동 업로드되고, 끈 경우에만 <code>exposure()</code>를 직접 호출합니다.",biz:"실험 일정은 콘솔 설정이 아니라 <b>이 코드가 배포되는 날</b>을 기준으로 잡습니다.",check:"완료 기준: 조회 코드와 기본값 폴백이 구현됐습니다."},
+ {devCode:1,go:["config","feature"],sel:"#expSdk",t:"13. 코드 배포와 구버전 대기",d:"코드를 배포해도 구버전 앱을 쓰는 사용자에게는 값이 반영되지 않습니다. 구버전 비중이 충분히 줄어든 뒤 실험을 시작해야 결과가 희석되지 않습니다.",dev:"버전별 사용 비중을 확인하고, 강제 업데이트가 필요한지 판단합니다.",biz:"이 단계를 건너뛰면 실험은 ‘실행 중’인데 두 군의 지표가 똑같이 나옵니다. 원인 파악에 가장 오래 걸리는 실패입니다.",check:"완료 기준: 조회 코드가 배포됐고 반영 가능한 버전 비중을 확인했습니다."},
 
  {go:["experiment","layer"],ddOpen:"experiment",sel:"#dd-layer",clickDemo:1,t:"12. ‘트래픽 레이어’ 클릭",d:"트래픽 레이어는 같은 사용자가 충돌하는 실험에 동시에 들어가지 않도록 막는 배타 영역입니다. 실험이 끝나면 점유하던 트래픽은 <b>자동으로 해제</b>되어 다음 실험이 재사용합니다.<br><b>왜 필요한가</b> — 한 사용자가 ‘결제 버튼 색’ 실험과 ‘가격 표시’ 실험에 동시에 들어가면, 매출이 올랐을 때 <b>어느 쪽 때문인지 구분할 수 없습니다.</b> 두 실험을 같은 레이어에 넣으면 한 사용자는 둘 중 하나에만 배정됩니다.<br>반대로 서로 무관한 영역(예: 온보딩 실험과 상점 실험)은 다른 레이어에 두어야 트래픽을 아낄 수 있습니다.",dev:"같은 화면·기능을 바꾸는 실험은 같은 레이어를 재사용합니다.",biz:"실험끼리 영향을 주고받지 않게 기능 영역을 나눕니다.",check:"완료 기준: 트래픽 레이어 목록이 열렸습니다."},
  {go:["experiment","layer"],sel:"#expCreate",clickDemo:1,t:"13. ‘새로운 트래픽 레이어 작성’ 클릭",d:"오른쪽 위 작성 버튼을 눌러 빈 레이어 창을 엽니다.",dev:"기존 레이어의 분할 단위와 점유율을 먼저 확인합니다.",biz:"새 영역이 아니라면 기존 레이어 재사용을 우선합니다.",check:"완료 기준: 새 레이어 작성 창을 열 준비가 됐습니다."},
@@ -2191,7 +2219,7 @@ TOURS.experiment=[
  {go:["experiment","explist"],expView:"edit",editProgress:15,sel:"#editSampleCalc",t:"67. 필요 표본과 기간 산정",d:"종료 조건의 일수는 관행이 아니라 계산 결과여야 합니다. 현재 지표값과 탐지하려는 최소 변화폭(MDE)으로 군당 필요 표본을 구하고, 일일 유입으로 나눠 일수를 얻은 뒤 주 단위로 올립니다.",dev:"일일 실험 대상 유입량을 산출해 전달합니다.",biz:"표본이 모자란 채로 끝난 실험은 결론을 낼 수 없습니다. 기간을 줄이려면 MDE를 키우거나 트래픽을 늘려야 합니다.",check:"완료 기준: 군당 필요 표본과 그에 맞는 기간을 계산했습니다."},
  {go:["experiment","explist"],expView:"edit",editProgress:15,sel:"#expDraft",clickDemo:1,t:"66. ‘초안 저장’ 클릭",d:"현재 설정을 저장하되 검토·실행 단계로 보내지 않습니다. 작성 중 안전하게 보관할 때 사용합니다.",dev:"새로고침 뒤 모든 값이 유지되는지 확인합니다.",biz:"미완성 상태임을 팀에 명확히 알립니다.",check:"완료 기준: 저장과 제출의 차이를 압니다."},
  {go:["experiment","explist"],expView:"edit",editProgress:14,sel:"#editReadiness",t:"67. 제출 전 준비 확인",d:"트래픽 범위, 대조군 한 개, 배분 합계 100%, 피처 활성화, 핵심 지표 연결을 확인합니다.",dev:"비배타 레이어라면 피처 충돌도 검사합니다.",biz:"차단 항목을 모두 해결한 뒤 제출합니다.",check:"완료 기준: 모든 필수 조건이 충족됐습니다."},
- {go:["experiment","explist"],expView:"detail",expStatus:"draft",sel:"#expQa",t:"68. 제출 전 배정 검증(QA)",d:"운영 작업에 테스트 발송·리허설이 있듯, 실험에도 <b>내 계정이 어느 군에 들어가는지 직접 확인하는 단계</b>가 필요합니다. QA 계정으로 대조군 값과 실험군 값이 각각 재현되는지, 재실행해도 같은 군에 머무는지 확인합니다.",dev:"조회·고정·기록·폴백 네 가지를 QA 단말에서 확인합니다.",biz:"검증 없이 제출하면 잘못된 값이 전체 대상에게 그대로 나갑니다.",check:"완료 기준: 두 군의 값이 QA 단말에서 재현됐습니다."},
+ {devCode:1,go:["experiment","explist"],expView:"detail",expStatus:"draft",sel:"#expQa",t:"68. 제출 전 배정 검증(QA)",d:"운영 작업에 테스트 발송·리허설이 있듯, 실험에도 <b>내 계정이 어느 군에 들어가는지 직접 확인하는 단계</b>가 필요합니다. QA 계정으로 대조군 값과 실험군 값이 각각 재현되는지, 재실행해도 같은 군에 머무는지 확인합니다.",dev:"조회·고정·기록·폴백 네 가지를 QA 단말에서 확인합니다.",biz:"검증 없이 제출하면 잘못된 값이 전체 대상에게 그대로 나갑니다.",check:"완료 기준: 두 군의 값이 QA 단말에서 재현됐습니다."},
  {go:["experiment","explist"],expView:"edit",editProgress:15,sel:"#expSubmit",clickDemo:1,t:"68. ‘저장 후 제출’ 클릭",d:"현재 값을 저장하고 검토 가능한 상태로 제출합니다. <b>제출과 실제 사용자 적용은 같은 동작이 아닙니다.</b>",dev:"제출 후 상태와 검증 결과가 정상 저장됐는지 확인합니다.",biz:"가설·대상·그룹·지표·종료 조건을 검토자에게 전달합니다.",check:"완료 기준: 제출 이후 상태를 확인했습니다."},
  {go:["experiment","explist"],expView:"detail",sel:"#expLog",clickDemo:1,t:"69. 제출 이력 확인",d:"다시 작업 기록을 열어 제출자·시각·변경 내용을 확인합니다.",dev:"배포 로그와 실험 상태 변경 시각을 함께 보관합니다.",biz:"승인과 실행 전 증빙을 남깁니다.",check:"완료 기준: 제출 이력을 추적할 수 있습니다."},
  {go:["experiment","explist"],expView:"detail",expStatus:"pending",sel:"#expStart",clickDemo:1,t:"70. ‘실험 실행’ 클릭 — 여기서 처음 적용됩니다",d:"제출한 실험은 <b>실행 대기</b> 상태이고, 이때까지 피처 값은 여전히 기본값으로 내려갑니다. <b>실험 실행</b>을 눌러야 규칙이 생효되고 배정이 시작됩니다. 실물 콘솔에서는 목록의 작업 열 <b>실행 아이콘</b>으로도 시작하며, 확인 창에서 \"실행 후 규칙 평가에 참여한다\"는 안내를 확인하고 진행합니다.",dev:"실행 직후 배정 로그와 노출 이벤트가 실제로 들어오는지 10분 내에 확인합니다.",biz:"실행 시각을 기록해 두면 나중에 지표 변화와 대조할 수 있습니다.",check:"완료 기준: 상태가 실행 중으로 바뀌고 노출 이벤트가 수집됩니다."},
@@ -2450,7 +2478,7 @@ function buildTourIndex(){
  TOUR.list.forEach(function(st,i){
   TOUR.i=i;var ph=tourPhaseMeta().n;
   if(ph!==last){h+='<div class="tix-ph">'+ph+'</div>';last=ph;}
-  h+='<button class="tix-item" id="tix-'+i+'" onclick="tourJump('+i+')">'+st.t.replace(/</g,"&lt;")+'</button>';
+  h+='<button class="tix-item" id="tix-'+i+'" onclick="tourJump('+i+')">'+(st.devCode?'<i class="tix-dev" title="개발팀 코드 작업 필요">⚙</i>':'')+st.t.replace(/</g,"&lt;")+'</button>';
  });
  TOUR.i=save;el.innerHTML=h+'</div>';
 }
@@ -2876,6 +2904,7 @@ function paintStep(st){
   '<button class="cs-x" onclick="endTour()" aria-label="가이드 종료">✕</button></div>'+
   '<h4 class="cs-title">'+st.t+'</h4>'+
   (role==="-"?'<div class="cs-role none">-</div>':'<div class="cs-role">'+role+'</div>')+
+  (st.devCode?'<div class="cs-devwork"><b>⚙ 개발팀 코드 작업 필요</b><span>'+(st.dev||"")+'</span></div>':'')+
   '<div class="cs-btns">'+(TOUR.i>0?'<button class="btn btn-def" onclick="tourPrev()">이전</button>':'')+
   '<button class="btn btn-pri" onclick="tourNext()">'+(TOUR.i===TOUR.list.length-1?(st.submitDemo?"작업 제출 완료":"가이드 완료"):"다음")+'</button></div>';
  /* 강조 요소 바로 아래에 붙이고, 공간이 없으면 위로 올립니다 */
