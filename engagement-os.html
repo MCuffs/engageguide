@@ -374,6 +374,7 @@ body.guide-bottom .scrim>.drawer{max-height:calc(100vh - min(36vh,390px) - 28px)
 #tourcard.below::before,#tourcard.above::after{content:"";position:absolute;left:var(--arrow-x,24px);margin-left:-7px;border:7px solid transparent;}
 #tourcard.below::before{top:-14px;border-bottom-color:#fff;filter:drop-shadow(0 -1px 0 #DDE1EA);}
 #tourcard.above::after{bottom:-14px;border-top-color:#fff;filter:drop-shadow(0 1px 0 #DDE1EA);}
+.sec-label{margin:16px 0 2px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--pri);}
 .cs-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
 .cs-step{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--pri);}
 .cs-x{background:none;border:none;font-size:13px;color:#8A8F9E;cursor:pointer;padding:2px 4px;}
@@ -905,7 +906,7 @@ function paintSide(){
    '<div class="section-label"><span>구성 전략</span><span>⌕</span></div>'+
    (tourGated("cfgitem")&&!tourMade("cfgitem")?'':
     '<div class="folder"><span class="tree-badge" style="background:#36A98F">↗</span><span>기본 폴더</span><span style="margin-left:auto">⌄</span></div>'+
-    '<div class="tree-item" onclick="S.nav=\'citem\';S.cfgTab=\'detail\';S.cfgDetailTab=\'templates\';paintSide();paintMain()"><span class="tree-badge">1</span><span>'+(TOUR.on&&TOUR.key==="config"?"상점 가격 정책":"11")+'</span></div>')+
+    '<div class="tree-item" id="stratTreeItem" onclick="go(\'cstrategy\')"><span class="tree-badge">1</span><span>'+(TOUR.on&&TOUR.key==="config"?"상점 가격 정책":"11")+'</span></div>')+
    '</div>';return;
  }
  host.innerHTML=SIDE[S.sec].map(n=>
@@ -1039,6 +1040,24 @@ function renderDrawer(){
    '<label class="fl"><span class="rq">*</span>전송 ID'+hl("f.sendid")+'</label><select id="d-sid"><option>유저 속성 · #account_id</option><option>유저 속성 · #distinct_id</option></select>'+
    '<label class="tg"><input type="checkbox" checked onchange="tgBox(this,\'d-fn\')"><span class="sw"></span>도달 퍼널 설정'+hl("f.funnel")+'</label><div id="d-fn">'+funnel(false)+'</div>'+
    '<label class="fl">컨텐츠 템플릿'+hl("f.tpl")+'</label>'+ptable(S.tpl,[["필드",1],["표시 이름",1],["입력 방식",1]]);
+ }else if(k==="cfgstrat"){t="새 전략 만들기";center=1;sub="";
+  b='<div class="fh" style="margin-top:4px">전략 시간대: UTC+9 · 오른쪽 위에서 변경한다고 가정합니다</div>'+
+   '<label class="fl" style="margin-top:10px"><span class="rq">*</span>전략 이름</label><input id="st-name" placeholder="예: 신정 메인 배너 교체">'+
+   '<div class="sec-label">① 목표 수용자</div>'+
+   '<label class="fl" id="st-user">목표 유저</label><div class="rd"><label><input type="radio" name="staud" checked> 전체 유저</label><label><input type="radio" name="staud"> 커스텀 세그먼트</label></div>'+
+   '<div class="fh">커스텀 세그먼트는 전략 시구와 계산 시간대가 같고, <b>#user_id 주체</b>인 태그·분군만 사용할 수 있습니다</div>'+
+   '<div class="estim" style="margin-top:8px"><span class="fh" style="margin:0">예상 커버 유저</span><span class="ev" id="stEst">—</span><button class="btn btn-def" onclick="document.getElementById(\'stEst\').textContent=\'12,480명\'">인원 예측</button></div>'+
+   '<label class="fl" id="st-env">목표 환경 <span class="sub2">(선택)</span></label><div class="row" style="gap:8px"><select style="flex:1"><option>환경 파라미터 선택</option><option>server_id</option><option>app_version</option></select><select style="flex:1"><option>=</option></select><input style="flex:1" placeholder="값"></div>'+
+   '<div class="fh">사용할 수 있는 환경 파라미터는 <b>구성 채널에서 정의한 값</b>으로 결정됩니다 — Webhook은 채널의 환경 파라미터, SDK는 요청 시 자동 휴대 파라미터</div>'+
+   '<div class="sec-label">② 전략 내용</div>'+
+   '<label class="fl" id="st-tpl"><span class="rq">*</span>템플릿 선택</label><select><option>a (개통됨)</option></select>'+
+   '<div class="fh">이 구성 항목에서 <b>개통 상태인 템플릿만</b> 선택할 수 있습니다</div>'+
+   '<label class="fl" id="st-content"><span class="rq">*</span>banner_title <span class="sub2">STRING · 필수</span></label><input id="st-val" placeholder="40자 이내">'+
+   '<div class="sec-label">③ 발표 설정</div>'+
+   '<div class="row" style="gap:8px" id="st-publish"><div style="flex:1"><label class="fl" style="margin-top:0">게시 시간</label><input value="2026-12-31 08:00"></div><div style="flex:1"><label class="fl" style="margin-top:0">종료 시간</label><input value="2027-01-04 00:00"></div></div>'+
+   '<label class="fl">전략 표시 시간 <span class="sub2">(선택 · 스케줄 표시용, 단말에는 전송되지 않음)</span></label><input placeholder="예: 2027-01-01 00:00">'+
+   '<div class="fh">Webhook 연동은 종료 시간이 적용 주기 표기용이며, 기본적으로 오프라인 지령을 하류에 전송하지 않습니다</div>'+
+   '<button class="btn btn-def" id="st-test" style="margin-top:12px" onclick="log(\'전략 발송 테스트 — 게시·일시 중지·오프라인 전 링크 확인\',\'ok\')">발송 테스트</button>';
  }else if(k==="cfgparam"){t="파라미터 새로 만들기";center=1;sub="";
   b='<label class="fl" style="margin-top:6px"><span class="rq">*</span>파라미터 이름'+hl("c.param")+'</label><input id="d-pname" placeholder="비즈니스 기능에서 파싱하는 변수명과 동일하게">'+
    '<div class="fh">코드가 읽는 키입니다 — 클라이언트·서버의 변수명과 글자까지 같아야 합니다</div>'+
@@ -1087,6 +1106,7 @@ function saveChan(k){var g=id=>{var e=document.getElementById(id);return e?e.val
  else if(k==="cfgwh"){S.cfgChans.push({name:n});S.cfgReady.channel=true;log("컨피그 채널 저장·활성화 — "+n+" (운영/테스트 환경 분리)","ok");}
  else if(k==="cfgitem"){log("구성 항목 생성 — "+n+" · 비즈니스 타입: 설정 파일","ok");S.cfgTab="detail";S.cfgDetailTab="params";}
  else if(k==="cfgparam"){S.cfgReady.param=true;log("파라미터 저장 — "+(g("d-pname")||"banner_title"),"ok");}
+ else if(k==="cfgstrat"){S.cfgReady.strategy="draft";log("전략 저장 — 전략 ID ST-0001 생성 (초안). 게시·일시 중지·오프라인은 이 ID로 관리합니다","ok");}
  closeDrawer();paintMain();}
 
 /* ─── Atlas 실험 ─── */
@@ -1185,8 +1205,8 @@ function vExpDetail(){
    '<button class="btn btn-pri" id="expArchive" onclick="S.expArchived=true;S.expView=\'list\';paintMain()">보관</button>';
  return '<div class="phead"><button class="btn btn-txt" onclick="S.expView=\'list\';paintMain()">‹</button><div><span class="bdg" style="background:#EEF0FE;color:#4C5BE0">피처 실험</span><h2 style="display:inline;margin-left:10px">[0016] '+x.title+'</h2> <span class="bdg" id="expStatusBdg" style="background:'+bs[1]+';color:'+bs[2]+'">'+bs[0]+'</span></div>'+
   '<div class="pact">'+act+'</div></div>'+
-  (S.expStatus==="pending"?'<div class="tip guide-only" id="expStartHint"><b>제출했지만 아직 사용자에게 적용되지 않았습니다.</b> 상태가 <b>실행 대기</b>인 동안 피처 값은 여전히 기본값으로 내려갑니다. 오른쪽 위 <b>실험 실행</b>을 눌러야 규칙이 생효되고 배정이 시작됩니다.</div>':'')+
-  (S.expStatus==="paused"?'<div class="tip guide-only" id="expPausedHint"><b>일시 중지 중에는 실험 규칙이 멈추고 데이터 수집이 중단되며, 피처 값은 즉시 기본값으로 회귀합니다.</b> 중지 전에는 중지 사유를 반드시 입력해야 하며, 재개하면 규칙이 다시 생효됩니다.</div>':'')+
+  (S.expStatus==="pending"?'<div class="tip guide-only" id="expStartHint"><b>제출했지만 아직 사용자에게 적용되지 않았습니다.</b> 상태가 <b>실행 대기</b>인 동안 피처 값은 여전히 기본값으로 내려갑니다. 오른쪽 위 <b>실험 실행</b>을 눌러야 규칙이 적용되고 배정이 시작됩니다.</div>':'')+
+  (S.expStatus==="paused"?'<div class="tip guide-only" id="expPausedHint"><b>일시 중지 중에는 실험 규칙이 멈추고 데이터 수집이 중단되며, 피처 값은 즉시 기본값으로 회귀합니다.</b> 중지 전에는 중지 사유를 반드시 입력해야 하며, 재개하면 규칙이 다시 적용됩니다.</div>':'')+
   (S.expStatus==="ended"?'<div class="tip guide-only" id="expEndedHint"><b>종료는 영구적이며 재실행할 수 없습니다.</b> 피처 값은 다음 우선순위 규칙(기본값)으로 회귀했고, 데이터는 동결되지만 리포트는 계속 열람할 수 있습니다. 이 실험이 점유하던 레이어 트래픽은 자동 해제되어(사용함 0%) 다음 실험이 쓸 수 있습니다.</div>':'')+
   '<div class="atlas-layout"><div>'+
    '<section class="atlas-card" id="expBasic"><h3>기본 정보</h3><dl class="atlas-kv"><dt>실험 이름</dt><dd>'+x.title+'</dd><dt>그룹</dt><dd>기본 폴더</dd><dt>실험 타입</dt><dd>피처 실험</dd><dt>실험 가설</dt><dd>'+x.hypothesis+'</dd><dt>종료 조건</dt><dd>실험 기간: 30일</dd><dt>기간</dt><dd>2026-07-22 09:02:41 ~ 2026-07-22 09:02:41</dd></dl></section>'+
@@ -1719,26 +1739,27 @@ function vCfgChan(){
   '<div class="tbl"><div class="tblscroll"><table class="at"><thead><tr><th>채널 이름</th><th>생성자</th><th>마지막 수정자</th><th>채널 스위치</th><th>작업</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 function vCfgStrat(){
- var ready=S.cfgReady.param&&S.cfgReady.template&&S.cfgReady.channel;
- return '<div class="phead"><h2>구성 전략</h2></div><div class="tbl" style="padding:20px 22px">'+
- '<div class="life" id="strategyLife"><span class="ls on">초안</span><span class="ar">→</span><span class="ls">승인</span><span class="ar">→</span><span class="ls">온라인</span><span class="ar">↔</span><span class="ls">중단</span><span class="ar">→</span><span class="ls">오프라인 / 취소</span></div>'+
- '<div class="readiness" id="strategyReady"><div class="readycard"><div class="rt">파라미터</div><div class="rd">타입·기본값·필수 여부</div><span class="rs">'+(S.cfgReady.param?"준비됨":"필요")+'</span></div>'+
- '<div class="readycard"><div class="rt">활성 템플릿</div><div class="rd">실제 필드가 연결된 상태</div><span class="rs">'+(S.cfgReady.template?"준비됨":"필요")+'</span></div>'+
- '<div class="readycard"><div class="rt">구성 채널</div><div class="rd">테스트/운영 환경 조회 성공</div><span class="rs">'+(S.cfgReady.channel?"준비됨":"필요")+'</span></div>'+
- '<div class="readycard"><div class="rt">롤백 기준</div><div class="rd">직전 템플릿과 중단 담당자</div><span class="rs">문서화 필요</span></div></div>'+
- '<label class="fl">타겟 오디언스'+hl("c.aud")+'</label><select id="cfg-aud"><option>전체 유저</option><option>신규 유저 (가입 7일 이내)</option><option>결제 유저</option><option>이탈 위험 유저 (3일 미접속)</option></select>'+
- '<div class="estim"><span class="fh" style="margin:0">예상 적용 인원</span><span class="ev" id="cfgEst">—</span><button class="btn btn-def" onclick="document.getElementById(\'cfgEst\').textContent=\'1,248명\'">예측</button></div>'+
- '<div class="fh">사용자 속성과 행동 이벤트가 실제 프로젝트에 존재하는지 확인한 뒤 대상을 예측합니다.</div>'+
- '<div style="display:flex;gap:8px;margin-top:18px"><button class="btn '+(ready?"btn-pri":"btn-def")+'" id="btnDeploy" onclick="deployCfg()">설정 배포</button>'+
- '<button class="btn btn-def" id="btnRollback" onclick="rollbackCfg()">직전 버전 롤백</button><button class="btn btn-txt" onclick="log(\'전략 작업 기록 조회 — 변경자·시각·사유 확인\',\'hi\')">작업 기록</button>'+hl("c.deploy")+'</div>'+
- (!ready?'<div class="tip w"><b>전략 생성 차단</b> — 파라미터, 활성 템플릿, 구성 채널을 모두 준비해야 합니다.</div>':'')+
- '<div class="tip w"><b>배포 원칙</b> — 테스트 환경 → 내부 QA → 신규 유저 5% → 25% → 전체 순으로 확대하고, 각 단계의 오류율·전환 하락 중단 기준을 미리 정하세요.</div></div>';}
+ var made=tourGated("cfgstrategy")?tourMade("cfgstrategy"):S.cfgReady.strategy==="online";
+ var itemName=TOUR.on&&TOUR.key==="config"?"상점 가격 정책":"11";
+ var rows=made
+  ?'<tr><td>ST-0001</td><td><span class="lnk">신정 메인 배너 교체</span></td><td>a</td><td><span class="dotst"><i></i>초안</span></td><td>2026-12-31 08:00</td><td>2027-01-04 00:00</td><td><div class="ico-act"><span id="btnDeploy" title="게시" onclick="deployCfg()">▶</span><span title="일시 중지">⏸</span><span id="btnRollback" title="오프라인" onclick="rollbackCfg()">⏹</span><span>⋮</span></div></td></tr>'
+  :'<tr><td colspan="7"><div class="empty">No data<br><span class="sub2">오른쪽 위 「＋ 새 전략 만들기」로 첫 전략을 만듭니다.</span></div></td></tr>';
+ return '<div class="phead"><h2>구성 전략 · '+itemName+hl("c.aud")+'</h2>'+
+  '<div class="pact"><div class="srch">⌕<input placeholder="전략 이름/ID 검색"></div>'+
+  '<button class="btn btn-pri" id="btnStrategyCreate" onclick="openDrawer(\'cfgstrat\')">＋ 새 전략 만들기</button></div></div>'+
+  '<div class="tip guide-only" id="strategyReady"><b>새 전략을 만들기 전 확인</b> — ① 이 구성 항목에 <b>개통된 채널</b>이 바인딩돼 있어야 하고 ② 사용할 <b>템플릿이 개통 상태</b>이며 발송 테스트를 통과했어야 합니다. 현재: 파라미터 '+(S.cfgReady.param?"준비됨":"필요")+' · 활성 템플릿 '+(S.cfgReady.template?"준비됨":"필요")+' · 구성 채널 '+(S.cfgReady.channel?"준비됨":"필요")+'</div>'+
+  '<div class="tbl"><div class="tblscroll"><table class="at"><thead><tr><th>전략 ID</th><th>전략 이름</th><th>템플릿</th><th>상태</th><th>게시 시간</th><th>종료 시간</th><th>작업</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
+  '<div class="tbl" style="margin-top:14px;padding:16px 18px"><div class="fl" style="margin-top:0">전략 상태 흐름</div>'+
+  '<div class="life" id="strategyLife" style="display:flex;margin-top:10px"><span class="ls on">초안</span><span class="ar">→</span><span class="ls">심사 중</span><span class="ar">→</span><span class="ls">게시 대기</span><span class="ar">→</span><span class="ls">게시됨</span><span class="ar">→</span><span class="ls">일시 중지</span><span class="ar">→</span><span class="ls">오프라인</span></div>'+
+  '<div class="sub2" style="margin-top:8px">Webhook 연동은 게시 중·게시 실패, 클라이언트 연동은 등록 중·등록 실패 상태가 추가로 존재합니다. 상선 후 편집하면 <b>새 버전</b>이 생성되고, 새 버전이 상선되기 전까지 이전 버전이 계속 적용합니다.</div>'+
+  '<div class="tip guide-only" style="margin-top:10px"><b>일시 중지 vs 하선</b> — 일시 중지는 수정 후 재게시할 때(暂停 중 편집 = 새 버전), 오프라인은 영구 종료이며 재게시할 수 없습니다. 위험 관리를 위해 일시 중지·오프라인은 <b>운영 관리자만</b> 조작할 수 있습니다.</div>';
+}
 function deployCfg(){var a=document.getElementById("cfg-aud");
  if(!(S.cfgReady.param&&S.cfgReady.template&&S.cfgReady.channel)){log("설정 배포 차단 — 파라미터·활성 템플릿·구성 채널을 확인하세요","no");return;}
- log("구성 전략 배포 → 대상: "+(a?a.value:"전체 유저"),"hi");
+ log("전략 게시(opType=online) → 대상 수용자에게 구성 전송 시작","hi");
  log("SDK가 원격 설정을 수신 → 앱이 값을 즉시 반영 (스토어 배포 불필요)","ok");
  S.cfgReady.strategy="online";S.locked=false;S.tab="home";phone();}
-function rollbackCfg(){S.cfgReady.strategy="offline";log("롤백 실행 — 전략 중단 → 직전 템플릿 home_v0 복구 → 영향 대상 확인","hi");phone();}
+function rollbackCfg(){S.cfgReady.strategy="offline";log("전략 오프라인(opType=offline) — 영구 종료, 재게시 불가","hi");phone();}
 function vCfgData(){
  return '<div class="phead"><h2>데이터 분석'+hl("c.data")+'</h2><div class="pact"><div class="srch" style="width:260px">구성 항목<span style="color:var(--line-2)">|</span><input placeholder="선택하세요"><span class="sub2">⌄</span></div></div></div>'+
   '<div class="tbl" style="padding:80px 20px;text-align:center">'+
@@ -1804,7 +1825,7 @@ var START_TUTORIALS=[
   ["메시지 푸시 — 복귀 알림","앱 밖 유저를 잠금화면 알림으로 부르기","19단계","startScenario('push')","▤","#FFF1E8","#D9722F"],
   ["Client 푸시 — 결제 팝업","결제 직전 유저에게 한정 할인 팝업","19단계","startScenario('client')","▣","#E9F5F2","#0E8477"]]],
  ["구성 센터",[
-  ["구성 센터 도입","구성 항목 → 파라미터 → 템플릿 → 전략 → 롤백","26단계","startTour('config')","⚙","#E9F5F2","#0E8477"]]],
+  ["구성 센터 도입","구성 항목 → 파라미터 → 템플릿 → 전략 → 롤백","32단계","startTour('config')","⚙","#E9F5F2","#0E8477"]]],
  ["실험 (Atlas)",[
   ["게임 — 전투 밸런스 실험","보스 HP를 낮추면 리텐션이 오를까","80단계","startExperimentScenario('game_balance')","◆","#EFEBFE","#7C5CE0"],
   ["커머스 — 결제 버튼 실험","CTA 색을 바꾸면 전환율이 오를까","80단계","startExperimentScenario('commerce_cta')","◈","#EAF2FF","#2F72D9"],
@@ -1979,7 +2000,7 @@ engage:[
 ],
 config:[
  {go:["config","citem"],cfgView:"list",center:1,t:"구성 센터 도입 · 실제 콘솔 흐름",
-  d:"구성 항목 → 파라미터 → 템플릿 필드 연결·활성화 → 구성 채널 → 전략 → 분석·롤백 순으로 <b>25개 체크포인트</b>를 진행합니다.",
+  d:"구성 항목 → 파라미터 → 템플릿 필드 연결·활성화 → 구성 채널 → 전략 → 분석·롤백 순으로 <b>31개 체크포인트</b>를 진행합니다.",
   dev:"SDK RemoteConfig 연동 + 값 적용 코드. 약 <b>1~2 man-day</b>.",
   biz:"운영은 1회성 발송이고 구성 센터는 배포된 값을 지속 적용합니다.",check:"완료 기준: 담당 PM·클라이언트 개발자·데이터 담당자를 지정합니다."},
  {go:["config","citem"],cfgView:"list",sel:"#cfgIntro",t:"1. 네 단계 도입 흐름 확인",
@@ -2054,26 +2075,54 @@ config:[
   d:"사용자 파라미터는 대상별 값을, 환경 파라미터는 배포 환경별 값을 전달합니다.",
   dev:"시스템 연동 식별자와 서버가 읽을 필드명을 일치시킵니다.",
   biz:"값이 비었을 때 사용할 기본값을 정의합니다.",check:"완료 기준: 샘플 payload를 서버와 함께 검수했습니다."},
- {go:["config","cstrategy"],h:"c.aud",t:"13. 타겟 오디언스 지정",
-  d:"전체가 아니라 특정 유저군에만 적용할 수 있습니다. 단계적 롤아웃의 기반입니다.",
-  dev:"조건에 사용할 유저 속성·이벤트가 수집되고 있어야 합니다.",
-  biz:"내부 QA → 신규 유저 5% → 25% → 전체 순서로 확대합니다.",check:"완료 기준: 대상 규모와 제외 조건을 미리 확인했습니다."},
- {go:["config","cstrategy"],sel:".estim",t:"14. 대상 인원 예측",
-  d:"전략을 저장하기 전에 사용자 조건·행동 이벤트·제외 조건으로 실제 적용 인원을 예측합니다.",
-  dev:"조건에 사용한 속성과 이벤트가 메타데이터에 존재하는지 확인합니다.",
-  biz:"0명·과다 대상이면 AND/OR, 기간, 제외 조건을 수정하고 다시 예측합니다.",check:"완료 기준: 예상 적용 인원과 제외 대상이 검토됐습니다."},
- {go:["config","cstrategy"],sel:"#strategyLife",t:"15. 전략 생명주기와 작업 기록",
-  d:"전략은 초안·승인·온라인·중단·오프라인·취소 상태를 가집니다. 변경자·시각·사유는 작업 기록에서 확인합니다.",
-  dev:"온라인 전략의 채널이나 파라미터를 바꿀 때 영향 범위를 먼저 확인합니다.",
-  biz:"승인·중단·롤백 권한 담당자를 분리합니다.",check:"완료 기준: 각 상태 전환 담당자와 승인 기준이 정해졌습니다."},
- {go:["config","cstrategy"],sel:"#btnDeploy",t:"16. 단계적 배포",
-  d:"버튼을 누르는 즉시 대상 유저의 앱에 값이 적용됩니다. 되돌리기 전까지 계속 유지됩니다.",
-  dev:"롤백 절차를 사전에 준비하세요. 잘못된 값이 나가면 즉시 이전 값으로 되돌려야 합니다.",
-  biz:"테스트 환경 검증 완료 후 승인자를 거쳐 실행합니다.",check:"완료 기준: 이전 템플릿 복구 절차와 중단 기준이 정해졌습니다."},
- {go:["config","cstrategy"],sel:"#btnRollback",t:"17. 롤백 리허설",
-  d:"실패 시 전략 중단 → 직전 템플릿 복구 → 영향 대상 확인 순으로 되돌립니다. 배포 전에 실제 담당자가 한 번 연습합니다.",
-  dev:"앱에는 안전한 기본값 폴백과 원격 설정 조회 실패 처리가 있어야 합니다.",
-  biz:"오류율·전환 하락·CS 증가 중 하나라도 임계치를 넘으면 즉시 중단합니다.",check:"완료 기준: 10분 안에 직전 버전으로 복구하는 리허설을 통과했습니다."},
+ {go:["config","cstrategy"],sel:"#stratTreeItem",clickDemo:1,t:"19. 구성 전략 트리에서 항목 클릭",
+  d:"실물 콘솔의 전략 진입 경로입니다 — 사이드바 <b>구성 전략</b> 아래 트리에서 구성 항목을 클릭하면 그 항목의 전략 관리 페이지가 열립니다.",
+  dev:"전략은 항목 단위로 관리됩니다. 항목 ID 기준으로 코드 조회가 일어납니다.",
+  biz:"전략 = 템플릿으로 만든 구체적 인스턴스(예: 신정 배너, 누적 결제 보상)입니다.",check:"완료 기준: 항목의 전략 관리 페이지가 열렸습니다."},
+ {go:["config","cstrategy"],sel:"#btnStrategyCreate",clickDemo:1,t:"20. ‘새 전략 만들기’ 클릭",
+  d:"새 전략을 만들기 전 두 가지가 준비돼 있어야 합니다 — ① 항목에 <b>개통된 채널</b> 바인딩 ② <b>개통 상태의 템플릿</b>(발송 테스트 통과). 조건이 안 되면 전략을 만들 수 없습니다.",
+  dev:"채널·템플릿 상태를 먼저 확인합니다.",
+  biz:"앞 단계(파라미터→템플릿→채널)를 건너뛰지 않았다면 그대로 진행됩니다.",check:"완료 기준: 전략 생성 창이 열렸습니다."},
+ {drawer:"cfgstrat",sel:"#st-user",t:"21. 목표 유저 — 전체 또는 커스텀 세그먼트",
+  d:"전체 유저에게 배포하거나, AE 행동 데이터로 조건에 맞는 유저만 선택합니다. 예: 결제 습관이 있지만 최근 미결제인 유저에게 고가치 패키지 구성 배포.",
+  dev:"커스텀 세그먼트는 전략 시간대와 계산 시간대가 같고 <b>#user_id 주체</b>인 태그·분군만 사용할 수 있습니다.",
+  biz:"세그먼트 조건을 확정한 뒤 반드시 인원 예측으로 커버 범위를 확인합니다.",check:"완료 기준: 대상 유저 방식이 정해졌습니다."},
+ {drawer:"cfgstrat",sel:".estim",t:"22. 인원 예측",
+  d:"조건 확정 후 예측 버튼으로 전략이 커버할 유저 수를 미리 확인합니다.",
+  dev:"조건에 쓰인 태그·분군이 실제 계산되고 있는지 확인합니다.",
+  biz:"0명이거나 과도하면 조건을 수정하고 다시 예측합니다.",check:"완료 기준: 예상 커버 인원을 확인했습니다."},
+ {drawer:"cfgstrat",sel:"#st-env",t:"23. 목표 환경 (선택)",
+  d:"특정 서버·앱 버전·언어처럼 <b>환경 단위</b>로도 배포 범위를 좁힐 수 있습니다. 예: 최근 오픈한 서버에만 신규 이벤트 구성 배포.",
+  dev:"사용 가능한 환경 파라미터는 <b>구성 채널에서 정의한 값</b>으로 결정됩니다 — Webhook은 채널의 환경 파라미터, SDK는 요청 시 자동 휴대 파라미터.",
+  biz:"유저 단위 Webhook 배포 시 하류가 해석할 ID 필드를 채널 커스텀 파라미터에 넣어야 합니다.",check:"완료 기준: 환경 조건의 출처(채널)를 이해했습니다."},
+ {drawer:"cfgstrat",sel:"#st-tpl",clickDemo:1,t:"24. 템플릿 선택",
+  d:"이 구성 항목에서 <b>개통 상태인 템플릿만</b> 목록에 나타납니다. 템플릿을 고르면 그 템플릿의 파라미터 입력 폼이 열립니다.",
+  dev:"템플릿 ID가 전략과 함께 하류로 전달되어 하위 기능을 식별합니다.",
+  biz:"같은 항목이라도 활동 형식마다 템플릿을 나눠 두면 전략 작성이 단순해집니다.",check:"완료 기준: 개통 템플릿이 선택됐습니다."},
+ {drawer:"cfgstrat",sel:"#st-content",t:"25. 전략 내용 — 파라미터 값 입력",
+  d:"선택한 템플릿의 파라미터에 이번 전략의 실제 값을 입력합니다. 필수 파라미터는 값 없이 저장할 수 없습니다.",
+  dev:"타입·글자 수 제한이 코드 파싱과 맞는지 확인합니다.",
+  biz:"운영자가 실수하기 쉬운 값은 파라미터 힌트를 참고합니다.",check:"완료 기준: 필수 값이 모두 입력됐습니다."},
+ {drawer:"cfgstrat",sel:"#st-publish",t:"26. 발표 설정 — 게시·종료 시간",
+  d:"전략의 게시 시간과 종료 시간을 지정합니다. 예: 신정 활동은 12/31 08:00 게시 → 1/4 00:00 종료. 스케줄 표시용 「전략 표시 시간」은 단말로 전송되지 않습니다.",
+  dev:"<b>Webhook 연동은 종료 시간이 표기용</b>이며 기본적으로 오프라인 지령을 하류에 전송하지 않습니다(필요 시 관리자 설정). SDK 연동은 종료 시간부터 단말이 구성을 받지 못합니다.",
+  biz:"모든 시간은 전략 시간대 기준입니다. 프로젝트·수신자 시간대와 혼동하지 않습니다.",check:"완료 기준: 게시·종료 시각과 시간대를 확정했습니다."},
+ {drawer:"cfgstrat",sel:"#st-test",clickDemo:1,t:"27. 발송 테스트",
+  d:"정식 게시 전에 게시 → 일시 중지 → 오프라인 전체 링크를 테스트합니다. Webhook은 화이트리스트 계정(최대 10명)으로, 클라이언트는 디버그 모드 단말로 테스트합니다.",
+  dev:"클라이언트 테스트는 자동으로 테스트 전략을 만들었다가 완료 시 삭제합니다.",
+  biz:"테스트 없이 게시하면 오류가 전체 대상에게 그대로 나갑니다.",check:"완료 기준: 테스트 발송이 정상 수신됐습니다."},
+ {drawer:"cfgstrat",sel:".df",clickDemo:1,creates:"cfgstrategy",t:"28. ‘저장’ 클릭 — 전략 ID 생성",
+  d:"저장하면 고유한 <b>전략 ID</b>가 생성되고 초안 상태로 목록에 나타납니다. 이후 게시·일시 중지·오프라인 등 전체 생명주기를 이 ID로 관리합니다.",
+  dev:"전략 ID를 운영 문서에 기록합니다.",
+  biz:"가이드에서는 실제 저장 없이 동작만 재현합니다.",check:"완료 기준: 전략이 초안으로 목록에 나타났습니다."},
+ {go:["config","cstrategy"],sel:"#strategyLife",t:"29. 상태 흐름 — 게시와 새 버전",
+  d:"초안 → 심사 중 → 게시 대기 → <b>게시됨</b> → 일시 중지 → 오프라인으로 흐릅니다. <b>게시 후 편집하면 새 버전</b>이 생성되고, 새 버전이 게시되기 전까지 이전 버전이 계속 적용됩니다.",
+  dev:"Webhook은 게시 중·게시 실패, 클라이언트는 등록 중·등록 실패 상태가 추가로 존재합니다.",
+  biz:"게시는 지정 시각 자동 또는 수동 중 선택합니다.",check:"완료 기준: 상태 전환과 버전 규칙을 설명할 수 있습니다."},
+ {go:["config","cstrategy"],sel:"#btnRollback",t:"30. 일시 중지 vs 오프라인",
+  d:"문제가 생기면 <b>일시 중지</b> 후 수정하고 재게시합니다(수정 = 새 버전). <b>오프라인은 영구 종료</b>라 다시 게시할 수 없습니다. 위험 관리를 위해 두 조작은 운영 관리자만 가능합니다.",
+  dev:"Webhook은 suspend/offline opType 수신 처리를 구현해 둡니다.",
+  biz:"중단 임계치(오류율·전환 하락·CS 증가)와 담당자를 게시 전에 정합니다.",check:"완료 기준: 중지·종료·복구 절차와 권한을 이해했습니다."},
  {go:["config","citem"],cfgView:"detail",cfgDetail:"analysis",sel:".twostep",t:"18. 분석 설정",
   d:"노출·클릭·참여 이벤트를 지정해 설정 변경의 효과를 집계합니다.",
   dev:"지정한 이벤트가 수집되고 있는지 확인합니다. 누락 시 집계가 비어 있습니다.",
@@ -2296,12 +2345,12 @@ TOURS.experiment=[
  {devCode:1,go:["experiment","explist"],expView:"detail",expStatus:"draft",sel:"#expQa",t:"68. 제출 전 배정 검증(QA)",d:"운영 작업에 테스트 발송·리허설이 있듯, 실험에도 <b>내 계정이 어느 군에 들어가는지 직접 확인하는 단계</b>가 필요합니다. QA 계정으로 대조군 값과 실험군 값이 각각 재현되는지, 재실행해도 같은 군에 머무는지 확인합니다.",dev:"조회·고정·기록·폴백 네 가지를 QA 단말에서 확인합니다.",biz:"검증 없이 제출하면 잘못된 값이 전체 대상에게 그대로 나갑니다.",check:"완료 기준: 두 군의 값이 QA 단말에서 재현됐습니다."},
  {go:["experiment","explist"],expView:"edit",editProgress:15,sel:"#expSubmit",clickDemo:1,t:"68. ‘저장 후 제출’ 클릭",d:"현재 값을 저장하고 검토 가능한 상태로 제출합니다. <b>제출과 실제 사용자 적용은 같은 동작이 아닙니다.</b>",dev:"제출 후 상태와 검증 결과가 정상 저장됐는지 확인합니다.",biz:"가설·대상·그룹·지표·종료 조건을 검토자에게 전달합니다.",check:"완료 기준: 제출 이후 상태를 확인했습니다."},
  {go:["experiment","explist"],expView:"detail",sel:"#expLog",clickDemo:1,t:"69. 제출 이력 확인",d:"다시 작업 기록을 열어 제출자·시각·변경 내용을 확인합니다.",dev:"배포 로그와 실험 상태 변경 시각을 함께 보관합니다.",biz:"승인과 실행 전 증빙을 남깁니다.",check:"완료 기준: 제출 이력을 추적할 수 있습니다."},
- {go:["experiment","explist"],expView:"detail",expStatus:"pending",sel:"#expStart",clickDemo:1,t:"70. ‘실험 실행’ 클릭 — 여기서 처음 적용됩니다",d:"제출한 실험은 <b>실행 대기</b> 상태이고, 이때까지 피처 값은 여전히 기본값으로 내려갑니다. <b>실험 실행</b>을 눌러야 규칙이 생효되고 배정이 시작됩니다. 실물 콘솔에서는 목록의 작업 열 <b>실행 아이콘</b>으로도 시작하며, 확인 창에서 \"실행 후 규칙 평가에 참여한다\"는 안내를 확인하고 진행합니다.",dev:"실행 직후 배정 로그와 노출 이벤트가 실제로 들어오는지 10분 내에 확인합니다.",biz:"실행 시각을 기록해 두면 나중에 지표 변화와 대조할 수 있습니다.",check:"완료 기준: 상태가 실행 중으로 바뀌고 노출 이벤트가 수집됩니다."},
+ {go:["experiment","explist"],expView:"detail",expStatus:"pending",sel:"#expStart",clickDemo:1,t:"70. ‘실험 실행’ 클릭 — 여기서 처음 적용됩니다",d:"제출한 실험은 <b>실행 대기</b> 상태이고, 이때까지 피처 값은 여전히 기본값으로 내려갑니다. <b>실험 실행</b>을 눌러야 규칙이 적용되고 배정이 시작됩니다. 실물 콘솔에서는 목록의 작업 열 <b>실행 아이콘</b>으로도 시작하며, 확인 창에서 \"실행 후 규칙 평가에 참여한다\"는 안내를 확인하고 진행합니다.",dev:"실행 직후 배정 로그와 노출 이벤트가 실제로 들어오는지 10분 내에 확인합니다.",biz:"실행 시각을 기록해 두면 나중에 지표 변화와 대조할 수 있습니다.",check:"완료 기준: 상태가 실행 중으로 바뀌고 노출 이벤트가 수집됩니다."},
  {go:["experiment","explist"],expView:"report",sel:"#reportSummary",t:"70. 리포트 요약 확인",d:"표본 수, 핵심 지표 변화, <b>95% 신뢰구간과 P 값</b>, 남은 기간을 함께 봅니다. 아래의 <b>실험 결론</b> 영역과 <b>실험 시간축</b>(실행·중지·재개·종료 기록)까지 확인해야 한 화면이 완성됩니다. 한 숫자만 보고 결론 내리지 않습니다.<br><b>언제 결론을 내려도 되나</b> — ① 계획한 표본에 도달했고 ② 통계적 유의성이 <b>95% 이상</b>이며 ③ 가드레일이 임계치를 넘지 않았을 때, 세 가지가 모두 충족될 때입니다.<br>유의성이 95% 미만이면 “차이 없음”이 아니라 <b>“아직 모른다”</b>입니다. 기간을 채우거나 표본을 더 모아야 합니다.<br>중간에 매일 들여다보다 유의해진 순간 종료하면 실제보다 성공률이 부풀려집니다. 종료 시점은 <b>시작 전에 정한 기준</b>으로만 판단합니다.",dev:"대조군과 실험군의 표본 불균형을 확인합니다.",biz:"기간·표본이 부족하면 결론을 보류합니다.",check:"완료 기준: 표본·효과·신뢰도를 함께 읽었습니다."},
  {go:["experiment","explist"],expView:"report",sel:"#reportSample",t:"71. 표본 수 추이 확인",d:"두 그룹의 사용자가 시간에 따라 비슷하게 쌓이는지 봅니다.",dev:"불균형하면 분할 단위 결측과 배정 로그를 조사합니다.",biz:"표본 문제가 있으면 성과 해석을 멈춥니다.",check:"완료 기준: 그룹 표본이 균형 있게 누적됩니다."},
  {go:["experiment","explist"],expView:"report",sel:"#reportTrend",t:"72. 지표 추이와 최종 결정",d:"핵심 지표와 안전 지표의 변화가 지속되는지 확인하고 확대·유지·롤백 중 하나를 결정합니다.",dev:"결과 기간·지표 버전·피처 버전을 기록합니다.",biz:"결론·근거·후속 조치·다음 실험을 한 문서에 남깁니다.",check:"완료 기준: 결과와 후속 조치가 기록됐습니다."},
 
- {go:["experiment","explist"],expView:"detail",expStatus:"running",sel:"#expPause",t:"71. 일시 중지 — 피처는 즉시 기본값으로 돌아갑니다",d:"일시 중지하면 <b>실험 규칙이 멈추고 데이터 수집이 중단되며, 피처 값은 즉시 기본값으로 회귀합니다.</b> 중지 전에 <b>중지 사유</b>를 반드시 입력해야 하고, 재개하면 규칙이 다시 생효됩니다. 가드레일이 임계치를 넘으면 결과를 기다리지 말고 즉시 중지합니다.",dev:"중지 구간은 데이터 공백으로 남아 리포트 해석에 영향을 줍니다. 시간축에서 중지·재개 구간을 확인합니다.",biz:"중지 판단 기준(가드레일 임계치, 오류율, CS 증가)을 시작 전에 정하고, 사유는 감사 이력에 남깁니다.",check:"완료 기준: 중지 기준·담당자·사유 기록 방식이 정해졌습니다."},
+ {go:["experiment","explist"],expView:"detail",expStatus:"running",sel:"#expPause",t:"71. 일시 중지 — 피처는 즉시 기본값으로 돌아갑니다",d:"일시 중지하면 <b>실험 규칙이 멈추고 데이터 수집이 중단되며, 피처 값은 즉시 기본값으로 회귀합니다.</b> 중지 전에 <b>중지 사유</b>를 반드시 입력해야 하고, 재개하면 규칙이 다시 적용됩니다. 가드레일이 임계치를 넘으면 결과를 기다리지 말고 즉시 중지합니다.",dev:"중지 구간은 데이터 공백으로 남아 리포트 해석에 영향을 줍니다. 시간축에서 중지·재개 구간을 확인합니다.",biz:"중지 판단 기준(가드레일 임계치, 오류율, CS 증가)을 시작 전에 정하고, 사유는 감사 이력에 남깁니다.",check:"완료 기준: 중지 기준·담당자·사유 기록 방식이 정해졌습니다."},
  {go:["experiment","explist"],expView:"detail",expStatus:"ended",sel:"#expEndedHint",t:"72. 실험 종료 — 영구적이며 트래픽이 해제됩니다",d:"종료는 <b>되돌릴 수 없습니다.</b> 종료 즉시 피처 값은 다음 우선순위 규칙(기본값)으로 회귀하므로 별도의 롤백 작업이 필요 없습니다. 데이터는 동결되지만 리포트는 계속 열람할 수 있고, 점유하던 <b>레이어 트래픽은 자동 해제</b>됩니다. 종료된 실험은 <b>보관</b>해 목록을 정리합니다.",dev:"종료 후 실제 단말에서 기본값이 내려오는지 확인합니다. 앱 캐시 반영 지연도 함께 봅니다.",biz:"결론·근거·후속 조치를 리포트와 함께 기록한 뒤 보관합니다.",check:"완료 기준: 종료의 효과(회귀·동결·해제)를 설명할 수 있습니다."}
 ];
 /* 단계를 삽입해도 번호가 어긋나지 않도록, 정의된 순서대로 다시 매깁니다.
@@ -2701,9 +2750,13 @@ function rectOf(st){
  if(delta){r={top:r.top-delta,bottom:r.bottom-delta,left:r.left,right:r.right,width:r.width,height:r.height};}
  /* 전체 폭 섹션은 가이드 카드를 제외한 실제 가시 영역만 강조합니다. */
  var minLeft=8,maxRight=window.innerWidth-8,minTop=8,maxBottom=window.innerHeight-8;
+ /* 작은 아이콘 대상은 버리지 않고 최소 강조 크기로 확장합니다 (DOMRect는 읽기 전용이라 복사) */
+ r={top:r.top,left:r.left,right:r.right,bottom:r.bottom,width:r.width,height:r.height};
+ if(r.right-r.left<24){var cxm=(r.left+r.right)/2;r.left=cxm-12;r.right=cxm+12;}
+ if(r.bottom-r.top<18){var cym=(r.top+r.bottom)/2;r.top=cym-9;r.bottom=cym+9;}
  var left=Math.max(r.left,minLeft),right=Math.min(r.right,maxRight);
  var top=Math.max(r.top,minTop),bottom=Math.min(r.bottom,maxBottom);
- if(right-left<24||bottom-top<18)return null;
+ if(right-left<12||bottom-top<10)return null;
  r={top:top,left:left,right:right,bottom:bottom,width:right-left,height:bottom-top};
  return r;
 }
