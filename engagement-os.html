@@ -1039,6 +1039,13 @@ function renderDrawer(){
    '<label class="fl"><span class="rq">*</span>전송 ID'+hl("f.sendid")+'</label><select id="d-sid"><option>유저 속성 · #account_id</option><option>유저 속성 · #distinct_id</option></select>'+
    '<label class="tg"><input type="checkbox" checked onchange="tgBox(this,\'d-fn\')"><span class="sw"></span>도달 퍼널 설정'+hl("f.funnel")+'</label><div id="d-fn">'+funnel(false)+'</div>'+
    '<label class="fl">컨텐츠 템플릿'+hl("f.tpl")+'</label>'+ptable(S.tpl,[["필드",1],["표시 이름",1],["입력 방식",1]]);
+ }else if(k==="cfgparam"){t="파라미터 새로 만들기";center=1;sub="";
+  b='<label class="fl" style="margin-top:6px"><span class="rq">*</span>파라미터 이름'+hl("c.param")+'</label><input id="d-pname" placeholder="비즈니스 기능에서 파싱하는 변수명과 동일하게">'+
+   '<div class="fh">코드가 읽는 키입니다 — 클라이언트·서버의 변수명과 글자까지 같아야 합니다</div>'+
+   '<label class="fl">표시 이름</label><input id="d-plabel" placeholder="운영자가 읽기 쉬운 이름">'+
+   '<label class="fl"><span class="rq">*</span>파라미터 타입</label><div class="row" style="gap:8px"><select id="d-ptype" style="flex:1"><option>STRING</option><option>NUMBER</option><option>BOOLEAN</option><option>JSON</option></select><select id="d-pinput" style="flex:1"><option>SHORT_TEXT</option><option>LONG_TEXT</option><option>SELECT</option></select></div>'+
+   '<label class="fl">힌트 문구</label><input id="d-phint" placeholder="운영자 입력 시 표시할 안내">'+
+   '<label class="fl" id="d-preq-row">필수 여부</label><div class="rd"><label><input type="checkbox" id="d-preq" checked> 필수 — 값 없이는 템플릿을 저장할 수 없습니다</label></div>';
  }else if(k==="cfgitem"){t="구성 항목 만들기";center=1;sub="";
   b='<label class="fl" style="margin-top:6px">구성 항목 이름</label><input id="d-name" placeholder="80자 이내로 입력하세요">'+
    '<label class="fl">구성 항목 ID'+hl("c.item")+'</label><input id="d-cfgid" placeholder="입력하세요">'+
@@ -1079,6 +1086,7 @@ function saveChan(k){var g=id=>{var e=document.getElementById(id);return e?e.val
  else if(k==="cl"){S.channels.client.push({name:n,mtype:g("d-mt")});log("클라이언트 채널 저장 — "+n+" · type="+g("d-mt"),"ok");}
  else if(k==="cfgwh"){S.cfgChans.push({name:n});S.cfgReady.channel=true;log("컨피그 채널 저장·활성화 — "+n+" (운영/테스트 환경 분리)","ok");}
  else if(k==="cfgitem"){log("구성 항목 생성 — "+n+" · 비즈니스 타입: 설정 파일","ok");S.cfgTab="detail";S.cfgDetailTab="params";}
+ else if(k==="cfgparam"){S.cfgReady.param=true;log("파라미터 저장 — "+(g("d-pname")||"banner_title"),"ok");}
  closeDrawer();paintMain();}
 
 /* ─── Atlas 실험 ─── */
@@ -1669,9 +1677,9 @@ function vCfgItem(){
   '<div class="tblscroll"><table class="at"><thead><tr><th>템플릿 ID</th><th>템플릿 이름</th><th>비고</th><th>생성자</th><th>마지막 수정자</th><th>템플릿 상태</th><th>작업</th></tr></thead><tbody>'+
   '<tr><td><span class="lnk">a</span></td><td>ㅁ</td><td>-</td><td>korea_csm@thinkingai.io<div class="sub2">2026-07-29 12:00:41</div></td><td>korea_csm@thinkingai.io<div class="sub2">2026-07-29 12:00:41</div></td><td><span class="swmini '+(S.cfgReady.template?"on":"")+'"></span></td><td>✎　▣　⋮</td></tr></tbody></table></div></div>'+
   (!S.cfgReady.param?'<div class="tip w guide-only"><b>전략 생성 차단</b> — 템플릿 필드가 비어 있습니다. 파라미터를 먼저 만든 뒤 실제 필드를 연결하세요.</div>':'');
- else if(S.cfgDetailTab==="params")body='<div class="tbl"><div class="phead" style="padding:13px 16px"><h2 style="font-size:14px">파라미터 관리'+hl("c.param")+'</h2><div class="pact"><div class="srch">🔍<input placeholder="파라미터 이름/표시 이름 검색"></div><button class="btn btn-pri" id="btnParamCreate" onclick="addDemoParam()">＋ 파라미터 새로 만들기</button></div></div>'+
+ else if(S.cfgDetailTab==="params")body='<div class="tbl"><div class="phead" style="padding:13px 16px"><h2 style="font-size:14px">파라미터 관리'+hl("c.param")+'</h2><div class="pact"><div class="srch">🔍<input placeholder="파라미터 이름/표시 이름 검색"></div><button class="btn btn-pri" id="btnParamCreate" onclick="openDrawer(\'cfgparam\')">＋ 파라미터 새로 만들기</button></div></div>'+
   '<div class="tblscroll"><table class="at"><thead><tr><th>파라미터 이름</th><th>파라미터 타입</th><th>힌트 문구</th><th>필수 여부</th><th>템플릿에 적용</th><th>생성자</th><th>마지막 수정자</th><th>작업</th></tr></thead><tbody>'+
-  (S.cfgReady.param?'<tr><td><code class="k">banner_title</code><div class="sub2">메인 배너 문구</div></td><td>STRING · SHORT_TEXT</td><td>40자 이내</td><td>필수</td><td><span class="bdg bdg-g">a</span></td><td>korea_csm@thinkingai.io</td><td>2026-08-03 10:12</td><td>✎　⋮</td></tr>':'<tr><td colspan="8"><div class="empty">No data</div></td></tr>')+
+  ((tourGated("cfgparam")?tourMade("cfgparam"):S.cfgReady.param)?'<tr><td><code class="k">banner_title</code><div class="sub2">메인 배너 문구</div></td><td>STRING · SHORT_TEXT</td><td>40자 이내</td><td>필수</td><td><span class="bdg bdg-g">a</span></td><td>korea_csm@thinkingai.io</td><td>2026-08-03 10:12</td><td>✎　⋮</td></tr>':'<tr><td colspan="8"><div class="empty">No data</div></td></tr>')+
   '</tbody></table></div></div><div class="tip guide-only"><b>타입 규칙</b> — 파라미터 이름과 표시 이름은 항목 내에서 중복되지 않아야 하며, 문자열은 짧은/긴 텍스트 하위 타입까지 정합니다.</div>';
  else if(S.cfgDetailTab==="use")body='<div class="sec"><h3>사용 설정</h3>'+
   '<div class="event-row" id="cfgUseLink"><div class="event-name">가져오기 방식</div><div></div><div><button class="btn btn-pri" onclick="go(\'cchan\')">연동</button></div></div>'+
@@ -1796,7 +1804,7 @@ var START_TUTORIALS=[
   ["메시지 푸시 — 복귀 알림","앱 밖 유저를 잠금화면 알림으로 부르기","19단계","startScenario('push')","▤","#FFF1E8","#D9722F"],
   ["Client 푸시 — 결제 팝업","결제 직전 유저에게 한정 할인 팝업","19단계","startScenario('client')","▣","#E9F5F2","#0E8477"]]],
  ["구성 센터",[
-  ["구성 센터 도입","구성 항목 → 파라미터 → 템플릿 → 전략 → 롤백","23단계","startTour('config')","⚙","#E9F5F2","#0E8477"]]],
+  ["구성 센터 도입","구성 항목 → 파라미터 → 템플릿 → 전략 → 롤백","26단계","startTour('config')","⚙","#E9F5F2","#0E8477"]]],
  ["실험 (Atlas)",[
   ["게임 — 전투 밸런스 실험","보스 HP를 낮추면 리텐션이 오를까","80단계","startExperimentScenario('game_balance')","◆","#EFEBFE","#7C5CE0"],
   ["커머스 — 결제 버튼 실험","CTA 색을 바꾸면 전환율이 오를까","80단계","startExperimentScenario('commerce_cta')","◈","#EAF2FF","#2F72D9"],
@@ -1971,7 +1979,7 @@ engage:[
 ],
 config:[
  {go:["config","citem"],cfgView:"list",center:1,t:"구성 센터 도입 · 실제 콘솔 흐름",
-  d:"구성 항목 → 파라미터 → 템플릿 필드 연결·활성화 → 구성 채널 → 전략 → 분석·롤백 순으로 <b>22개 체크포인트</b>를 진행합니다.",
+  d:"구성 항목 → 파라미터 → 템플릿 필드 연결·활성화 → 구성 채널 → 전략 → 분석·롤백 순으로 <b>25개 체크포인트</b>를 진행합니다.",
   dev:"SDK RemoteConfig 연동 + 값 적용 코드. 약 <b>1~2 man-day</b>.",
   biz:"운영은 1회성 발송이고 구성 센터는 배포된 값을 지속 적용합니다.",check:"완료 기준: 담당 PM·클라이언트 개발자·데이터 담당자를 지정합니다."},
  {go:["config","citem"],cfgView:"list",sel:"#cfgIntro",t:"1. 네 단계 도입 흐름 확인",
@@ -2006,10 +2014,22 @@ config:[
   d:"상세 화면은 기본 정보 · 템플릿 관리 · 파라미터 관리 · 사용 설정 · 분석 설정 다섯 탭으로 구성됩니다. 템플릿보다 파라미터를 먼저 만들어야 하므로 <b>파라미터 관리</b> 탭을 클릭합니다.",
   dev:"탭 순서와 생성 의존성이 다르다는 점을 기억합니다.",
   biz:"화면 순서대로가 아니라 의존성 순서대로 진행합니다.",check:"완료 기준: 파라미터 관리 탭이 열렸습니다."},
- {devCode:1,go:["config","citem"],cfgView:"detail",cfgDetail:"params",h:"c.param",t:"6. 파라미터를 먼저 생성",
-  d:"파라미터 이름은 클라이언트·서버의 변수명과 동일해야 합니다. 타입과 기본값도 함께 정의합니다.",
+ {go:["config","citem"],cfgView:"detail",cfgDetail:"params",sel:"#btnParamCreate",clickDemo:1,t:"9. ‘파라미터 새로 만들기’ 클릭",
+  d:"목록이 비어 있습니다. 오른쪽 위 버튼을 눌러 첫 파라미터 생성 창을 엽니다.",
+  dev:"이 항목에서 코드가 읽을 값의 목록을 먼저 정리해 둡니다.",
+  biz:"작업마다 바뀌는 값만 파라미터로 만듭니다.",check:"완료 기준: 파라미터 생성 창을 열 준비가 됐습니다."},
+ {devCode:1,drawer:"cfgparam",sel:"#d-pname",t:"10. 파라미터 이름·타입 입력",
+  d:"파라미터 이름은 <b>클라이언트·서버 코드의 변수명과 글자까지 동일</b>해야 합니다. 타입(STRING·NUMBER·BOOLEAN·JSON)과 입력 방식도 실제 값과 맞게 고릅니다.",
   dev:"같은 이름으로 값을 읽고, 값이 없을 때 기본값으로 폴백하는 처리를 구현합니다.",
-  biz:"이름·타입·기본값·필수 여부·힌트 문구를 표로 합의합니다.",check:"완료 기준: 누락/타입 오류 때의 기본 동작이 문서화됐습니다."},
+  biz:"이름·타입·기본값·필수 여부·힌트 문구를 표로 합의합니다.",check:"완료 기준: 코드와 콘솔의 파라미터 이름이 같습니다."},
+ {drawer:"cfgparam",sel:"#d-preq-row",t:"11. 힌트 문구·필수 여부",
+  d:"힌트 문구는 운영자가 값을 입력할 때 보는 안내입니다. 필수로 지정하면 값 없이는 템플릿을 저장할 수 없습니다.",
+  dev:"필수 파라미터의 결측 처리(기본값 폴백)를 코드에서 보장합니다.",
+  biz:"실수하기 쉬운 형식(글자 수·단위)을 힌트에 적어 둡니다.",check:"완료 기준: 누락/타입 오류 때의 기본 동작이 문서화됐습니다."},
+ {drawer:"cfgparam",sel:".df",clickDemo:1,creates:"cfgparam",t:"12. ‘저장’ 클릭",
+  d:"저장하면 파라미터 목록에 행이 추가되고, 이제 템플릿에 이 필드를 연결할 수 있습니다.",
+  dev:"저장된 이름을 그대로 코드 상수로 옮깁니다.",
+  biz:"가이드에서는 클릭 동작을 재현하며 실제 프로젝트에는 저장하지 않습니다.",check:"완료 기준: 파라미터가 목록에 나타났습니다."},
  {go:["config","citem"],cfgView:"detail",cfgDetail:"templates",sel:".twostep",t:"7. 템플릿에 실제 필드 연결",
   d:"파라미터 목록에서 생성된 실제 필드를 템플릿 구성에 연결합니다. 빈 템플릿은 전략에 사용할 수 없습니다.",
   dev:"템플릿 ID와 앱의 파싱 스키마를 맞추고 연결된 필드의 타입을 검증합니다.",
@@ -2377,6 +2397,12 @@ function prepareTourDemo(st){
  if(TOUR.key==="config"&&st.drawer==="cfgitem"){
   if(TOUR.i>4){tourSetInstant("#d-name","상점 가격 정책");tourSetInstant("#d-cfgid","shop_pricing");}
  }
+ if(TOUR.key==="config"&&st.drawer==="cfgparam"){
+  var ci9=TOUR.i;
+  if(ci9<=9)tourSetInstant("#d-pname","");else tourType("#d-pname","banner_title",300,36);
+  if(ci9>9)tourSetInstant("#d-plabel","메인 배너 문구");
+  if(ci9>10)tourSetInstant("#d-phint","40자 이내");
+ }
  if(st.taskStage==="basic"){
   tourSetInstant(".tcreate .tn","");
   tourSetInstant("#taskBasic textarea","");
@@ -2700,6 +2726,7 @@ function showStep(){
  if(st.cfgDetail)S.cfgDetailTab=st.cfgDetail;
  if(st.expView)S.expView=st.expView;
  S.expStatus=st.expStatus||"draft";
+ if(TOUR.key==="config"&&TOUR.created&&TOUR.created.cfgparam!=null)S.cfgReady.param=tourMade("cfgparam");
  S.composing=!!st.compose;
  paintTop();paintSide();paintMain();
  if(st.wizard){
@@ -2717,8 +2744,8 @@ function showStep(){
 function tourPhaseMeta(){
  if(TOUR.key==="config"){
   if(TOUR.i<=2)return {i:0,n:"구조 이해"};
-  if(TOUR.i<=11)return {i:1,n:"항목·템플릿"};
-  if(TOUR.i<=15)return {i:2,n:"채널 연동"};
+  if(TOUR.i<=14)return {i:1,n:"항목·템플릿"};
+  if(TOUR.i<=18)return {i:2,n:"채널 연동"};
   return {i:3,n:"전략·측정"};
  }
  if(TOUR.key==="experiment"){
