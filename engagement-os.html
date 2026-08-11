@@ -1714,7 +1714,7 @@ function vCfgItem(){
   '<div class="tbl"><div class="phead" style="padding:13px 16px"><h2 style="font-size:14px">템플릿 목록</h2><div class="pact"><div class="srch">🔍<input placeholder="템플릿 이름/ID 검색"></div><button class="btn btn-pri" id="btnTplCreate" onclick="openDrawer(\'cfgtpl\')">＋ 새 템플릿 만들기</button></div></div>'+
   '<div class="tblscroll"><table class="at"><thead><tr><th>템플릿 ID</th><th>템플릿 이름</th><th>비고</th><th>생성자</th><th>마지막 수정자</th><th>템플릿 상태</th><th>작업</th></tr></thead><tbody>'+
   ((tourGated("cfgtpl")?tourMade("cfgtpl"):true)
-   ?'<tr><td><span class="lnk">'+(TOUR.on&&TOUR.key==="config"?"main_banner":"a")+'</span></td><td>'+(TOUR.on&&TOUR.key==="config"?"메인 배너":"ㅁ")+'</td><td>-</td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-11 14:50</div></td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-11 14:50</div></td><td><span class="swmini '+(S.cfgReady.template?"on":"")+'"></span></td><td><span title="'+(S.cfgReady.template?"템플릿이 활성화 중이므로 편집할 수 없습니다":"편집")+'" style="'+(S.cfgReady.template?"opacity:.4":"")+'">✎</span>　▣　⋮</td></tr>'
+   ?'<tr><td><span class="lnk">'+(TOUR.on&&TOUR.key==="config"?"main_banner":"a")+'</span></td><td>'+(TOUR.on&&TOUR.key==="config"?"메인 배너":"ㅁ")+'</td><td>-</td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-11 14:50</div></td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-11 14:50</div></td><td><span class="swmini '+(S.cfgReady.template?"on":"")+'" id="tplToggle" style="cursor:pointer" onclick="S.cfgReady.template=!S.cfgReady.template;paintMain();log(S.cfgReady.template?\'템플릿 개통 — 전략 생성 가능\':\'템플릿 닫힘\',\'ok\')"></span></td><td><span title="'+(S.cfgReady.template?"템플릿이 활성화 중이므로 편집할 수 없습니다":"편집")+'" style="'+(S.cfgReady.template?"opacity:.4":"")+'">✎</span>　<span id="tplTest" title="발송 테스트" style="cursor:pointer" onclick="log(\'템플릿 발송 테스트 — 통로·내용 형식 정상 확인\',\'ok\')">➤</span>　⋮</td></tr>'
    :'<tr><td colspan="7"><div class="empty">No data</div></td></tr>')+'</tbody></table></div></div>'+
   (!S.cfgReady.param?'<div class="tip w guide-only"><b>전략 생성 차단</b> — 템플릿 필드가 비어 있습니다. 파라미터를 먼저 만든 뒤 실제 필드를 연결하세요.</div>':'');
  else if(S.cfgDetailTab==="params")body='<div class="tbl"><div class="phead" style="padding:13px 16px"><h2 style="font-size:14px">파라미터 관리'+hl("c.param")+'</h2><div class="pact"><div class="srch">🔍<input placeholder="파라미터 이름/표시 이름 검색"></div><button class="btn btn-pri" id="btnParamCreate" onclick="openDrawer(\'cfgparam\')">＋ 파라미터 새로 만들기</button></div></div>'+
@@ -1810,8 +1810,9 @@ function vCfgChan(){
     ["2단계: Webhook 채널 새로 만들기","채널에서 유저 단위 구성 배포 시 함께 전달할 유저 정보와 환경 단위 설정에 사용할 환경 파라미터를 정의합니다. 생성 후 채널을 구성 항목에 바인딩할 수 있습니다.","더 알아보기 →"]]
   :[["1단계: AE SDK 연동","클라이언트 채널을 사용하려면 AE RemoteConfig SDK를 연동하여 클라이언트에서 구성을 가져오도록 구현해야 합니다.","연동 문서 →"],
     ["2단계: 채널 새로 만들기","채널을 새로 만들고, 구성 배포 시 함께 전달할 유저 속성을 추가할 수 있습니다. 생성 후 채널을 대상 구성 항목에 바인딩하세요.","더 알아보기 →"]];
- var rows=isWh&&S.cfgChans.length
-  ?S.cfgChans.map(c=>'<tr><td><span class="lnk">'+esc(c.name)+'</span></td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-06 15:00</div></td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-06 15:00</div></td><td><span class="swmini"></span></td><td><div class="ico-act"><span>✎</span><span>⋮</span></div></td></tr>').join("")
+ var chMade=tourGated("cfgchan")?tourMade("cfgchan"):S.cfgChans.length>0;
+ var rows=isWh&&(tourGated("cfgchan")?chMade:S.cfgChans.length)
+  ?(tourGated("cfgchan")?[{name:"shop-config-webhook"}]:S.cfgChans).map(c=>'<tr><td><span class="lnk">'+esc(c.name)+'</span></td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-06 15:00</div></td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-06 15:00</div></td><td><span class="swmini"></span></td><td><div class="ico-act"><span>✎</span><span>⋮</span></div></td></tr>').join("")
   :'<tr><td colspan="5"><div class="empty">No data</div></td></tr>';
  return '<div class="phead"><h2>'+(isWh?"Webhook 채널":"클라이언트 채널")+hl("c.chan")+'</h2>'+
   '<div class="pact"><div class="srch">⌕<input placeholder="채널 이름 검색"></div>'+
@@ -1827,7 +1828,7 @@ function vCfgStrat(){
  var ready=S.cfgReady.channel&&S.cfgReady.template;
  var cnt=[["전체",made?1:0,"#333"],["활성",0,"#12803F"],["활성화 대기",0,"#2F72D9"],["일시 중지됨",0,"#7C5CE0"],["비활성",0,"#8A8F9E"],["초안",made?1:0,"#8A8F9E"],["승인 중",0,"#3C50FF"],["거부",0,"#C0392B"]];
  var rows=made
-  ?'<tr><td><span class="lnk">7</span></td><td>신정 메인 배너 교체</td><td>'+(TOUR.on&&TOUR.key==="config"?"main_banner":"a")+'</td><td><span class="dotst"><i></i>초안</span></td><td>🗓 1회</td><td>-</td><td>2026-12-31 08:00 ~ 2027-01-04</td><td>UTC+8</td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-06 15:00</div></td><td><div class="ico-act"><span id="btnDeploy" title="게시" onclick="deployCfg()">▶</span><span title="테스트 전송">➤</span><span id="btnRollback" title="더보기">⋮</span></div></td></tr>'
+  ?'<tr><td><span class="lnk">7</span></td><td>신정 메인 배너 교체</td><td>'+(TOUR.on&&TOUR.key==="config"?"main_banner":"a")+'</td><td><span class="dotst"><i style="'+(S.cfgReady.strategy==="online"?"background:#12803F":"")+'"></i>'+(S.cfgReady.strategy==="online"?"활성":"초안")+'</span></td><td>🗓 1회</td><td>'+(S.cfgReady.strategy==="online"?"2026-12-31 08:00":"-")+'</td><td>2026-12-31 08:00 ~ 2027-01-04</td><td>UTC+8</td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-06 15:00</div></td><td><div class="ico-act"><span id="btnDeploy" title="게시" onclick="deployCfg()">▶</span><span title="테스트 전송">➤</span><span id="btnRollback" title="더보기">⋮</span></div></td></tr>'
   :'<tr><td colspan="10"><div class="empty">No data</div></td></tr>';
  return '<div class="phead"><h2><span class="tree-badge" style="background:#36A98F;display:inline-grid;margin-right:8px">'+itemName[0]+'</span>'+itemName+hl("c.aud")+' <span class="bdg" style="background:#EEF0FE;color:#4C5BE0">⛓ Webhook</span></h2>'+
   '<div class="pact"><div class="seg" style="margin-right:4px"><button aria-pressed="true">리스트</button><button aria-pressed="false">일정</button><button aria-pressed="false">데이터</button></div>'+
@@ -1915,7 +1916,7 @@ var START_TUTORIALS=[
   ["메시지 푸시 — 복귀 알림","앱 밖 유저를 잠금화면 알림으로 부르기","19단계","startScenario('push')","▤","#FFF1E8","#D9722F"],
   ["Client 푸시 — 결제 팝업","결제 직전 유저에게 한정 할인 팝업","19단계","startScenario('client')","▣","#E9F5F2","#0E8477"]]],
  ["구성 센터",[
-  ["구성 센터 도입","구성 항목 → 파라미터 → 템플릿 → 전략 → 롤백","38단계","startTour('config')","⚙","#E9F5F2","#0E8477"]]],
+  ["구성 센터 도입","구성 항목 → 파라미터 → 템플릿 → 전략 → 롤백","42단계","startTour('config')","⚙","#E9F5F2","#0E8477"]]],
  ["실험 (Atlas)",[
   ["게임 — 전투 밸런스 실험","보스 HP를 낮추면 리텐션이 오를까","80단계","startExperimentScenario('game_balance')","◆","#EFEBFE","#7C5CE0"],
   ["커머스 — 결제 버튼 실험","CTA 색을 바꾸면 전환율이 오를까","80단계","startExperimentScenario('commerce_cta')","◈","#EAF2FF","#2F72D9"],
@@ -2090,7 +2091,7 @@ engage:[
 ],
 config:[
  {go:["config","citem"],cfgView:"list",center:1,t:"구성 센터 도입 · 실제 콘솔 흐름",
-  d:"구성 항목 → 파라미터 → 템플릿 필드 연결·활성화 → 구성 채널 → 전략 → 분석·롤백 순으로 <b>37개 체크포인트</b>를 진행합니다.",
+  d:"구성 항목 → 파라미터 → 템플릿 필드 연결·활성화 → 구성 채널 → 전략 → 분석·롤백 순으로 <b>41개 체크포인트</b>를 진행합니다.",
   dev:"SDK RemoteConfig 연동 + 값 적용 코드. 약 <b>1~2 man-day</b>.",
   biz:"운영은 1회성 발송이고 구성 센터는 배포된 값을 지속 적용합니다.",check:"완료 기준: 담당 PM·클라이언트 개발자·데이터 담당자를 지정합니다."},
  {go:["config","citem"],cfgView:"list",sel:"#cfgIntro",t:"1. 네 단계 도입 흐름 확인",
@@ -2165,14 +2166,22 @@ config:[
   d:"우상단 저장을 누르면 템플릿 목록으로 돌아가고, 템플릿은 아직 <b>닫힘 상태</b>입니다.",
   dev:"저장된 Json 구조를 코드 파싱 스키마와 대조합니다.",
   biz:"테스트 전에는 개통하지 않습니다.",check:"완료 기준: 목록에 템플릿이 닫힘 상태로 나타났습니다."},
- {go:["config","citem"],cfgView:"detail",cfgDetail:"templates",sel:"#tplGate",t:"8. 템플릿 활성화 게이트",
-  d:"템플릿은 생성만 해서는 전략에서 사용할 수 없습니다. 필드 연결 검증을 통과한 뒤 상태 스위치를 활성화합니다.",
-  dev:"활성화 전 필수 필드·기본값·의존 설정을 검증합니다.",
-  biz:"테스트용 템플릿과 직전 롤백 버전을 모두 보관합니다.",check:"완료 기준: 템플릿 상태가 활성이고 전략 생성 가능 상태입니다."},
- {devCode:1,go:["config","citem"],cfgView:"detail",cfgDetail:"use",sel:"#cfgUseLink",t:"9. 사용 설정에서 연동",
-  d:"가져오기 방식과 멤버·권한을 확인한 뒤 실제 배포 채널에 연결합니다.",
+ {go:["config","citem"],cfgView:"detail",cfgDetail:"templates",sel:"#tplTest",clickDemo:1,t:"19. 템플릿 발송 테스트",
+  d:"개통 전에 작업열의 <b>발송 테스트(➤)</b>로 통로 연결과 내용 형식을 확인합니다. Webhook은 화이트리스트 계정으로, 클라이언트는 디버그 단말로 게시→중지→종료 전 링크를 테스트할 수 있습니다.",
+  dev:"채널이 항목에 바인딩돼 있어야 테스트 발송 내용이 실제로 전송됩니다.",
+  biz:"테스트를 통과하지 않은 템플릿은 개통하지 않습니다.",check:"완료 기준: 테스트 발송이 정상 수신됐습니다."},
+ {go:["config","citem"],cfgView:"detail",cfgDetail:"templates",sel:"#tplToggle",clickDemo:1,t:"20. 템플릿 상태 토글 — 개통",
+  d:"목록의 <b>템플릿 상태 스위치</b>를 켜야 전략에서 사용할 수 있습니다. 필드가 1개 이상 연결되고 테스트를 통과한 템플릿만 개통하세요.<br><b>개통 중에는 편집할 수 없습니다</b> — 파라미터를 수정하려면 먼저 닫아야 하고, 전략이 사용 중이면 닫기도 제한됩니다.",
+  dev:"개통 후 Json 구조가 코드 파싱 스키마와 일치하는지 최종 확인합니다.",
+  biz:"운영 중 수정은 닫기 → 수정 → 재테스트 → 재개통 순서입니다.",check:"완료 기준: 템플릿 상태가 개통(파랑)입니다."},
+ {go:["config","citem"],cfgView:"detail",cfgDetail:"templates",sel:"#ctab-use",clickDemo:1,t:"21. ‘사용 설정’ 탭 클릭",
+  d:"템플릿이 준비됐으니 <b>사용 설정</b> 탭으로 이동해 이 항목의 가져오기 방식(채널)을 연결합니다.",
+  dev:"채널이 연결되지 않으면 어떤 전략도 하류로 전달되지 않습니다.",
+  biz:"가져오기 방식이 「연동」으로만 표시되면 아직 채널이 없다는 뜻입니다.",check:"완료 기준: 사용 설정 탭이 열렸습니다."},
+ {devCode:1,go:["config","citem"],cfgView:"detail",cfgDetail:"use",sel:"#cfgUseLink",clickDemo:1,t:"22. ‘연동’ 클릭 — 채널 페이지로",
+  d:"가져오기 방식의 <b>연동</b> 버튼을 누르면 구성 채널 관리 페이지로 이동합니다. Webhook 또는 클라이언트 SDK 중 하나를 준비해 바인딩합니다.",
   dev:"운영/테스트 환경의 수신 경로 또는 SDK 연동을 준비합니다.",
-  biz:"연동 버튼을 누르기 전에 테스트 환경 담당자를 지정합니다.",check:"완료 기준: 테스트 환경에서 설정 조회가 성공합니다."},
+  biz:"연동 전 테스트 환경 담당자를 지정합니다.",check:"완료 기준: 채널 관리 페이지로 이동했습니다."},
  {go:["config","cchan"],sel:"#cfgChanIntro",t:"10. 구성 채널 관리",
   d:"설정값을 어디로 내려보낼지 정합니다. 운영 터치 채널과 이름은 같지만 용도가 다릅니다.",
   dev:"Webhook이면 수신 엔드포인트, 클라이언트면 RemoteConfig SDK 연동이 필요합니다.",
@@ -2182,9 +2191,13 @@ config:[
   dev:"두 환경 모두 엔드포인트를 준비합니다. 설정 반영 실패 시 롤백 처리도 함께 구현하세요.",
   biz:"테스트 환경 URL을 반드시 채우고 채널 검증은 서버 구현 후 켭니다.",check:"완료 기준: 테스트 호출 200 응답과 동일 message ID 멱등성을 확인했습니다."},
  {drawer:"cfgwh",sel:".pt",t:"12. 사용자·환경 파라미터",
-  d:"사용자 파라미터는 대상별 값을, 환경 파라미터는 배포 환경별 값을 전달합니다.",
+  d:"사용자 파라미터는 대상별 값을, 환경 파라미터는 배포 환경별 값을 전달합니다. 여기서 정의한 환경 파라미터가 나중에 전략의 <b>대상 환경</b> 조건이 됩니다.",
   dev:"시스템 연동 식별자와 서버가 읽을 필드명을 일치시킵니다.",
   biz:"값이 비었을 때 사용할 기본값을 정의합니다.",check:"완료 기준: 샘플 payload를 서버와 함께 검수했습니다."},
+ {drawer:"cfgwh",sel:".df",clickDemo:1,creates:"cfgchan",t:"23. 채널 ‘저장’ 클릭",
+  d:"저장하면 채널 목록에 행이 추가됩니다. 저장 전까지는 목록이 비어 있고(No data), 저장 후 이 채널을 구성 항목에 바인딩하면 연동이 완성됩니다.",
+  dev:"운영·테스트 두 환경의 엔드포인트가 모두 200으로 응답하는지 확인합니다.",
+  biz:"가이드에서는 동작만 재현하며 실제로 저장하지 않습니다.",check:"완료 기준: 채널이 목록에 나타났습니다."},
  {go:["config","cstrategy"],sel:"#stratTreeItem",clickDemo:1,t:"19. 구성 전략 트리에서 항목 클릭",
   d:"실물 콘솔의 전략 진입 경로입니다 — 사이드바 <b>구성 전략</b> 아래 트리에서 구성 항목을 클릭하면 그 항목의 전략 관리 페이지가 열립니다.",
   dev:"전략은 항목 단위로 관리됩니다. 항목 ID 기준으로 코드 조회가 일어납니다.",
@@ -2229,6 +2242,10 @@ config:[
   d:"초안 → 심사 중 → 게시 대기 → <b>게시됨</b> → 일시 중지 → 오프라인으로 흐릅니다. <b>게시 후 편집하면 새 버전</b>이 생성되고, 새 버전이 게시되기 전까지 이전 버전이 계속 적용됩니다.",
   dev:"Webhook은 게시 중·게시 실패, 클라이언트는 등록 중·등록 실패 상태가 추가로 존재합니다.",
   biz:"게시는 지정 시각 자동 또는 수동 중 선택합니다.",check:"완료 기준: 상태 전환과 버전 규칙을 설명할 수 있습니다."},
+ {go:["config","cstrategy"],sel:"#btnDeploy",clickDemo:1,t:"30. ‘게시’ 클릭 — 여기서 처음 적용됩니다",
+  d:"저장·제출만으로는 아무것도 배포되지 않습니다. 목록 작업열의 <b>게시(▶)</b>를 눌러야 규칙이 적용되고 대상 수용자에게 구성 전송이 시작됩니다.",
+  dev:"게시 직후 하류 수신(opType=online)과 반영 여부를 10분 내 확인합니다.",
+  biz:"게시 시각을 기록해 두면 지표 변화와 대조할 수 있습니다.",check:"완료 기준: 전략 상태가 활성으로 바뀌었습니다."},
  {go:["config","cstrategy"],sel:"#btnRollback",t:"30. 일시 중지 vs 오프라인",
   d:"문제가 생기면 <b>일시 중지</b> 후 수정하고 재게시합니다(수정 = 새 버전). <b>오프라인은 영구 종료</b>라 다시 게시할 수 없습니다. 위험 관리를 위해 두 조작은 운영 관리자만 가능합니다.",
   dev:"Webhook은 suspend/offline opType 수신 처리를 구현해 둡니다.",
@@ -2901,9 +2918,11 @@ function showStep(){
  S.tplLinked=!!st.tplLinked;
  if(TOUR.key==="config"&&TOUR.created&&TOUR.created.cfgparam!=null)S.cfgReady.param=tourMade("cfgparam");
  if(TOUR.key==="config"&&TOUR.created&&TOUR.created.cfgtpl!=null){
-  if(TOUR._tplActIdx==null)TOUR._tplActIdx=TOUR.list.findIndex(function(x){return /템플릿 활성화 게이트/.test(x.t);});
-  S.cfgReady.template=TOUR._tplActIdx>-1&&TOUR.i>TOUR._tplActIdx;
-  S.cfgReady.channel=S.cfgReady.channel||TOUR.i>TOUR._tplActIdx+4;
+  if(TOUR._tplOnIdx==null)TOUR._tplOnIdx=TOUR.list.findIndex(function(x){return /상태 토글 — 개통/.test(x.t);});
+  S.cfgReady.template=TOUR._tplOnIdx>-1&&TOUR.i>TOUR._tplOnIdx;
+  S.cfgReady.channel=tourMade("cfgchan");
+  if(TOUR._pubIdx==null)TOUR._pubIdx=TOUR.list.findIndex(function(x){return /‘게시’ 클릭/.test(x.t);});
+  S.cfgReady.strategy=(TOUR._pubIdx>-1&&TOUR.i>TOUR._pubIdx)?"online":(tourMade("cfgstrategy")?"draft":null);
  }
  S.composing=!!st.compose;
  paintTop();paintSide();paintMain();
@@ -2925,8 +2944,8 @@ function showStep(){
 function tourPhaseMeta(){
  if(TOUR.key==="config"){
   if(TOUR.i<=2)return {i:0,n:"구조 이해"};
-  if(TOUR.i<=19)return {i:1,n:"항목·템플릿"};
-  if(TOUR.i<=23)return {i:2,n:"채널 연동"};
+  if(TOUR.i<=21)return {i:1,n:"항목·템플릿"};
+  if(TOUR.i<=26)return {i:2,n:"채널 연동"};
   return {i:3,n:"전략·측정"};
  }
  if(TOUR.key==="experiment"){
