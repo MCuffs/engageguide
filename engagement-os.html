@@ -2412,7 +2412,8 @@ function tourTypeElement(e,value,delay,speed){
 function toggleTourMenu(e){e.stopPropagation();document.getElementById("tourMenu").classList.toggle("hidden");}
 document.addEventListener("click",function(e){
  var m=document.getElementById("tourMenu");if(m)m.classList.add("hidden");
- if(openDD&&!(e.target.closest&&e.target.closest(".navwrap"))){openDD=null;paintTop();}
+ /* 가이드 UI(다음 버튼·인덱스)에서 발생한 클릭은 투어가 방금 연 드롭다운을 닫지 않습니다 */
+ if(openDD&&!(e.target.closest&&(e.target.closest(".navwrap")||e.target.closest("#tourcard")||e.target.closest("#tourindex")))){openDD=null;paintTop();}
 });
 function startTour(k){
  document.getElementById("tourMenu").classList.add("hidden");closeStartHome();closeGuideHome();
