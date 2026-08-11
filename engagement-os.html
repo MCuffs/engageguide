@@ -3192,14 +3192,8 @@ function paintStep(st){
   sp.style.width=(r.width+pad*2)+"px";sp.style.height=(r.height+pad*2)+"px";}
  else{sp.style.opacity=0;sp.style.top="50%";sp.style.left="50%";sp.style.width="0px";sp.style.height="0px";}
  var phase=tourPhaseMeta(),beginner=tourBeginnerMeta(st);
- function roleOf(step){var b=tourBeginnerMeta(step);return ((typeof tourOneLineText==="function"?tourOneLineText(step,b):"")||b.plain||"").trim();}
- /* 같은 문장은 투어에서 처음 등장한 단계에서만 보여주고, 이후 재등장하면 '-'로 줄입니다 */
- if(!TOUR._roleFirst||TOUR._roleList!==TOUR.list){
-  TOUR._roleList=TOUR.list;TOUR._roleFirst={};
-  TOUR.list.forEach(function(step,idx){var t=roleOf(step);if(!(t in TOUR._roleFirst))TOUR._roleFirst[t]=idx;});
- }
- var role=roleOf(st);
- if(!role||TOUR._roleFirst[role]!==TOUR.i)role="-";
+ /* 말풍선 본문은 단계 고유 설명(d) — 모든 단계에 실제 설명이 표시됩니다 */
+ var role=st.d||beginner.plain||"-";
  cd.innerHTML='<div class="cs-top"><span class="cs-step">STEP '+(TOUR.i+1)+'/'+TOUR.list.length+' · '+phase.n+'</span>'+
   '<button class="cs-x" onclick="endTour()" aria-label="가이드 종료">✕</button></div>'+
   '<h4 class="cs-title">'+st.t+'</h4>'+
