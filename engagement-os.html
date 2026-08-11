@@ -374,6 +374,17 @@ body.guide-bottom .scrim>.drawer{max-height:calc(100vh - min(36vh,390px) - 28px)
 #tourcard.below::before,#tourcard.above::after{content:"";position:absolute;left:var(--arrow-x,24px);margin-left:-7px;border:7px solid transparent;}
 #tourcard.below::before{top:-14px;border-bottom-color:#fff;filter:drop-shadow(0 -1px 0 #DDE1EA);}
 #tourcard.above::after{bottom:-14px;border-top-color:#fff;filter:drop-shadow(0 1px 0 #DDE1EA);}
+.sw-stepper{padding:26px 14px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:22px;background:var(--panel);}
+.sw-step{display:flex;gap:10px;align-items:flex-start;opacity:.55;}
+.sw-step.on{opacity:1;}
+.sw-step .n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--sub);display:grid;place-items:center;font-size:12px;color:var(--ink-2);}
+.sw-step.on .n{background:var(--pri);color:#fff;}
+.sw-step b{display:block;font-size:13px;color:var(--ink-2);}
+.sw-step span{font-size:11.5px;color:var(--ink-3);}
+.sw-body{padding:24px 28px;overflow-y:auto;position:relative;}
+.sw-title{font-size:15px;color:var(--ink);margin:0 0 14px;}
+.sw-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:560px;}
+.sw-nav{display:flex;gap:8px;margin-top:26px;}
 .sec-label{margin:16px 0 2px;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--pri);}
 .cs-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
 .cs-step{font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--pri);}
@@ -1059,12 +1070,13 @@ function renderDrawer(){
    '<div class="fh">Webhook 연동은 종료 시간이 적용 주기 표기용이며, 기본적으로 오프라인 지령을 하류에 전송하지 않습니다</div>'+
    '<button class="btn btn-def" id="st-test" style="margin-top:12px" onclick="log(\'전략 발송 테스트 — 게시·일시 중지·오프라인 전 링크 확인\',\'ok\')">발송 테스트</button>';
  }else if(k==="cfgparam"){t="파라미터 새로 만들기";center=1;sub="";
-  b='<label class="fl" style="margin-top:6px"><span class="rq">*</span>파라미터 이름'+hl("c.param")+'</label><input id="d-pname" placeholder="비즈니스 기능에서 파싱하는 변수명과 동일하게">'+
+  b='<label class="fl" style="margin-top:6px"><span class="rq">*</span>파라미터 이름'+hl("c.param")+'</label><input id="d-pname" placeholder="입력하세요">'+
    '<div class="fh">코드가 읽는 키입니다 — 클라이언트·서버의 변수명과 글자까지 같아야 합니다</div>'+
-   '<label class="fl">표시 이름</label><input id="d-plabel" placeholder="운영자가 읽기 쉬운 이름">'+
-   '<label class="fl"><span class="rq">*</span>파라미터 타입</label><div class="row" style="gap:8px"><select id="d-ptype" style="flex:1"><option>STRING</option><option>NUMBER</option><option>BOOLEAN</option><option>JSON</option></select><select id="d-pinput" style="flex:1"><option>SHORT_TEXT</option><option>LONG_TEXT</option><option>SELECT</option></select></div>'+
-   '<label class="fl">힌트 문구</label><input id="d-phint" placeholder="운영자 입력 시 표시할 안내">'+
-   '<label class="fl" id="d-preq-row">필수 여부</label><div class="rd"><label><input type="checkbox" id="d-preq" checked> 필수 — 값 없이는 템플릿을 저장할 수 없습니다</label></div>';
+   '<label class="fl"><span class="rq">*</span>표시 이름</label><input id="d-plabel" placeholder="80자 이내로 입력하세요">'+
+   '<label class="fl"><span class="rq">*</span>파라미터 타입</label><select id="d-ptype"><option>🔤 문자열/한 줄 텍스트</option><option>🔤 문자열/여러 줄 텍스트</option><option>🔢 숫자</option><option>◐ 불리언</option><option>{} JSON</option></select>'+
+   '<label class="fl">기본값</label><input id="d-pdefault" placeholder="기본값">'+
+   '<label class="fl">힌트 문구 ⓘ</label><input id="d-phint" placeholder="80자 이내로 입력하세요">'+
+   '<label class="fl" id="d-preq-row"><span class="rq">*</span>필수 여부</label><select id="d-preq"><option>선택</option><option>필수</option><option>선택 사항</option></select>';
  }else if(k==="cfgitem"){t="구성 항목 만들기";center=1;sub="";
   b='<label class="fl" style="margin-top:6px">구성 항목 이름</label><input id="d-name" placeholder="80자 이내로 입력하세요">'+
    '<label class="fl">구성 항목 ID'+hl("c.item")+'</label><input id="d-cfgid" placeholder="입력하세요">'+
@@ -1705,9 +1717,11 @@ function vCfgItem(){
   '<div class="event-row" id="cfgUseLink"><div class="event-name">가져오기 방식</div><div></div><div><button class="btn btn-pri" onclick="go(\'cchan\')">연동</button></div></div>'+
   '<div class="event-row"><div class="event-name">멤버 및 권한</div><div class="placeholder">커스텀 권한은 현재 지원하지 않습니다</div><div><a class="lnk" href="https://docs-v2.thinkingdata.kr/?version=v6.0&lan=ko-KR&code=webhook_connection" target="_blank">사용 설명서</a>에서 권한 정보를 확인하실 수 있습니다</div></div>'+
   '<div class="empty" style="padding:80px 0">▧<br>커스텀 권한은 현재 지원하지 않습니다</div></div>';
- else body='<div class="sec"><h3>분석 설정</h3><p class="fh" style="margin-top:0">비즈니스 전환 핵심 이벤트 및 기타 커스텀 분석 지표를 설정하면 데이터 분석에서 설정 배포 효과 데이터를 확인할 수 있습니다. <a class="lnk" href="https://docs-v2.thinkingdata.kr/?version=v6.0&lan=ko-KR&code=webhook_connection" target="_blank">사용 설명서</a>를 참조하세요.</p>'+
-  '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px"><h3 style="font-size:14px;margin:0">사전 정의 이벤트</h3><button class="btn btn-def">편집</button></div>'+
-  ['노출 이벤트','클릭 이벤트','참여 이벤트'].map(function(n){return '<div class="event-row"><div class="event-name">'+n+'</div><div class="placeholder">이벤트 선택　⌄</div><div class="placeholder">필터 조건　＋</div></div>';}).join("")+
+ else body='<div class="sec"><h3>분석 설정</h3><p class="fh" style="margin-top:0">비즈니스 전환 핵심 이벤트 및 기타 커스텀 분석 지표를 설정하면 <span class="lnk">데이터 분석</span>에서 설정 배포 효과 데이터를 확인할 수 있습니다. 관련 이벤트 트래킹 규칙은 <a class="lnk" href="https://docs-v2.thinkingdata.kr/?version=v6.0&lan=ko-KR&code=webhook_connection" target="_blank">사용 설명서</a>를 참조하세요.</p>'+
+  '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px"><h3 style="font-size:14px;margin:0">사전 정의 이벤트 ⓘ</h3><button class="btn btn-pri">✎ 편집</button></div>'+
+  '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:12px">'+['노출 이벤트','클릭 이벤트','참여 이벤트'].map(function(n){return '<div><div class="fl" style="margin-top:0">'+n+'</div><div class="placeholder" style="border:1px solid var(--line-2);border-radius:8px;height:32px;display:flex;align-items:center;padding:0 10px;margin-top:6px">이벤트 선택　⌄</div><div class="placeholder" style="margin-top:8px">＋ 필터 조건</div></div>';}).join("")+'</div>'+
+  '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:24px"><h3 style="font-size:14px;margin:0">분석 지표 직접 설정</h3><button class="btn btn-pri">＋ 지표</button></div>'+
+  '<div class="tblscroll" style="margin-top:10px"><table class="at"><thead><tr><th>지표명</th><th>표시 이름</th><th>생성 방식</th><th>최종 업데이트</th><th>마지막 업데이트 시간</th><th>계산 규칙</th><th>작업</th></tr></thead><tbody><tr><td colspan="7"><div class="empty">No data</div></td></tr></tbody></table></div>'+
   '<div class="twostep guide-only" style="margin-top:14px"><div class="guidebox"><span class="n">1</span><div><b>노출 이벤트</b><p>설정값이 사용자에게 실제 노출된 이벤트</p></div></div><div class="guidebox"><span class="n">2</span><div><b>클릭 · 참여 이벤트</b><p>변경된 설정으로 발생한 후속 행동</p></div></div></div>'+
   '<div style="display:flex;align-items:center;justify-content:space-between;margin:24px 0 10px"><h3 style="font-size:14px;margin:0">분석 지표 직접 설정</h3><button class="btn btn-pri">＋ 지표</button></div>'+
   '<div class="tbl"><div class="tblscroll"><table class="at"><thead><tr><th>지표명</th><th>표시 이름</th><th>생성 방식</th><th>최종 업데이트</th><th>마지막 업데이트 시간</th><th>계산 규칙</th><th>작업</th></tr></thead><tbody><tr><td colspan="7"><div class="empty">No data</div></td></tr></tbody></table></div></div></div>';
@@ -1715,6 +1729,57 @@ function vCfgItem(){
   '<div class="detail-tabs">'+tabs.map(t=>'<button id="ctab-'+t[0]+'" class="'+(S.cfgDetailTab===t[0]?"on":"")+'" onclick="S.cfgDetailTab=\''+t[0]+'\';paintMain()">'+t[1]+'</button>').join("")+'</div>'+
   '<div class="detail-content">'+body+'</div>';
 }
+var SW={open:false,step:1,picked:false};
+function openStratPick(){
+ document.getElementById("drawerHost").innerHTML=
+  '<div class="scrim" style="justify-content:center;align-items:center" onclick="if(event.target===this)closeDrawer()">'+
+  '<div class="drawer" role="dialog" style="max-width:400px;height:auto;border-radius:12px" id="stratPick">'+
+  '<div class="dh"><div class="row"><h3>템플릿 선택</h3><button class="x" onclick="closeDrawer()">✕</button></div></div>'+
+  '<div class="db"><div class="srch" style="width:100%">⌕<input placeholder="검색"></div>'+
+  '<div class="exp-type on" id="sw-tplcard" style="margin-top:12px"><b>a</b><span>개통됨 · 이 항목의 개통 템플릿만 표시됩니다</span></div></div>'+
+  '<div class="df"><button class="btn btn-txt" style="margin-right:auto">⧉ 구성 템플릿</button><button class="btn btn-txt" onclick="closeDrawer()">취소</button>'+
+  '<button class="btn btn-pri" id="stratPickOk" onclick="closeDrawer();openStratWiz()">확인</button></div></div></div>';
+}
+function openStratWiz(step){SW.open=true;SW.step=step||1;renderStratWiz();}
+function closeStratWiz(){SW.open=false;document.getElementById("wizHost").innerHTML="";paintMain();}
+function renderStratWiz(){
+ var host=document.getElementById("wizHost");
+ if(!SW.open){host.innerHTML="";return;}
+ var stp=SW.step;
+ var body="";
+ if(stp===1){
+  body='<h3 class="sw-title">타겟 오디언스</h3>'+
+   '<div class="sw-cards"><div class="exp-type on" id="sw-user"><b>👥 타겟 사용자</b><span>AE 데이터 리소스를 활용해 목표 사용자를 직접 정의할 수 있습니다. 예를 들어, 활성화 여부나 결제 이력을 기준으로 타겟 그룹을 설정할 수 있습니다.</span></div>'+
+   '<div class="exp-type" id="sw-env"><b>🖥 대상 환경</b><span>환경 파라미터를 사용해 지정 서버, 시스템 언어 등 환경 수준의 설정을 정의합니다</span></div></div>'+
+   '<div class="seg" style="margin-top:16px"><button aria-pressed="true">모든 사용자</button><button aria-pressed="false">커스텀 그룹</button></div>'+
+   '<div class="estim" style="margin-top:12px;max-width:420px"><span class="fh" style="margin:0">예상 인원</span><span class="ev" id="swEst">모든 사용자</span><button class="btn btn-def" onclick="document.getElementById(\'swEst\').textContent=\'12,480명\'">인원 예측</button></div>'+
+   '<div class="fh">커스텀 그룹은 전략 시간대와 계산 시간대가 같고 #user_id 주체인 태그·분군만 사용할 수 있습니다</div>';
+ }else if(stp===2){
+  body='<div class="row" style="gap:10px;align-items:baseline"><h3 class="sw-title" style="margin:0">전략 콘텐츠</h3><span class="sub2">현재 템플릿: a ✎</span><button class="btn btn-def" style="margin-left:auto" id="sw-json">{} Json 구조</button></div>'+
+   '<div id="sw-content" style="max-width:520px"><label class="fl">메인 배너 문구 <span class="sub2">(banner_title)</span></label><input id="sw-val" placeholder="입력하세요" maxlength="200"><div class="fh" style="text-align:right">0 / 200</div></div>';
+ }else{
+  body='<h3 class="sw-title">게시 설정</h3><div id="sw-publish" style="max-width:520px">'+
+   '<label class="fl" style="margin-top:0"><span class="rq">*</span>발행 타입</label><div class="sw-cards" style="max-width:400px"><div class="exp-type on"><b>🗓 1회</b></div><div class="exp-type"><b>↻ 시간 지정 - 반복</b></div></div>'+
+   '<label class="fl"><span class="rq">*</span>전략 출시 시간 ⓘ</label><div class="rd"><label><input type="radio" name="swon" checked> 지정 시간</label><input style="width:150px" value="2026-12-31 08:00"><label><input type="radio" name="swon"> 수동</label></div>'+
+   '<label class="fl"><span class="rq">*</span>전략 종료 시간 ⓘ</label><div class="rd"><label><input type="radio" name="swoff" checked> 지정 시간</label><input style="width:150px" value="2027-01-04 00:00"><label><input type="radio" name="swoff"> 영구</label></div>'+
+   '<label class="fl">일정 시작 시간 ⓘ</label><label class="tg"><input type="checkbox"><span class="sw"></span><span class="fh" style="margin:0">*지정하지 않으면 출시 시간부터 일정이 시작됩니다</span></label>'+
+   '<div class="fh" style="margin-top:10px">Webhook 연동은 종료 시간이 적용 주기 표기용이며, 기본적으로 오프라인 지령을 하류에 전송하지 않습니다</div></div>';
+ }
+ host.innerHTML='<div class="tcreate" id="stratWiz"><div class="tcbar">'+
+  '<button class="btn btn-txt" onclick="closeStratWiz()">‹</button><span class="bdg" style="background:#EEF0FE;color:#4C5BE0">⛓ Webhook</span>'+
+  '<input class="tn" id="sw-name" placeholder="전략 이름을 입력하세요. (80자 이내)" style="max-width:280px">'+
+  '<span class="sub2" style="margin-left:auto">UTC-8</span>'+
+  '<button class="btn btn-def">초안 저장</button><button class="btn btn-def" id="sw-test" onclick="log(\'전략 테스트 전송 — 게시·일시 중지·비활성 전 링크 확인\',\'ok\')">📤 테스트 전송</button>'+
+  '<button class="btn btn-pri" id="swSubmit" onclick="saveStratWiz()">💾 저장 후 제출</button></div>'+
+  '<div class="tcbody" style="grid-template-columns:200px minmax(0,1fr)">'+
+  '<aside class="sw-stepper">'+[["타겟 오디언스","모든 사용자"],["전략 콘텐츠","a"],["게시 설정","1회"]].map(function(g,gi){
+    return '<div class="sw-step '+(stp===gi+1?"on":"")+'"><span class="n">'+(gi+1)+'</span><div><b>'+g[0]+'</b><span>'+g[1]+'</span></div></div>';}).join("")+'</aside>'+
+  '<section class="sw-body">'+body+
+  '<div class="sw-nav">'+(stp>1?'<button class="btn btn-def" onclick="openStratWiz('+(stp-1)+')">← 이전</button>':'')+
+  (stp<3?'<button class="btn btn-def" onclick="openStratWiz('+(stp+1)+')">→ 다음</button>':'')+'</div></section></div></div>';
+}
+function saveStratWiz(){S.cfgReady.strategy="draft";closeStratWiz();
+ log("전략 저장 후 제출 — 전략 ID 7 생성 (초안 → 승인 중). 게시·중지·비활성은 이 ID로 관리합니다","ok");}
 function openCfgItem(){S.drawer={k:"cfgitem"};renderDrawer();}
 function addDemoParam(){S.cfgReady.param=true;log("설정 파라미터 생성 — banner_title · STRING/SHORT_TEXT · 필수","ok");paintMain();}
 function enableDemoTemplate(){
@@ -1740,19 +1805,26 @@ function vCfgChan(){
 }
 function vCfgStrat(){
  var made=tourGated("cfgstrategy")?tourMade("cfgstrategy"):S.cfgReady.strategy==="online";
- var itemName=TOUR.on&&TOUR.key==="config"?"상점 가격 정책":"11";
+ var itemName=TOUR.on&&TOUR.key==="config"?"상점 가격 정책":"test123";
+ var ready=S.cfgReady.channel&&S.cfgReady.template;
+ var cnt=[["전체",made?1:0,"#333"],["활성",0,"#12803F"],["활성화 대기",0,"#2F72D9"],["일시 중지됨",0,"#7C5CE0"],["비활성",0,"#8A8F9E"],["초안",made?1:0,"#8A8F9E"],["승인 중",0,"#3C50FF"],["거부",0,"#C0392B"]];
  var rows=made
-  ?'<tr><td>ST-0001</td><td><span class="lnk">신정 메인 배너 교체</span></td><td>a</td><td><span class="dotst"><i></i>초안</span></td><td>2026-12-31 08:00</td><td>2027-01-04 00:00</td><td><div class="ico-act"><span id="btnDeploy" title="게시" onclick="deployCfg()">▶</span><span title="일시 중지">⏸</span><span id="btnRollback" title="오프라인" onclick="rollbackCfg()">⏹</span><span>⋮</span></div></td></tr>'
-  :'<tr><td colspan="7"><div class="empty">No data<br><span class="sub2">오른쪽 위 「＋ 새 전략 만들기」로 첫 전략을 만듭니다.</span></div></td></tr>';
- return '<div class="phead"><h2>구성 전략 · '+itemName+hl("c.aud")+'</h2>'+
-  '<div class="pact"><div class="srch">⌕<input placeholder="전략 이름/ID 검색"></div>'+
-  '<button class="btn btn-pri" id="btnStrategyCreate" onclick="openDrawer(\'cfgstrat\')">＋ 새 전략 만들기</button></div></div>'+
-  '<div class="tip guide-only" id="strategyReady"><b>새 전략을 만들기 전 확인</b> — ① 이 구성 항목에 <b>개통된 채널</b>이 바인딩돼 있어야 하고 ② 사용할 <b>템플릿이 개통 상태</b>이며 발송 테스트를 통과했어야 합니다. 현재: 파라미터 '+(S.cfgReady.param?"준비됨":"필요")+' · 활성 템플릿 '+(S.cfgReady.template?"준비됨":"필요")+' · 구성 채널 '+(S.cfgReady.channel?"준비됨":"필요")+'</div>'+
-  '<div class="tbl"><div class="tblscroll"><table class="at"><thead><tr><th>전략 ID</th><th>전략 이름</th><th>템플릿</th><th>상태</th><th>게시 시간</th><th>종료 시간</th><th>작업</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-  '<div class="tbl" style="margin-top:14px;padding:16px 18px"><div class="fl" style="margin-top:0">전략 상태 흐름</div>'+
-  '<div class="life" id="strategyLife" style="display:flex;margin-top:10px"><span class="ls on">초안</span><span class="ar">→</span><span class="ls">심사 중</span><span class="ar">→</span><span class="ls">게시 대기</span><span class="ar">→</span><span class="ls">게시됨</span><span class="ar">→</span><span class="ls">일시 중지</span><span class="ar">→</span><span class="ls">오프라인</span></div>'+
-  '<div class="sub2" style="margin-top:8px">Webhook 연동은 게시 중·게시 실패, 클라이언트 연동은 등록 중·등록 실패 상태가 추가로 존재합니다. 상선 후 편집하면 <b>새 버전</b>이 생성되고, 새 버전이 상선되기 전까지 이전 버전이 계속 적용합니다.</div>'+
-  '<div class="tip guide-only" style="margin-top:10px"><b>일시 중지 vs 하선</b> — 일시 중지는 수정 후 재게시할 때(暂停 중 편집 = 새 버전), 오프라인은 영구 종료이며 재게시할 수 없습니다. 위험 관리를 위해 일시 중지·오프라인은 <b>운영 관리자만</b> 조작할 수 있습니다.</div>';
+  ?'<tr><td><span class="lnk">7</span></td><td>신정 메인 배너 교체</td><td>a</td><td><span class="dotst"><i></i>초안</span></td><td>🗓 1회</td><td>-</td><td>2026-12-31 08:00 ~ 2027-01-04</td><td>UTC+8</td><td>korea_csm@thinkingai.io<div class="sub2">2026-08-06 15:00</div></td><td><div class="ico-act"><span id="btnDeploy" title="게시" onclick="deployCfg()">▶</span><span title="테스트 전송">➤</span><span id="btnRollback" title="더보기">⋮</span></div></td></tr>'
+  :'<tr><td colspan="10"><div class="empty">No data</div></td></tr>';
+ return '<div class="phead"><h2><span class="tree-badge" style="background:#36A98F;display:inline-grid;margin-right:8px">'+itemName[0]+'</span>'+itemName+hl("c.aud")+' <span class="bdg" style="background:#EEF0FE;color:#4C5BE0">⛓ Webhook</span></h2>'+
+  '<div class="pact"><div class="seg" style="margin-right:4px"><button aria-pressed="true">리스트</button><button aria-pressed="false">일정</button><button aria-pressed="false">데이터</button></div>'+
+  '<div class="srch">⌕<input placeholder="전략 ID/이름 검색"></div>'+
+  '<button class="btn btn-def">☰ 일괄 작업</button>'+
+  '<span class="navwrap" style="position:relative">'+
+  '<button class="btn btn-pri" id="btnStrategyCreate" style="'+(ready?'':'opacity:.55')+'" onclick="'+(ready?'openStratPick()':'log(\'전략 생성 불가 — 채널 연동과 개통 템플릿이 필요합니다\',\'no\')')+'">＋ 전략 새로 만들기</button>'+
+  (!ready?'<div class="tip w guide-only" style="position:absolute;right:0;top:40px;width:290px;z-index:5;margin:0"><b>버튼이 비활성인 이유</b><br>· 설정 항목에 가져오기 방식을 먼저 설정해 주세요 → 연동하기<br>· 사용 가능한 템플릿이 없습니다. 설정 항목을 확인해 주세요 → 설정하러 가기</div>':'')+
+  '</span></div></div>'+
+  '<div class="atlas-counters" style="grid-template-columns:repeat(8,minmax(84px,1fr))" id="strategyCounters">'+cnt.map(function(c){return '<div class="atlas-count"><div class="l"><i style="background:'+c[2]+';width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:5px"></i>'+c[0]+'</div><div class="v">'+c[1]+'</div></div>';}).join("")+'</div>'+
+  '<div class="tbl"><div class="tblscroll"><table class="at" style="min-width:1350px"><thead><tr>'+["전략 ID","전략 이름","템플릿","전략 상태","발행 타입","활성화 시간","적용 주기","시간대","마지막 수정자","작업"].map(x=>'<th>'+x+'</th>').join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
+  '<div class="tbl guide-only" style="margin-top:14px;padding:16px 18px"><div class="fl" style="margin-top:0">전략 상태 흐름</div>'+
+  '<div class="life" id="strategyLife" style="display:flex;margin-top:10px"><span class="ls on">초안</span><span class="ar">→</span><span class="ls">승인 중</span><span class="ar">→</span><span class="ls">활성화 대기</span><span class="ar">→</span><span class="ls">활성</span><span class="ar">→</span><span class="ls">일시 중지됨</span><span class="ar">→</span><span class="ls">비활성</span></div>'+
+  '<div class="sub2" style="margin-top:8px">Webhook 연동은 게시 중·게시 실패, 클라이언트 연동은 등록 중·등록 실패 상태가 추가로 존재합니다. 활성 상태에서 편집하면 <b>새 버전</b>이 생성되고, 새 버전이 활성화되기 전까지 이전 버전이 계속 적용됩니다.</div>'+
+  '<div class="tip" style="margin-top:10px"><b>일시 중지 vs 비활성(오프라인)</b> — 일시 중지는 수정 후 재게시할 때(수정 = 새 버전), 비활성은 영구 종료이며 재게시할 수 없습니다. 두 조작은 운영 관리자만 가능합니다.</div></div>';
 }
 function deployCfg(){var a=document.getElementById("cfg-aud");
  if(!(S.cfgReady.param&&S.cfgReady.template&&S.cfgReady.channel)){log("설정 배포 차단 — 파라미터·활성 템플릿·구성 채널을 확인하세요","no");return;}
@@ -2044,7 +2116,7 @@ config:[
   dev:"같은 이름으로 값을 읽고, 값이 없을 때 기본값으로 폴백하는 처리를 구현합니다.",
   biz:"이름·타입·기본값·필수 여부·힌트 문구를 표로 합의합니다.",check:"완료 기준: 코드와 콘솔의 파라미터 이름이 같습니다."},
  {drawer:"cfgparam",sel:"#d-preq-row",t:"11. 힌트 문구·필수 여부",
-  d:"힌트 문구는 운영자가 값을 입력할 때 보는 안내입니다. 필수로 지정하면 값 없이는 템플릿을 저장할 수 없습니다.",
+  d:"<b>기본값</b>은 전략에서 값을 비웠을 때 사용할 안전값입니다. 힌트 문구는 운영자가 입력할 때 보는 안내(80자)이고, <b>필수</b>로 지정하면 값 없이는 전략을 저장할 수 없습니다.",
   dev:"필수 파라미터의 결측 처리(기본값 폴백)를 코드에서 보장합니다.",
   biz:"실수하기 쉬운 형식(글자 수·단위)을 힌트에 적어 둡니다.",check:"완료 기준: 누락/타입 오류 때의 기본 동작이 문서화됐습니다."},
  {drawer:"cfgparam",sel:".df",clickDemo:1,creates:"cfgparam",t:"12. ‘저장’ 클릭",
@@ -2083,35 +2155,35 @@ config:[
   d:"새 전략을 만들기 전 두 가지가 준비돼 있어야 합니다 — ① 항목에 <b>개통된 채널</b> 바인딩 ② <b>개통 상태의 템플릿</b>(발송 테스트 통과). 조건이 안 되면 전략을 만들 수 없습니다.",
   dev:"채널·템플릿 상태를 먼저 확인합니다.",
   biz:"앞 단계(파라미터→템플릿→채널)를 건너뛰지 않았다면 그대로 진행됩니다.",check:"완료 기준: 전략 생성 창이 열렸습니다."},
- {drawer:"cfgstrat",sel:"#st-user",t:"21. 목표 유저 — 전체 또는 커스텀 세그먼트",
+ {swPick:1,sel:"#stratPick",t:"21. 템플릿 선택",
+  d:"버튼을 누르면 먼저 <b>템플릿 선택</b> 창이 뜹니다. 이 항목의 <b>개통 템플릿만</b> 목록에 나타나며, 확인을 누르면 전략 작성 화면이 열립니다.",
+  dev:"템플릿 ID가 전략과 함께 하류로 전달되어 하위 기능을 식별합니다.",
+  biz:"같은 항목이라도 활동 형식마다 템플릿을 나눠 두면 전략 작성이 단순해집니다.",check:"완료 기준: 개통 템플릿이 선택됐습니다."},
+ {swStep:1,sel:"#sw-user",t:"22. 목표 유저 — 전체 또는 커스텀 그룹",
   d:"전체 유저에게 배포하거나, AE 행동 데이터로 조건에 맞는 유저만 선택합니다. 예: 결제 습관이 있지만 최근 미결제인 유저에게 고가치 패키지 구성 배포.",
   dev:"커스텀 세그먼트는 전략 시간대와 계산 시간대가 같고 <b>#user_id 주체</b>인 태그·분군만 사용할 수 있습니다.",
   biz:"세그먼트 조건을 확정한 뒤 반드시 인원 예측으로 커버 범위를 확인합니다.",check:"완료 기준: 대상 유저 방식이 정해졌습니다."},
- {drawer:"cfgstrat",sel:".estim",t:"22. 인원 예측",
+ {swStep:1,sel:".estim",t:"23. 인원 예측",
   d:"조건 확정 후 예측 버튼으로 전략이 커버할 유저 수를 미리 확인합니다.",
   dev:"조건에 쓰인 태그·분군이 실제 계산되고 있는지 확인합니다.",
   biz:"0명이거나 과도하면 조건을 수정하고 다시 예측합니다.",check:"완료 기준: 예상 커버 인원을 확인했습니다."},
- {drawer:"cfgstrat",sel:"#st-env",t:"23. 목표 환경 (선택)",
+ {swStep:1,sel:"#sw-env",t:"24. 대상 환경 (선택)",
   d:"특정 서버·앱 버전·언어처럼 <b>환경 단위</b>로도 배포 범위를 좁힐 수 있습니다. 예: 최근 오픈한 서버에만 신규 이벤트 구성 배포.",
   dev:"사용 가능한 환경 파라미터는 <b>구성 채널에서 정의한 값</b>으로 결정됩니다 — Webhook은 채널의 환경 파라미터, SDK는 요청 시 자동 휴대 파라미터.",
   biz:"유저 단위 Webhook 배포 시 하류가 해석할 ID 필드를 채널 커스텀 파라미터에 넣어야 합니다.",check:"완료 기준: 환경 조건의 출처(채널)를 이해했습니다."},
- {drawer:"cfgstrat",sel:"#st-tpl",clickDemo:1,t:"24. 템플릿 선택",
-  d:"이 구성 항목에서 <b>개통 상태인 템플릿만</b> 목록에 나타납니다. 템플릿을 고르면 그 템플릿의 파라미터 입력 폼이 열립니다.",
-  dev:"템플릿 ID가 전략과 함께 하류로 전달되어 하위 기능을 식별합니다.",
-  biz:"같은 항목이라도 활동 형식마다 템플릿을 나눠 두면 전략 작성이 단순해집니다.",check:"완료 기준: 개통 템플릿이 선택됐습니다."},
- {drawer:"cfgstrat",sel:"#st-content",t:"25. 전략 내용 — 파라미터 값 입력",
+ {swStep:2,sel:"#sw-content",t:"25. 전략 콘텐츠 — 파라미터 값 입력",
   d:"선택한 템플릿의 파라미터에 이번 전략의 실제 값을 입력합니다. 필수 파라미터는 값 없이 저장할 수 없습니다.",
   dev:"타입·글자 수 제한이 코드 파싱과 맞는지 확인합니다.",
   biz:"운영자가 실수하기 쉬운 값은 파라미터 힌트를 참고합니다.",check:"완료 기준: 필수 값이 모두 입력됐습니다."},
- {drawer:"cfgstrat",sel:"#st-publish",t:"26. 발표 설정 — 게시·종료 시간",
-  d:"전략의 게시 시간과 종료 시간을 지정합니다. 예: 신정 활동은 12/31 08:00 게시 → 1/4 00:00 종료. 스케줄 표시용 「전략 표시 시간」은 단말로 전송되지 않습니다.",
+ {swStep:3,sel:"#sw-publish",t:"26. 게시 설정 — 발행 타입·출시·종료",
+  d:"<b>발행 타입(1회 / 시간 지정-반복)</b>을 고르고, 전략 <b>출시 시간</b>(지정/수동)과 <b>종료 시간</b>(지정/영구)을 정합니다. 스케줄 표시용 「일정 시작 시간」은 단말로 전송되지 않습니다.",
   dev:"<b>Webhook 연동은 종료 시간이 표기용</b>이며 기본적으로 오프라인 지령을 하류에 전송하지 않습니다(필요 시 관리자 설정). SDK 연동은 종료 시간부터 단말이 구성을 받지 못합니다.",
   biz:"모든 시간은 전략 시간대 기준입니다. 프로젝트·수신자 시간대와 혼동하지 않습니다.",check:"완료 기준: 게시·종료 시각과 시간대를 확정했습니다."},
- {drawer:"cfgstrat",sel:"#st-test",clickDemo:1,t:"27. 발송 테스트",
+ {swStep:3,sel:"#sw-test",clickDemo:1,t:"27. 테스트 전송",
   d:"정식 게시 전에 게시 → 일시 중지 → 오프라인 전체 링크를 테스트합니다. Webhook은 화이트리스트 계정(최대 10명)으로, 클라이언트는 디버그 모드 단말로 테스트합니다.",
   dev:"클라이언트 테스트는 자동으로 테스트 전략을 만들었다가 완료 시 삭제합니다.",
   biz:"테스트 없이 게시하면 오류가 전체 대상에게 그대로 나갑니다.",check:"완료 기준: 테스트 발송이 정상 수신됐습니다."},
- {drawer:"cfgstrat",sel:".df",clickDemo:1,creates:"cfgstrategy",t:"28. ‘저장’ 클릭 — 전략 ID 생성",
+ {swStep:3,sel:"#swSubmit",clickDemo:1,creates:"cfgstrategy",t:"28. ‘저장 후 제출’ — 전략 ID 생성",
   d:"저장하면 고유한 <b>전략 ID</b>가 생성되고 초안 상태로 목록에 나타납니다. 이후 게시·일시 중지·오프라인 등 전체 생명주기를 이 ID로 관리합니다.",
   dev:"전략 ID를 운영 문서에 기록합니다.",
   biz:"가이드에서는 실제 저장 없이 동작만 재현합니다.",check:"완료 기준: 전략이 초안으로 목록에 나타났습니다."},
@@ -2732,6 +2804,7 @@ function rectOf(st){
  }
  /* 대상을 화면 중앙으로 '부드럽게' 스크롤하되, 도착 좌표를 미리 계산해
     스팟·말풍선은 최종 위치로 곧장 그립니다 — 페이지와 스팟이 함께 미끄러져 도착합니다. */
+ r={top:r.top,left:r.left,right:r.right,bottom:r.bottom,width:r.width,height:r.height};
  var bh=window.__instantScroll?"instant":"smooth",delta=0;
  var cont=null,pinned=false,pp=el.parentElement;
  while(pp&&pp!==document.body){var cs=getComputedStyle(pp);
@@ -2747,11 +2820,19 @@ function rectOf(st){
  else if(!pinned){var tgt2=window.scrollY+r.top-(window.innerHeight/2-Math.min(r.height,window.innerHeight)/2);
   tgt2=Math.max(0,Math.min(tgt2,document.documentElement.scrollHeight-window.innerHeight));
   delta=tgt2-window.scrollY;window.scrollTo({top:tgt2,behavior:bh});}
- if(delta){r={top:r.top-delta,bottom:r.bottom-delta,left:r.left,right:r.right,width:r.width,height:r.height};}
+ if(delta){r.top-=delta;r.bottom-=delta;}
+ /* 가로 스크롤 컨테이너(넓은 테이블) 안의 대상은 컨테이너를 가로로 스크롤해 화면 안으로 */
+ var contX=null,px=el.parentElement;
+ while(px&&px!==document.body){var csx=getComputedStyle(px);
+  if(/(auto|scroll)/.test(csx.overflowX)&&px.scrollWidth>px.clientWidth+2){contX=px;break;}px=px.parentElement;}
+ if(contX){var crx=contX.getBoundingClientRect();
+  var tx=contX.scrollLeft+(r.left-crx.left)-(contX.clientWidth/2-Math.min(r.width,contX.clientWidth)/2);
+  tx=Math.max(0,Math.min(tx,contX.scrollWidth-contX.clientWidth));
+  var dx=tx-contX.scrollLeft;contX.scrollTo({left:tx,behavior:bh});
+  if(dx){r.left-=dx;r.right-=dx;}}
  /* 전체 폭 섹션은 가이드 카드를 제외한 실제 가시 영역만 강조합니다. */
  var minLeft=8,maxRight=window.innerWidth-8,minTop=8,maxBottom=window.innerHeight-8;
- /* 작은 아이콘 대상은 버리지 않고 최소 강조 크기로 확장합니다 (DOMRect는 읽기 전용이라 복사) */
- r={top:r.top,left:r.left,right:r.right,bottom:r.bottom,width:r.width,height:r.height};
+ /* 작은 아이콘 대상은 버리지 않고 최소 강조 크기로 확장합니다 */
  if(r.right-r.left<24){var cxm=(r.left+r.right)/2;r.left=cxm-12;r.right=cxm+12;}
  if(r.bottom-r.top<18){var cym=(r.top+r.bottom)/2;r.top=cym-9;r.bottom=cym+9;}
  var left=Math.max(r.left,minLeft),right=Math.min(r.right,maxRight);
@@ -2788,6 +2869,9 @@ function showStep(){
  }
  if(st.drawer)openDrawer(st.drawer);
  if(st.expModal)openExpModal(st.expModal,st);
+ if(st.swPick){openStratPick();}
+ else if(st.swStep){SW.open=true;SW.step=st.swStep;renderStratWiz();}
+ else if(typeof SW!=="undefined"&&SW.open){SW.open=false;document.getElementById("wizHost").innerHTML="";}
  prepareTourDemo(st);
  updateTourIndex();
  setTimeout(function(){if(TOUR.on&&TOUR.list[TOUR.i]===st){paintStep(st);animateTourStep(st);}},120);
