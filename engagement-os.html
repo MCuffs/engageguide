@@ -284,7 +284,7 @@ code.k{font-family:var(--mono);font-size:12px;background:var(--sub);border:1px s
 #tourblock{position:fixed;inset:0;z-index:899;background:transparent;}
 #tourindex{display:none;position:fixed;left:12px;top:68px;bottom:12px;width:224px;z-index:902;flex-direction:column;background:#fff;border:1px solid #DDE1EA;border-radius:12px;box-shadow:0 10px 32px rgba(15,23,42,.14);overflow:hidden;}
 .st-scrim{position:fixed;inset:0;z-index:940;background:rgba(15,20,34,.55);display:flex;align-items:center;justify-content:center;animation:viewFade .25s ease;}
-.st-home{width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow-y:auto;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(10,16,40,.35);padding:30px 34px 22px;}
+.st-home{width:min(880px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow-y:auto;background:#fff;border-radius:16px;box-shadow:0 30px 80px rgba(10,16,40,.35);padding:30px 34px 22px;}
 .st-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
 .st-head h2{margin:0 0 6px;font-size:22px;color:#1F2430;}
 .st-head p{margin:0;font-size:13.5px;color:#6A7180;}
@@ -1936,6 +1936,21 @@ function openStartHome(cat){
      '<span class="st-cat-ic" style="background:'+c[3]+';color:'+c[4]+'">'+c[2]+'</span>'+
      '<b>'+c[0]+'</b><span>'+c[1]+'</span><em>튜토리얼 '+cnt+'개 ›</em></button>';}).join("")+'</div>'+
    '<div class="st-foot">모듈을 선택하면 튜토리얼 목록이 나옵니다</div>';
+ }else if(cat===2){
+  /* 실험: 일러스트 + 검증 가설이 있던 기존 시나리오 선택 화면 구성 */
+  h+='<div class="st-head"><div><button class="st-back" onclick="openStartHome()">‹ 모듈 선택</button><h2>실험 (Atlas)</h2></div>'+
+   '<button class="st-x" onclick="closeStartHome()" aria-label="닫고 둘러보기">✕</button></div>'+
+   '<div class="scenario-grid" style="margin-top:16px">'+
+   [["game_balance","게임 실험 시작"],["commerce_cta","커머스 실험 시작"],["subscription_onboarding","구독 실험 시작"]]
+   .map(function(kv){var x=EXP_SCENARIOS[kv[0]];
+    return '<article class="scenario-card"><div class="scenario-body">'+
+     '<div class="row" style="justify-content:space-between;align-items:center"><span class="scenario-tag">'+x.type+'</span><span class="st-count">80단계</span></div>'+
+     '<h4>'+x.title+'</h4><p class="use">'+x.use+'</p>'+
+     '<div class="scenario-art">'+EXP_ART[kv[0]]+'</div>'+
+     '<div class="scenario-case"><small>검증 가설</small><b>'+x.hypothesis+'</b></div>'+
+     '<button class="btn btn-pri" onclick="closeStartHome();startExperimentScenario(\''+kv[0]+'\')">'+kv[1]+'</button>'+
+     '</div></article>';}).join("")+'</div>'+
+   '<div class="st-foot">카드의 시작 버튼을 누르면 바로 시작됩니다 · 진행 중 좌측 인덱스로 아무 단계나 이동할 수 있습니다</div>';
  }else{
   var g=START_TUTORIALS[cat];
   h+='<div class="st-head"><div><button class="st-back" onclick="openStartHome()">‹ 모듈 선택</button><h2>'+g[0]+'</h2></div>'+
