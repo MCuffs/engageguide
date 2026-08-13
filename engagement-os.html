@@ -362,6 +362,7 @@ body{transition:margin-left .3s ease;}
  #main.view-anim,.side.view-anim,.scrim,.scrim .drawer,.tcreate,.navdd,.guide-home-scrim{animation:none;}
  html{scroll-behavior:auto;}
  body{transition:none;}#spot{transition:none;}}
+body.tour-cont #main.view-anim,body.tour-cont .side.view-anim,body.tour-cont .scrim,body.tour-cont .scrim .drawer,body.tour-cont .tcreate,body.tour-cont .navdd{animation:none!important;}
 body.guide-active{margin-left:248px;}
 /* scrollIntoView(start)가 sticky 상단바(내비 56 + 편집바) 뒤로 대상을 숨기지 않게 합니다. */
 html{scroll-padding-top:128px;scroll-padding-bottom:24px;}
@@ -2722,7 +2723,8 @@ function startTour(k){
  document.getElementById("tourMenu").classList.add("hidden");closeStartHome();closeGuideHome();
  document.body.classList.add("guide-active");
  TOUR.on=true;TOUR.key=k;TOUR.list=TOURS[k];TOUR.i=0;
- TOUR.created={};TOUR.list.forEach(function(st,i){if(st.creates)TOUR.created[st.creates]=i;});TOUR.manualDock=null;TOUR.drag=null;TOUR.resize=null;TOUR.floatPos=null;TOUR.floatSize=null;
+ TOUR.created={};TOUR.list.forEach(function(st,i){if(st.creates)TOUR.created[st.creates]=i;});
+ TOUR._prevStep=null;TOUR._pageKey=null;TOUR._tplOnIdx=null;TOUR._pubIdx=null;TOUR.manualDock=null;TOUR.drag=null;TOUR.resize=null;TOUR.floatPos=null;TOUR.floatSize=null;
  if(!document.getElementById("spot")){
   ["tourblock","spot","tourindex"].forEach(function(id){var d=document.createElement("div");d.id=id;document.body.appendChild(d);});
   var c=document.createElement("div");c.id="tourcard";document.body.appendChild(c);
@@ -2916,19 +2918,15 @@ function rectOf(st){
  return r;
 }
 function showStep(){
- var st=TOUR.list[TOUR.i];
- /* 각 단계의 화면 상태를 처음부터 다시 구성해 앞/뒤 이동이 결정적으로 동작하게 합니다. */
- S.drawer=null;document.getElementById("drawerHost").innerHTML="";
- NT.open=false;NT.phase=0;document.getElementById("wizHost").innerHTML="";
+ var st=TOUR.list[TOUR.i],prev=TOUR._prevStep;
  if(st.taskKind)ensureScenarioChannel(st.taskKind);
  if(st.seed&&!S.channels.webhook.length&&!S.channels.push.length&&!S.channels.client.length){
   S.channels.webhook.push({name:"ingame-mail",url:"https://api.example.com/engage/webhook",sendId:"유저 속성 · #account_id"});
   log("가이드: 데모 채널을 자동 생성했습니다","hi");}
- /* 드롭다운은 해당 단계에서만 열어 둡니다. 초기화하지 않으면 이후 단계 화면을 가립니다. */
  openDD=st.ddOpen||null;
  if(st.go){S.sec=st.go[0];document.body.setAttribute("data-sec",S.sec);
   document.getElementById("sideTitle").textContent=S.sec==="engage"?"운영 설정":S.sec==="experiment"?"실험":"시나리오 관리";
-  S.nav=st.go[1];paintTop();paintSide();}
+  S.nav=st.go[1];}
  if(st.ct)S.chTab=st.ct;
  if(st.cfgView)S.cfgTab=st.cfgView;
  if(st.cfgDetail)S.cfgDetailTab=st.cfgDetail;
@@ -2944,20 +2942,35 @@ function showStep(){
   S.cfgReady.strategy=(TOUR._pubIdx>-1&&TOUR.i>TOUR._pubIdx)?"online":(tourMade("cfgstrategy")?"draft":null);
  }
  S.composing=!!st.compose;
- paintTop();paintSide();paintMain();
- if(st.wizard){
+ /* ── 같은 장면이 이어지면 재렌더를 건너뛰어 화면이 '새로 로딩'되지 않게 합니다 ── */
+ var madeSig=TOUR.created?Object.keys(TOUR.created).map(function(k){return tourMade(k)?1:0;}).join(""):"";
+ var pageKey=[S.sec,S.nav,S.chTab,S.cfgTab,S.cfgDetailTab,S.expView,S.expStatus,S.tplLinked?1:0,S.composing?1:0,openDD||"",madeSig,
+  st.editProgress!=null?st.editProgress:"",st.expProgress!=null?st.expProgress:"",
+  S.cfgReady.param?1:0,S.cfgReady.template?1:0,S.cfgReady.channel?1:0,S.cfgReady.strategy||""].join("|");
+ var samePage=prev&&TOUR._pageKey===pageKey;
+ var sameDrawer=prev&&st.drawer&&prev.drawer===st.drawer&&!st.expModal&&!prev.expModal;
+ var sameModal=prev&&st.expModal&&prev.expModal===st.expModal;
+ var sameWiz=prev&&st.wizard&&prev.wizard&&(prev.wizardPhase||3)===(st.wizardPhase||3)&&prev.taskKind===st.taskKind;
+ var sameSw=prev&&st.swStep&&prev.swStep===st.swStep;
+ var cont=samePage||sameDrawer||sameModal||sameWiz||sameSw;
+ if(cont){document.body.classList.add("tour-cont");
+  setTimeout(function(){document.body.classList.remove("tour-cont");},400);}
+ TOUR._pageKey=pageKey;TOUR._prevStep=st;
+ if(!sameDrawer){S.drawer=null;document.getElementById("drawerHost").innerHTML="";}
+ if(!sameWiz&&!sameSw){NT.open=false;NT.phase=0;if(!st.swStep)document.getElementById("wizHost").innerHTML="";}
+ if(!samePage){paintTop();paintSide();paintMain();}
+ if(st.wizard&&!sameWiz){
   NT.open=true;NT.phase=st.wizardPhase||3;NT.kind=st.taskKind||"wh";
   NT.chan=NT.phase===1?null:0;NT.step=0;renderWiz();
- }
- if(st.drawer)openDrawer(st.drawer);
+ }else if(st.wizard&&sameWiz){NT.open=true;}
+ if(st.drawer&&!sameDrawer)openDrawer(st.drawer);
  if(st.expModal)openExpModal(st.expModal,st);
  if(st.swPick){openStratPick();}
- else if(st.swStep){SW.open=true;SW.step=st.swStep;renderStratWiz();}
+ else if(st.swStep){SW.open=true;var swChanged=SW.step!==st.swStep;SW.step=st.swStep;if(!sameSw||swChanged)renderStratWiz();}
  else if(typeof SW!=="undefined"&&SW.open){SW.open=false;document.getElementById("wizHost").innerHTML="";}
  prepareTourDemo(st);
  updateTourIndex();
- setTimeout(function(){if(TOUR.on&&TOUR.list[TOUR.i]===st){paintStep(st);animateTourStep(st);}},120);
- /* 데모 타이핑·체크 펼침 등 늦은 레이아웃 변화를 흡수하는 2차 보정 — 스팟은 트랜지션으로 따라갑니다 */
+ setTimeout(function(){if(TOUR.on&&TOUR.list[TOUR.i]===st){paintStep(st);animateTourStep(st);}},cont?30:120);
  setTimeout(function(){if(TOUR.on&&TOUR.list[TOUR.i]===st)paintStep(st);},560);
 }
 function tourPhaseMeta(){
