@@ -362,7 +362,7 @@ body{transition:margin-left .3s ease;}
  #main.view-anim,.side.view-anim,.scrim,.scrim .drawer,.tcreate,.navdd,.guide-home-scrim{animation:none;}
  html{scroll-behavior:auto;}
  body{transition:none;}#spot{transition:none;}}
-body.tour-cont #main.view-anim,body.tour-cont .side.view-anim,body.tour-cont .scrim,body.tour-cont .scrim .drawer,body.tour-cont .tcreate,body.tour-cont .navdd{animation:none!important;}
+body.tour-cont #main.view-anim,body.tour-cont .side.view-anim,body.tour-cont .scrim,body.tour-cont .scrim .drawer,body.tour-cont .tcreate,body.tour-cont .navdd,body.tour-on #main.view-anim,body.tour-on .side.view-anim,body.tour-on .scrim,body.tour-on .scrim .drawer,body.tour-on .tcreate,body.tour-on .navdd{animation:none!important;}
 body.guide-active{margin-left:248px;}
 /* scrollIntoView(start)가 sticky 상단바(내비 56 + 편집바) 뒤로 대상을 숨기지 않게 합니다. */
 html{scroll-padding-top:128px;scroll-padding-bottom:24px;}
@@ -2733,7 +2733,7 @@ document.addEventListener("click",function(e){
 });
 function startTour(k){
  document.getElementById("tourMenu").classList.add("hidden");closeStartHome();closeGuideHome();
- document.body.classList.add("guide-active");
+ document.body.classList.add("guide-active","tour-on");
  TOUR.on=true;TOUR.key=k;TOUR.list=TOURS[k];TOUR.i=0;
  TOUR.created={};TOUR.list.forEach(function(st,i){if(st.creates)TOUR.created[st.creates]=i;});
  TOUR._prevStep=null;TOUR._pageKey=null;TOUR._tplOnIdx=null;TOUR._pubIdx=null;TOUR.manualDock=null;TOUR.drag=null;TOUR.resize=null;TOUR.floatPos=null;TOUR.floatSize=null;
@@ -2758,7 +2758,7 @@ function ensureScenarioChannel(kind){
  if(kind==="wh"&&!S.channels.webhook.some(function(c){return c.name==="ingame-mail-prod";}))
   S.channels.webhook.unshift({name:"ingame-mail-prod",url:"https://api.example.com/engage/webhook",sendId:"유저 속성 · #account_id"});
 }
-function endTour(){clearTourMotion();TOUR.on=false;document.body.classList.remove("guide-active","guide-left","guide-right","guide-bottom");closeDrawer();
+function endTour(){clearTourMotion();TOUR.on=false;document.body.classList.remove("guide-active","tour-on","guide-left","guide-right","guide-bottom");closeDrawer();
  ["tourblock","spot","tourcard","tourindex"].forEach(function(id){var e=document.getElementById(id);if(e)e.style.display="none";});paintMain();openStartHome();}
 function buildTourIndex(){
  var el=document.getElementById("tourindex");if(!el)return;
@@ -2970,7 +2970,7 @@ function showStep(){
  TOUR._pageKey=pageKey;TOUR._prevStep=st;
  if(!sameDrawer&&!sameModal){S.drawer=null;document.getElementById("drawerHost").innerHTML="";}
  if(!sameWiz&&!sameSw){NT.open=false;NT.phase=0;if(!st.swStep)document.getElementById("wizHost").innerHTML="";}
- if(!samePage){paintTop();paintSide();paintMain();}
+ if(!samePage){var __sy=window.scrollY;paintTop();paintSide();paintMain();window.scrollTo(0,__sy);}
  if(st.wizard&&!sameWiz){
   NT.open=true;NT.phase=st.wizardPhase||3;NT.kind=st.taskKind||"wh";
   NT.chan=NT.phase===1?null:0;NT.step=0;renderWiz();
