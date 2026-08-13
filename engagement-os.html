@@ -376,7 +376,7 @@ body.guide-bottom .scrim>.drawer{max-height:calc(100vh - min(36vh,390px) - 28px)
 #spot{position:fixed;z-index:900;border-radius:12px;pointer-events:none;
  box-shadow:0 0 0 9999px rgba(11,16,28,.52),0 0 0 3px #6D7CFF,0 10px 40px rgba(31,51,202,.28);
  transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),width .3s cubic-bezier(.4,0,.2,1),height .3s cubic-bezier(.4,0,.2,1);}
-#tourcard{position:fixed;z-index:901;transition:top .25s ease,left .25s ease;width:min(400px,calc(100vw - 24px));background:#fff;border:1px solid #DDE1EA;border-radius:12px;box-shadow:0 14px 44px rgba(15,23,42,.22);padding:13px 15px 12px;display:none;animation:viewFade .18s ease;}
+#tourcard{position:fixed;z-index:901;transition:top .25s ease,left .25s ease;width:min(400px,calc(100vw - 24px));background:#fff;border:1px solid #DDE1EA;border-radius:12px;box-shadow:0 14px 44px rgba(15,23,42,.22);padding:13px 15px 12px;display:none;}
 #tourcard.below::before,#tourcard.above::after{content:"";position:absolute;left:var(--arrow-x,24px);margin-left:-7px;border:7px solid transparent;}
 #tourcard.below::before{top:-14px;border-bottom-color:#fff;filter:drop-shadow(0 -1px 0 #DDE1EA);}
 #tourcard.above::after{bottom:-14px;border-top-color:#fff;filter:drop-shadow(0 1px 0 #DDE1EA);}
@@ -1359,7 +1359,15 @@ function openExpModal(kind,st){
  else if(kind==="layer"){title="새로운 트래픽 레이어 작성";save="저장";body='<div class="tip"><b>'+x.title+'의 트래픽 배타 레이어</b><br>동일 사용자는 이 레이어에서 최대 하나의 실험에만 배정됩니다.</div><div id="ex-layer-name"><label class="fl"><span class="rq">*</span>트래픽 레이어 이름</label><input id="ex-layer" value="'+v(1,x.layer)+'" placeholder="배타 범위가 드러나는 이름"></div><div id="ex-layer-group"><label class="fl"><span class="rq">*</span>그룹</label><select>'+options(2,"기본 폴더")+'</select></div><div id="ex-layer-mode"><label class="fl">분할 모드</label><div class="rd"><label><input type="radio" '+(p>=3?"checked":"")+'> 원격 분할</label><label><input type="radio" disabled> 로컬 분할</label></div></div><div id="ex-layer-unit"><label class="fl"><span class="rq">*</span>분할 단위</label><select>'+options(4,split,'<option>'+(split==="#user_id"?"#account_id":"#user_id")+'</option><option>#distinct_id</option><option>#device_id</option>')+'</select></div><div id="ex-layer-finish"><label class="fl">비고</label><textarea placeholder="레이어 사용 목적">'+v(5,x.type+" 시나리오 전용 레이어")+'</textarea></div>';}
  else if(kind==="metric"){title="지표 생성";body='<div id="ex-metric-name"><label class="fl"><span class="rq">*</span>지표명</label><input id="ex-metric" value="'+v(1,x.metric)+'" placeholder="영문 소문자와 밑줄로 입력"></div><div id="ex-metric-label"><label class="fl"><span class="rq">*</span>표시 이름</label><input id="ex-metric-label-input" value="'+v(2,x.metricLabel)+'" placeholder="누구나 이해할 수 있는 이름"></div><div id="ex-metric-group"><label class="fl"><span class="rq">*</span>지표 그룹</label><select>'+options(3,"기본 폴더")+'</select></div><div id="ex-metric-type"><label class="fl">지표 타입</label><div class="rd"><label><input type="radio" '+(p>=4?"checked":"")+'> 이벤트 지표</label><label><input type="radio" disabled> 리텐션 지표</label><label><input type="radio" disabled> 퍼널 지표</label></div></div><div id="ex-metric-calc"><label class="fl">계산 기준</label><select>'+options(5,x.metricCalc)+'</select></div><div id="ex-metric-direction"><label class="fl">지표 방향</label><div class="rd"><label><input type="radio" '+(p>=6?"checked":"")+'> 정방향</label><label><input type="radio"> 역방향</label></div></div><div id="ex-metric-finish"><label class="fl"><span class="rq">*</span>지표 설명</label><textarea placeholder="이 지표로 무엇을 판단하는지 작성">'+v(7,x.title+"의 성공 여부를 판단하는 핵심 지표")+'</textarea></div>';}
  else{title="작업 기록";save="닫기";body='<div style="padding:8px 0"><b>2026-07-22 09:02:41</b><div class="sub2">Jung Minsu · 실험 생성</div></div>';}
- document.getElementById("drawerHost").innerHTML='<div class="scrim"><div class="drawer" role="dialog" style="max-width:620px;height:auto;max-height:88vh;border-radius:12px;align-self:center"><div class="dh"><div class="row"><h3>'+title+'</h3><button class="x" onclick="closeDrawer()" aria-label="닫기">✕</button></div></div><div class="db">'+body+'</div><div class="df"><button class="btn btn-txt" id="expModalCancel" onclick="closeDrawer()">취소</button><button class="btn btn-pri" id="expModalSave" onclick="closeDrawer()">'+save+'</button></div></div></div>';
+ var host=document.getElementById("drawerHost");
+ if(window.__modalKeep&&host.querySelector(".drawer .db")){
+  var hh=host.querySelector(".drawer h3");if(hh)hh.textContent=title;
+  host.querySelector(".drawer .db").innerHTML=body;
+  var sv=host.querySelector("#expModalSave");if(sv)sv.textContent=save;
+ }else{
+  host.innerHTML='<div class="scrim"><div class="drawer" role="dialog" style="max-width:620px;height:auto;max-height:88vh;border-radius:12px;align-self:center"><div class="dh"><div class="row"><h3>'+title+'</h3><button class="x" onclick="closeDrawer()" aria-label="닫기">✕</button></div></div><div class="db">'+body+'</div><div class="df"><button class="btn btn-txt" id="expModalCancel" onclick="closeDrawer()">취소</button><button class="btn btn-pri" id="expModalSave" onclick="closeDrawer()">'+save+'</button></div></div></div>';
+ }
+ window.__modalKeep=0;
 }
 
 /* ── 운영 작업 ── */
@@ -1789,6 +1797,14 @@ function renderStratWiz(){
    '<label class="fl">일정 시작 시간 ⓘ</label><label class="tg"><input type="checkbox"><span class="sw"></span><span class="fh" style="margin:0">*지정하지 않으면 출시 시간부터 일정이 시작됩니다</span></label>'+
    '<div class="fh" style="margin-top:10px">Webhook 연동은 종료 시간이 적용 주기 표기용이며, 기본적으로 오프라인 지령을 하류에 전송하지 않습니다</div></div>';
  }
+ var navHtml='<div class="sw-nav">'+(stp>1?'<button class="btn btn-def" onclick="openStratWiz('+(stp-1)+')">← 이전</button>':'')+
+  (stp<3?'<button class="btn btn-def" onclick="openStratWiz('+(stp+1)+')">→ 다음</button>':'')+'</div>';
+ var existing=document.getElementById("stratWiz");
+ if(existing){
+  [...existing.querySelectorAll(".sw-step")].forEach(function(el,gi){el.classList.toggle("on",stp===gi+1);});
+  existing.querySelector(".sw-body").innerHTML=body+navHtml;
+  return;
+ }
  host.innerHTML='<div class="tcreate" id="stratWiz"><div class="tcbar">'+
   '<button class="btn btn-txt" onclick="closeStratWiz()">‹</button><span class="bdg" style="background:#EEF0FE;color:#4C5BE0">⛓ Webhook</span>'+
   '<input class="tn" id="sw-name" placeholder="전략 이름을 입력하세요. (80자 이내)" style="max-width:280px">'+
@@ -1798,9 +1814,7 @@ function renderStratWiz(){
   '<div class="tcbody" style="grid-template-columns:200px minmax(0,1fr)">'+
   '<aside class="sw-stepper">'+[["타겟 오디언스","모든 사용자"],["전략 콘텐츠",(TOUR.on&&TOUR.key==="config"?"main_banner":"a")],["게시 설정","1회"]].map(function(g,gi){
     return '<div class="sw-step '+(stp===gi+1?"on":"")+'"><span class="n">'+(gi+1)+'</span><div><b>'+g[0]+'</b><span>'+g[1]+'</span></div></div>';}).join("")+'</aside>'+
-  '<section class="sw-body">'+body+
-  '<div class="sw-nav">'+(stp>1?'<button class="btn btn-def" onclick="openStratWiz('+(stp-1)+')">← 이전</button>':'')+
-  (stp<3?'<button class="btn btn-def" onclick="openStratWiz('+(stp+1)+')">→ 다음</button>':'')+'</div></section></div></div>';
+  '<section class="sw-body">'+body+navHtml+'</section></div></div>';
 }
 function saveStratWiz(){S.cfgReady.strategy="draft";closeStratWiz();
  log("전략 저장 후 제출 — 전략 ID 7 생성 (초안 → 승인 중). 게시·중지·비활성은 이 ID로 관리합니다","ok");}
@@ -2956,7 +2970,7 @@ function showStep(){
  if(cont){document.body.classList.add("tour-cont");
   setTimeout(function(){document.body.classList.remove("tour-cont");},400);}
  TOUR._pageKey=pageKey;TOUR._prevStep=st;
- if(!sameDrawer){S.drawer=null;document.getElementById("drawerHost").innerHTML="";}
+ if(!sameDrawer&&!sameModal){S.drawer=null;document.getElementById("drawerHost").innerHTML="";}
  if(!sameWiz&&!sameSw){NT.open=false;NT.phase=0;if(!st.swStep)document.getElementById("wizHost").innerHTML="";}
  if(!samePage){paintTop();paintSide();paintMain();}
  if(st.wizard&&!sameWiz){
@@ -2964,7 +2978,7 @@ function showStep(){
   NT.chan=NT.phase===1?null:0;NT.step=0;renderWiz();
  }else if(st.wizard&&sameWiz){NT.open=true;}
  if(st.drawer&&!sameDrawer)openDrawer(st.drawer);
- if(st.expModal)openExpModal(st.expModal,st);
+ if(st.expModal){window.__modalKeep=sameModal?1:0;openExpModal(st.expModal,st);}
  if(st.swPick){openStratPick();}
  else if(st.swStep){SW.open=true;var swChanged=SW.step!==st.swStep;SW.step=st.swStep;if(!sameSw||swChanged)renderStratWiz();}
  else if(typeof SW!=="undefined"&&SW.open){SW.open=false;document.getElementById("wizHost").innerHTML="";}
